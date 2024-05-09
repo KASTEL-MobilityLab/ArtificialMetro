@@ -4,7 +4,7 @@ import DebugView from './view/DebugView.vue';
 import * as carsharing from './provider/carsharing';
 
 onMounted(() => {
-  // carsharing.load()
+  carsharing.load()
 })
 </script>
 
