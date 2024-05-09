@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import DebugView from './view/DebugView.vue';
-import * as carsharing from './provider/carsharing';
+import { onMounted } from 'vue'
+import DebugView from './view/DebugView.vue'
+import FooterBar from './view/FooterBar.vue'
+import * as carsharing from './provider/carsharing'
 
 onMounted(() => {
   carsharing.load()
@@ -9,13 +10,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <header>
-
-  </header>
-
   <main>
     <DebugView></DebugView>
   </main>
+
+  <FooterBar></FooterBar>
 </template>
 
 <style scoped></style>

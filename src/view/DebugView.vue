@@ -21,7 +21,7 @@ channel.onmessage = (car: MessageEvent<Coordinate>) => {
 </script>
 
 <template>
-  <div style="height: 600px; width: 800px">
+  <div style="height: calc(100vh - 100px); width: 100%">
     <LMap v-model:zoom="zoom" :center="[49.006889, 8.403653]">
       <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OSM"></LTileLayer>
       <LMarker v-for="marker, i in markers" v-bind:key="i" :lat-lng="marker"></LMarker>
