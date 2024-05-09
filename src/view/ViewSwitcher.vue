@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import type { LucideProps } from 'lucide-vue-next';
+import type { FunctionalComponent } from 'vue';
+
 type View = {
     title: string,
+    icon: FunctionalComponent<LucideProps, {}, any, {}>,
 }
 const props = defineProps<{
     views: View[],
@@ -11,8 +15,9 @@ const props = defineProps<{
 <template>
     <ul>
         <li v-for="view, id in props.views" :key="id" :active="id == props.active">
+            <component :is="view.icon" :height="30" :width="30"></component>
             {{ view.title }}
-            <span class="active-indicator" v-if="id == props.active"></span>
+            <span class="active-indicator"></span>
         </li>
     </ul>
 </template>
@@ -43,11 +48,21 @@ ul li {
     align-items: center;
     flex-grow: 1;
 
-    padding: 10px 0;
+    gap: 5px;
+
+    padding: 0;
+    padding-top: 20px;
+    padding-bottom: 5px;
+
+    cursor: pointer;
 }
 
 ul li[active="true"] {
     color: var(--accent-color);
+}
+
+ul li svg {
+    /* height: 50px; */
 }
 
 ul li .active-indicator {
@@ -58,5 +73,9 @@ ul li .active-indicator {
     border-radius: 100%;
 
     background-color: var(--accent-bg-color);
+    visibility: hidden;
+}
+ul li[active="true"] .active-indicator {
+    visibility: visible;
 }
 </style>

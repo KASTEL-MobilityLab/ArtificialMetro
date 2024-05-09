@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@vue-leaflet/vue-leaflet": "^0.10.1",
+    "lucide-vue-next": "^0.378.0",
     "vue": "^3.4.21",
     "web-csv-toolbox": "^0.8.0"
   },

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import ViewSwitcher from './ViewSwitcher.vue'
+import { GlobeIcon, MapIcon } from 'lucide-vue-next'
 
 const views = [
-    { title: "Map" },
-    { title: "Other" },
+    { title: "Map", icon: MapIcon },
+    { title: "Other", icon: GlobeIcon },
 ]
 
 </script>
