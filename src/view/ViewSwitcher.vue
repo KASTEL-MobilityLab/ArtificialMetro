@@ -61,10 +61,6 @@ ul li[active="true"] {
     color: var(--accent-color);
 }
 
-ul li svg {
-    /* height: 50px; */
-}
-
 ul li .active-indicator {
     display: block;
 

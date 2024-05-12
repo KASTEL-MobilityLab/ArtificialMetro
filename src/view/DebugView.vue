@@ -14,17 +14,15 @@ let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
 
 let carsharingChannel = new BroadcastChannel("carsharing")
-carsharingChannel.onmessage = (message: MessageEvent<CarsharingStation>) => {
-  const station = message.data
-  if (station.available > 0) {
-    stations.value.push(station)
-  }
+carsharingChannel.onmessage = (message: MessageEvent<CarsharingStation[]>) => {
+  const new_stations = message.data.filter(station => station.available > 0)
+  stations.value.splice(0, stations.value.length, ...new_stations)
 }
 
 let scooterChannel = new BroadcastChannel("scooter")
-scooterChannel.onmessage = (message: MessageEvent<Scooter>) => {
-  const scooter = message.data
-  scooters.value.push(scooter)
+scooterChannel.onmessage = (message: MessageEvent<Scooter[]>) => {
+  const new_scooters = message.data
+  scooters.value.splice(0, scooters.value.length, ...new_scooters)
 }
 
 function num_to_color(num: number): string {
@@ -48,9 +46,8 @@ function num_to_color(num: number): string {
         :fill="true" :fill-color="num_to_color(marker.available)" :fill-opacity="1" :stroke="true" :radius="8"
         color="black"></LCircleMarker>
 
-        <LCircleMarker v-for="marker, i in scooters" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
-        :fill="true" fill-color="blue" :fill-opacity="1" :stroke="false" :radius="5"
-        ></LCircleMarker>
+      <LCircleMarker v-for="marker, i in scooters" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
+        :fill="true" fill-color="blue" :fill-opacity="1" :stroke="false" :radius="5"></LCircleMarker>
     </LMap>
   </div>
 </template>

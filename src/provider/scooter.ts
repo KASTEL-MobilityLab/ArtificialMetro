@@ -8,6 +8,12 @@ const channel = new BroadcastChannel("scooter")
 
 export async function load() {
     const response = await fetch(endpoint)
+    const scooters = await extractScooter(response);
+    channel.postMessage(scooters)
+}
+
+async function extractScooter(response: Response): Promise<Scooter[]> {
+    const scooters = []
 
     for await (const record of csv.parse(response)) {
         const coordinate = geometryToCoordinate(record.geometry)
@@ -17,7 +23,7 @@ export async function load() {
             timestamp: record.last_reported,
             position: coordinate
         }
-        channel.postMessage(station)
+        scooters.push(station)
     }
-
+    return scooters
 }
