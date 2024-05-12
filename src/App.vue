@@ -2,18 +2,17 @@
 import { onMounted } from 'vue'
 import DebugView from './view/DebugView.vue'
 import FooterBar from './view/FooterBar.vue'
-import * as carsharing from './provider/carsharing'
-import * as scooter from './provider/scooter'
+import * as provider from './provider/provider'
 
 onMounted(() => {
-  carsharing.load()
-  scooter.load()
+  provider.startCarsharingProvider()
+  provider.startScooterProvider()
 })
 </script>
 
 <template>
   <FooterBar></FooterBar>
-  
+
   <main>
     <DebugView></DebugView>
   </main>
