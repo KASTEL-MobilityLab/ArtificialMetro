@@ -12,13 +12,18 @@ const views = [
 <template>
     <footer>
         <ViewSwitcher :views="views" :active="0"></ViewSwitcher>
+        <div id="view-controls"></div>
     </footer>
 </template>
 
 <style scoped>
 footer {
-    display: block;
+    display: flex;
     position: fixed;
+
+    flex-direction: row;
+    justify-content: stretch;
+    align-items: stretch;
 
     left: 0;
     right: 0;
@@ -29,5 +34,8 @@ footer {
 
     background-color: var(--view-bg-color);
     color: var(--view-fg-color);
+}
+.view-switcher {
+    width: 50%;
 }
 </style>

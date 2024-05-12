@@ -13,7 +13,7 @@ const props = defineProps<{
 </script>
 
 <template>
-    <ul>
+    <ul class="view-switcher">
         <li v-for="view, id in props.views" :key="id" :active="id == props.active">
             <component :is="view.icon" :height="30" :width="30"></component>
             {{ view.title }}

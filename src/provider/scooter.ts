@@ -2,7 +2,7 @@ import { geometryToCoordinate, type Scooter } from "@/model/vehicles";
 import * as csv from "web-csv-toolbox"
 
 const endpoint = "https://api.mobidata-bw.de/geoserver/MobiData-BW/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=MobiData-BW%3Asharing_vehicles&CQL_FILTER=form_factor%20%3D%20%27scooter%27&maxFeatures=20000&outputFormat=csv"
-const attribution = "NVBW MobiData BW"
+export const attribution = "NVBW MobiData BW"
 
 const channel = new BroadcastChannel("scooter")
 

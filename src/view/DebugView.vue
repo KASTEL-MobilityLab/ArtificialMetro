@@ -2,8 +2,10 @@
 import "leaflet/dist/leaflet.css"
 import L from "leaflet"
 import { LMap, LTileLayer, LMarker, LCircleMarker } from "@vue-leaflet/vue-leaflet"
-import { ref, type Ref } from "vue"
+import { computed, ref, type Ref } from "vue"
 import type { CarsharingStation, Coordinate, Scooter } from "@/model/vehicles"
+import * as carsharing from '../provider/carsharing'
+import * as scooter from '../provider/scooter'
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -12,6 +14,10 @@ globalThis.L = L
 let zoom = ref(14)
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
+
+let attribution = computed(() => {
+  return `Carsharing: ${carsharing.attribution}, Scooter: ${scooter.attribution}`
+})
 
 let carsharingChannel = new BroadcastChannel("carsharing")
 carsharingChannel.onmessage = (message: MessageEvent<CarsharingStation[]>) => {
@@ -50,6 +56,9 @@ function num_to_color(num: number): string {
         :fill="true" fill-color="blue" :fill-opacity="1" :stroke="false" :radius="5"></LCircleMarker>
     </LMap>
   </div>
+  <Teleport to="#view-controls">
+    <span>{{ attribution }}</span>
+  </Teleport>
 </template>
 
 <style scoped></style>

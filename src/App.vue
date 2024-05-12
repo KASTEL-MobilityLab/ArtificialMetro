@@ -12,11 +12,13 @@ onMounted(() => {
 </script>
 
 <template>
+  <FooterBar></FooterBar>
+  
   <main>
     <DebugView></DebugView>
   </main>
 
-  <FooterBar></FooterBar>
+  
 </template>
 
 <style scoped></style>
