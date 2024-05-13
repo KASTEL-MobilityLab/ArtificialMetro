@@ -2,11 +2,11 @@
 import "leaflet/dist/leaflet.css"
 import L from "leaflet"
 import { LMap, LTileLayer, LMarker, LCircleMarker } from "@vue-leaflet/vue-leaflet"
-import { computed, ref, type Ref } from "vue"
+import { computed, onMounted, ref, type Ref } from "vue"
 import type { CarsharingStation, Coordinate, Scooter } from "@/model/vehicles"
 import * as carsharing from '../provider/carsharing'
 import * as scooter from '../provider/scooter'
-import { BaseStore } from "@/storage/base_store"
+import { BaseStore, BaseRepos } from "@/storage/base_store"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -20,13 +20,14 @@ let attribution = computed(() => {
   return `Carsharing: ${carsharing.attribution}, Scooter: ${scooter.attribution}`
 })
 
-let carsharingChannel = new BroadcastChannel("carsharing")
-carsharingChannel.onmessage = async (message: MessageEvent<CarsharingStation[]>) => {
+onMounted(async () => {
   let store = await BaseStore.open()
-  let repo = store.carsharingStations()
-  let new_stations = await repo.get()
-  stations.value.splice(0, stations.value.length, ...new_stations)
-}
+  store.onUpdate(BaseRepos.CarsharingStations, async () => {
+      let repo = store.carsharingStations()
+      let new_stations = await repo.get()
+      stations.value.splice(0, stations.value.length, ...new_stations)
+  })
+})
 
 let scooterChannel = new BroadcastChannel("scooter")
 scooterChannel.onmessage = (message: MessageEvent<Scooter[]>) => {
