@@ -26,12 +26,13 @@ onMounted(async () => {
   let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
 
   carsharingRepo.onUpdate(async repo => {
-    let new_stations = await repo.get()
+    let new_stations = await repo.current()
     stations.value.splice(0, stations.value.length, ...new_stations)
   })
 
   scooterRepo.onUpdate(async repo => {
-    const new_scooters = await repo.get()
+    const new_scooters = await repo.current()
+    repo.getMaxDate()
     scooters.value.splice(0, scooters.value.length, ...new_scooters)
   })
 })

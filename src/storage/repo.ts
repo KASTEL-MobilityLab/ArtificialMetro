@@ -11,7 +11,17 @@ export class Repo<T extends Storeable, R extends string> {
         this.db = db
         this.name = name
         this.channel = new BroadcastChannel(channel_name)
-        this.channel_name =channel_name
+        this.channel_name = channel_name
+    }
+
+    onUpdate(func: { (repo: Repo<T, R>): void }) {
+        const channel = new BroadcastChannel(this.channel_name)
+        channel.onmessage = (evt: MessageEvent<R>) => {
+            const message = evt.data
+            if (message == this.name) {
+                func(this)
+            }
+        }
     }
 
     async store(stations: T[]) {
@@ -27,18 +37,32 @@ export class Repo<T extends Storeable, R extends string> {
         this.channel.postMessage(this.name)
     }
 
-    async get(): Promise<T[]> {
+    async all(): Promise<T[]> {
         return await this.db.getAll(this.name)
     }
 
-    onUpdate(func: { (repo: Repo<T, R>): void }) {
-        const channel = new BroadcastChannel(this.channel_name)
-        channel.onmessage = (evt: MessageEvent<R>) => {
-            const message = evt.data
-            if (message == this.name) {
-                func(this)
-            }
+    async current(): Promise<T[]> {
+        const currentTimestamp = await this.getMaxDate()
+        if (currentTimestamp == null) {
+            return []
+        } else {
+            return await this.db.getAllFromIndex(this.name, "timestamp", IDBKeyRange.only(currentTimestamp))
         }
+    }
+
+    async getMaxDate(): Promise<Date | null> {
+        const tx = this.db.transaction(this.name, 'readonly')
+        // reverse-sort on the timestamp index. 
+        // The first item is the current timestamp
+        const index = tx.store.index("timestamp")
+        const cursor = index.iterate(null, 'prevunique')
+        for await (const item of cursor) {
+            const timestamp = item.value.timestamp as Date
+            return timestamp
+        }
+        // make sure the transaction is done
+        await tx.done
+        return null
     }
 
 }
