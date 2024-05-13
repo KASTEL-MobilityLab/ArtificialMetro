@@ -16,13 +16,14 @@ export async function load() {
 
 async function extractScooter(response: Response): Promise<Scooter[]> {
     const scooters = []
+    const currentTime = new Date()
 
     for await (const record of csv.parse(response)) {
         const coordinate = geometryToCoordinate(record.geometry)
         const station: Scooter = {
             id: record.FID,
             provider: record.feed_id,
-            timestamp: new Date(record.last_reported),
+            timestamp: currentTime,
             position: coordinate
         }
         scooters.push(station)

@@ -16,6 +16,7 @@ export async function load() {
 
 async function extractStations(response: Response): Promise<CarsharingStation[]> {
     const stations = []
+    const currentTime = new Date()
 
     for await (const record of csv.parse(response)) {
         const coordinate = geometryToCoordinate(record.geometry)
@@ -24,7 +25,7 @@ async function extractStations(response: Response): Promise<CarsharingStation[]>
             provider: record.feed_id,
             name: record.name,
             available: parseInt(record.num_vehicles_available),
-            timestamp: new Date(record.last_reported),
+            timestamp: currentTime,
             position: coordinate
         }
         stations.push(station)
