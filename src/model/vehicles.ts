@@ -4,7 +4,7 @@ export interface Coordinate {
 }
 
 export interface CarsharingStation {
-    id: string,
+    stationId: string,
     provider: string,
     name: string,
     available: number,

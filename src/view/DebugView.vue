@@ -6,6 +6,7 @@ import { computed, ref, type Ref } from "vue"
 import type { CarsharingStation, Coordinate, Scooter } from "@/model/vehicles"
 import * as carsharing from '../provider/carsharing'
 import * as scooter from '../provider/scooter'
+import { CarsharingRepo } from "@/storage/carsharing_repo"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -20,8 +21,9 @@ let attribution = computed(() => {
 })
 
 let carsharingChannel = new BroadcastChannel("carsharing")
-carsharingChannel.onmessage = (message: MessageEvent<CarsharingStation[]>) => {
-  const new_stations = message.data.filter(station => station.available > 0)
+carsharingChannel.onmessage = async (message: MessageEvent<CarsharingStation[]>) => {
+  let repo = await CarsharingRepo.new()
+  let new_stations = await repo.getStations()
   stations.value.splice(0, stations.value.length, ...new_stations)
 }
 
