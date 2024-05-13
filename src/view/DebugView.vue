@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import "leaflet/dist/leaflet.css"
 import L from "leaflet"
-import { LMap, LTileLayer, LMarker, LCircleMarker } from "@vue-leaflet/vue-leaflet"
+import { LMap, LTileLayer, LCircleMarker } from "@vue-leaflet/vue-leaflet"
 import { computed, onMounted, ref, type Ref } from "vue"
-import type { CarsharingStation, Coordinate, Scooter } from "@/model/vehicles"
+import type { CarsharingStation, Scooter } from "@/model/vehicles"
 import * as carsharing from '../provider/carsharing'
 import * as scooter from '../provider/scooter'
-import { BaseStore, BaseRepos } from "@/storage/base_store"
+import { BaseStore, BaseRepo } from "@/storage/base_store"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -22,18 +22,17 @@ let attribution = computed(() => {
 
 onMounted(async () => {
   let store = await BaseStore.open()
-  store.onUpdate(BaseRepos.CarsharingStations, async () => {
-      let repo = store.carsharingStations()
-      let new_stations = await repo.get()
-      stations.value.splice(0, stations.value.length, ...new_stations)
+  store.onUpdate(BaseRepo.CarsharingStations, async () => {
+    let repo = store.carsharingStations()
+    let new_stations = await repo.get()
+    stations.value.splice(0, stations.value.length, ...new_stations)
+  })
+  store.onUpdate(BaseRepo.Scooters, async () => {
+    let repo = store.scooters()
+    const new_scooters = await repo.get()
+    scooters.value.splice(0, scooters.value.length, ...new_scooters)
   })
 })
-
-let scooterChannel = new BroadcastChannel("scooter")
-scooterChannel.onmessage = (message: MessageEvent<Scooter[]>) => {
-  const new_scooters = message.data
-  scooters.value.splice(0, scooters.value.length, ...new_scooters)
-}
 
 function num_to_color(num: number): string {
   if (num == 1) {

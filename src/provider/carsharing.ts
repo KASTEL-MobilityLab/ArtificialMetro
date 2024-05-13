@@ -5,17 +5,13 @@ import * as csv from "web-csv-toolbox"
 const endpoint = "https://api.mobidata-bw.de/geoserver/MobiData-BW/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=MobiData-BW%3Asharing_stations_car&maxFeatures=20000&outputFormat=csv"
 export const attribution = "NVBW MobiData BW"
 
-const channel = new BroadcastChannel("carsharing")
 const store = await BaseStore.open()
 
 export async function load() {
     const response = await fetch(endpoint)
     const stations = await extractStations(response)
     
-    const repo = store.carsharingStations()
-    await repo.store(stations)
-
-    channel.postMessage(stations)
+    await store.carsharingStations().store(stations)
 }
 
 async function extractStations(response: Response): Promise<CarsharingStation[]> {

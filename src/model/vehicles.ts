@@ -15,7 +15,7 @@ export interface CarsharingStation {
 export interface Scooter {
     id: string,
     provider: string,
-    timestamp: string,
+    timestamp: Date,
     position: Coordinate,
 }
 
