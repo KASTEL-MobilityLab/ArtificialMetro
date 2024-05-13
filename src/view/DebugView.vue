@@ -22,13 +22,15 @@ let attribution = computed(() => {
 
 onMounted(async () => {
   let store = await BaseStore.open()
-  store.onUpdate(BaseRepo.CarsharingStations, async () => {
-    let repo = store.carsharingStations()
+  let carsharingRepo = store.repo<CarsharingStation>(BaseRepo.CarsharingStations)
+  let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
+
+  carsharingRepo.onUpdate(async repo => {
     let new_stations = await repo.get()
     stations.value.splice(0, stations.value.length, ...new_stations)
   })
-  store.onUpdate(BaseRepo.Scooters, async () => {
-    let repo = store.scooters()
+
+  scooterRepo.onUpdate(async repo => {
     const new_scooters = await repo.get()
     scooters.value.splice(0, scooters.value.length, ...new_scooters)
   })

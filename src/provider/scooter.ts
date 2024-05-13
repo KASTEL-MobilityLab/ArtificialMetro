@@ -1,5 +1,5 @@
 import { geometryToCoordinate, type Scooter } from "@/model/vehicles";
-import { BaseStore } from "@/storage/base_store";
+import { BaseRepo, BaseStore } from "@/storage/base_store";
 import * as csv from "web-csv-toolbox"
 
 const endpoint = "https://api.mobidata-bw.de/geoserver/MobiData-BW/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=MobiData-BW%3Asharing_vehicles&CQL_FILTER=form_factor%20%3D%20%27scooter%27&maxFeatures=20000&outputFormat=csv"
@@ -11,7 +11,7 @@ export async function load() {
     const response = await fetch(endpoint)
     const scooters = await extractScooter(response);
 
-    await store.scooters().store(scooters)
+    store.repo<Scooter>(BaseRepo.Scooters).store(scooters)
 }
 
 async function extractScooter(response: Response): Promise<Scooter[]> {

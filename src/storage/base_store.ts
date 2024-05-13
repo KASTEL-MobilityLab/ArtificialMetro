@@ -1,6 +1,6 @@
 import { openDB, type IDBPDatabase } from "idb";
-import type { CarsharingStation, Scooter } from "@/model/vehicles";
 import { Repo } from "./repo";
+import type { Storeable } from "@/model/storeable";
 
 const BASE_STORE = "base-store"
 export enum BaseRepo {
@@ -22,22 +22,8 @@ export class BaseStore {
         return new BaseStore(db)
     }
 
-    onUpdate(repo: BaseRepo, func: { (): void }) {
-        const channel = new BroadcastChannel(BASE_STORE)
-        channel.onmessage = (evt: MessageEvent<BaseRepo>) => {
-            const message = evt.data
-            if (message == repo) {
-                func()
-            }
-        }
-    }
-
-    carsharingStations(): Repo<CarsharingStation, BaseRepo> {
-        return new Repo(this.db, BaseRepo.CarsharingStations, BASE_STORE)
-    }
-
-    scooters(): Repo<Scooter, BaseRepo> {
-        return new Repo(this.db, BaseRepo.Scooters, BASE_STORE)
+    repo<T extends Storeable>(repo: BaseRepo): Repo<T, BaseRepo> {
+        return new Repo(this.db, repo, BASE_STORE)
     }
 }
 
