@@ -1,21 +1,23 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import DebugView from './view/DebugView.vue';
-import * as carsharing from './provider/carsharing';
+import { onMounted } from 'vue'
+import DebugView from './view/DebugView.vue'
+import FooterBar from './view/FooterBar.vue'
+import * as provider from './provider/provider'
 
 onMounted(() => {
-  carsharing.load()
+  provider.startCarsharingProvider()
+  provider.startScooterProvider()
 })
 </script>
 
 <template>
-  <header>
-
-  </header>
+  <FooterBar></FooterBar>
 
   <main>
     <DebugView></DebugView>
   </main>
+
+  
 </template>
 
 <style scoped></style>

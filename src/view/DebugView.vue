@@ -1,34 +1,70 @@
 <script setup lang="ts">
 import "leaflet/dist/leaflet.css"
 import L from "leaflet"
-import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet"
-import { ref, type Ref } from "vue";
+import { LMap, LTileLayer, LCircleMarker } from "@vue-leaflet/vue-leaflet"
+import { computed, onMounted, ref, type Ref } from "vue"
+import type { CarsharingStation, Scooter } from "@/model/vehicles"
+import * as carsharing from '../provider/carsharing'
+import * as scooter from '../provider/scooter'
+import { BaseStore, BaseRepo } from "@/storage/base_store"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
-globalThis.L = L;
+globalThis.L = L
 
-type Coordinate = [number, number];
+let zoom = ref(14)
+let stations: Ref<CarsharingStation[]> = ref([])
+let scooters: Ref<Scooter[]> = ref([])
 
-let zoom = ref(14);
-let markers: Ref<[Coordinate]> = ref([] as unknown as [Coordinate]);
+let attribution = computed(() => {
+  return `Carsharing: ${carsharing.attribution}, Scooter: ${scooter.attribution}`
+})
 
-let channel = new BroadcastChannel("carsharing");
-channel.onmessage = (car: MessageEvent<Coordinate>) => {
-  markers.value.push(car.data)
+onMounted(async () => {
+  let store = await BaseStore.open()
+  let carsharingRepo = store.repo<CarsharingStation>(BaseRepo.CarsharingStations)
+  let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
+
+  carsharingRepo.onUpdate(async repo => {
+    let new_stations = await repo.current()
+    stations.value.splice(0, stations.value.length, ...new_stations)
+  })
+
+  scooterRepo.onUpdate(async repo => {
+    const new_scooters = await repo.current()
+    repo.getMaxDate()
+    scooters.value.splice(0, scooters.value.length, ...new_scooters)
+  })
+})
+
+function num_to_color(num: number): string {
+  if (num == 1) {
+    return "red"
+  } else if (num == 2) {
+    return "yellow"
+  } else {
+    return "green"
+  }
 }
 
 </script>
 
 <template>
-  <div style="height: 600px; width: 800px">
+  <div style="height: calc(100vh - 100px); width: 100%">
     <LMap v-model:zoom="zoom" :center="[49.006889, 8.403653]">
       <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OSM"></LTileLayer>
-      <LMarker v-for="marker, i in markers" v-bind:key="i" :lat-lng="marker"></LMarker>
+      <!-- <LMarker v-for="marker, i in stations" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"></LMarker> -->
+      <LCircleMarker v-for="marker, i in stations" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
+        :fill="true" :fill-color="num_to_color(marker.available)" :fill-opacity="1" :stroke="true" :radius="8"
+        color="black"></LCircleMarker>
+
+      <LCircleMarker v-for="marker, i in scooters" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
+        :fill="true" fill-color="blue" :fill-opacity="1" :stroke="false" :radius="5"></LCircleMarker>
     </LMap>
   </div>
+  <Teleport to="#view-controls">
+    <span>{{ attribution }}</span>
+  </Teleport>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

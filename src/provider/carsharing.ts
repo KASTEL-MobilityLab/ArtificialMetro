@@ -1,28 +1,34 @@
+import { geometryToCoordinate, type CarsharingStation } from "@/model/vehicles";
+import { BaseRepo, BaseStore } from "@/storage/base_store";
 import * as csv from "web-csv-toolbox"
 
 const endpoint = "https://api.mobidata-bw.de/geoserver/MobiData-BW/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=MobiData-BW%3Asharing_stations_car&maxFeatures=20000&outputFormat=csv"
-const attribution = "NVBW MobiData BW"
+export const attribution = "NVBW MobiData BW"
 
-type Coordinate = [number, number];
-
-const channel = new BroadcastChannel("carsharing");
+const store = await BaseStore.open()
 
 export async function load() {
     const response = await fetch(endpoint)
+    const stations = await extractStations(response)
 
-    for await (const record of csv.parse(response)) {
-        const coordinate = geoToCoordinate(record.geometry)
-        channel.postMessage(coordinate)
-    }
-
+    store.repo<CarsharingStation>(BaseRepo.CarsharingStations).store(stations)
 }
 
-function geoToCoordinate(geometry: string): Coordinate {
-    geometry = geometry.substring(7);
-    const splitter = geometry.indexOf(" ");
-    const first = geometry.substring(0, splitter);
-    let second = geometry.substring(splitter+1);
-    second = second.substring(0, second.length - 1);
+async function extractStations(response: Response): Promise<CarsharingStation[]> {
+    const stations = []
+    const currentTime = new Date()
 
-    return [parseFloat(second), parseFloat(first)]
+    for await (const record of csv.parse(response)) {
+        const coordinate = geometryToCoordinate(record.geometry)
+        const station: CarsharingStation = {
+            id: record.FID,
+            provider: record.feed_id,
+            name: record.name,
+            available: parseInt(record.num_vehicles_available),
+            timestamp: currentTime,
+            position: coordinate
+        }
+        stations.push(station)
+    }
+    return stations
 }
