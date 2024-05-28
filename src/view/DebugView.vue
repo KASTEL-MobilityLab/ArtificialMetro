@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import "leaflet/dist/leaflet.css"
 import L from "leaflet"
-import { LMap, LTileLayer, LMarker, LCircleMarker } from "@vue-leaflet/vue-leaflet"
-import { computed, ref, type Ref } from "vue"
-import type { CarsharingStation, Coordinate, Scooter } from "@/model/vehicles"
+import { LMap, LTileLayer, LCircleMarker } from "@vue-leaflet/vue-leaflet"
+import { computed, onMounted, ref, type Ref } from "vue"
+import type { CarsharingStation, Scooter } from "@/model/vehicles"
 import * as carsharing from '../provider/carsharing'
 import * as scooter from '../provider/scooter'
+import { BaseStore, BaseRepo } from "@/storage/base_store"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -19,17 +20,22 @@ let attribution = computed(() => {
   return `Carsharing: ${carsharing.attribution}, Scooter: ${scooter.attribution}`
 })
 
-let carsharingChannel = new BroadcastChannel("carsharing")
-carsharingChannel.onmessage = (message: MessageEvent<CarsharingStation[]>) => {
-  const new_stations = message.data.filter(station => station.available > 0)
-  stations.value.splice(0, stations.value.length, ...new_stations)
-}
+onMounted(async () => {
+  let store = await BaseStore.open()
+  let carsharingRepo = store.repo<CarsharingStation>(BaseRepo.CarsharingStations)
+  let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
 
-let scooterChannel = new BroadcastChannel("scooter")
-scooterChannel.onmessage = (message: MessageEvent<Scooter[]>) => {
-  const new_scooters = message.data
-  scooters.value.splice(0, scooters.value.length, ...new_scooters)
-}
+  carsharingRepo.onUpdate(async repo => {
+    let new_stations = await repo.current()
+    stations.value.splice(0, stations.value.length, ...new_stations)
+  })
+
+  scooterRepo.onUpdate(async repo => {
+    const new_scooters = await repo.current()
+    repo.getMaxDate()
+    scooters.value.splice(0, scooters.value.length, ...new_scooters)
+  })
+})
 
 function num_to_color(num: number): string {
   if (num == 1) {

@@ -8,14 +8,14 @@ export interface CarsharingStation {
     provider: string,
     name: string,
     available: number,
-    timestamp: string,
+    timestamp: Date,
     position: Coordinate,
 }
 
 export interface Scooter {
     id: string,
     provider: string,
-    timestamp: string,
+    timestamp: Date,
     position: Coordinate,
 }
 
