@@ -12,7 +12,33 @@ import { BaseStore, BaseRepo } from "@/storage/base_store"
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
 globalThis.L = L
 
-let zoom = ref(15)
+const PRESETS = [
+  {
+    position: {
+      lat: 49.006889,
+      lon: 8.403653,
+    },
+    zoom: 15,
+  },
+  {
+    position: {
+      lat: 49.011620,
+      lon: 8.417007,
+    },
+    zoom: 16,
+  },
+  {
+    position: {
+      lat: 49.013618,
+      lon: 8.419233,
+    },
+    zoom: 17,
+  }
+]
+
+let currentPreset = ref(1)
+let zoom = computed(() => PRESETS[currentPreset.value].zoom)
+let center = computed(() => PRESETS[0].position)
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
 
@@ -51,7 +77,7 @@ function num_to_color(num: number): string {
 
 <template>
   <div style="height: calc(100vh - 100px); width: 100%">
-    <LMap v-model:zoom="zoom" :center="[49.006889, 8.403653]">
+    <LMap v-model:zoom="zoom" :center="center">
       <!-- Humanitarian: https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png -->
       <!-- Dark: https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png -->
       <!-- Light: https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png -->
