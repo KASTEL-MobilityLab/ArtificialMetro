@@ -18,11 +18,11 @@ ul {
     justify-content: center;
     align-items: flex-start;
 
-    gap: 5px;
+    gap: 3px;
 
     position: absolute;
     z-index: 1000;
-    left: 5px;
+    left: 0;
     top: calc(50% - 25px);
 
     margin: 0;
@@ -34,7 +34,7 @@ li {
 
     width: 20px;
     height: 20px;
-    border-radius: 100%;
+    border-radius: 0 100% 100% 0;
 
     background: var(--card-bg-color);
     box-shadow: 0 0 5px var(--card-shade-color);
