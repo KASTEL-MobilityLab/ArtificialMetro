@@ -7,6 +7,7 @@ import type { CarsharingStation, Scooter } from "@/model/vehicles"
 import * as carsharing from '../provider/carsharing'
 import * as scooter from '../provider/scooter'
 import { BaseStore, BaseRepo } from "@/storage/base_store"
+import PresetScaler from "./PresetScaler.vue"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -92,6 +93,7 @@ function num_to_color(num: number): string {
         :fill="true" fill-color="#398888" :fill-opacity="1" :stroke="false" :radius="5"></LCircleMarker>
     </LMap>
   </div>
+  <PresetScaler :current-preset="currentPreset" :num-presets="PRESETS.length"></PresetScaler>
   <Teleport to="#view-controls">
     <span>{{ attribution }}</span>
   </Teleport>
