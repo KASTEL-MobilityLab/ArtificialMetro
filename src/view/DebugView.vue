@@ -12,7 +12,7 @@ import { BaseStore, BaseRepo } from "@/storage/base_store"
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
 globalThis.L = L
 
-let zoom = ref(14)
+let zoom = ref(15)
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
 
@@ -38,12 +38,12 @@ onMounted(async () => {
 })
 
 function num_to_color(num: number): string {
-  if (num == 1) {
-    return "red"
+  if (num <= 1) {
+    return "#8C423C"
   } else if (num == 2) {
-    return "yellow"
+    return "#A5784F"
   } else {
-    return "green"
+    return "#6F8750"
   }
 }
 
@@ -52,14 +52,18 @@ function num_to_color(num: number): string {
 <template>
   <div style="height: calc(100vh - 100px); width: 100%">
     <LMap v-model:zoom="zoom" :center="[49.006889, 8.403653]">
-      <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OSM"></LTileLayer>
-      <!-- <LMarker v-for="marker, i in stations" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"></LMarker> -->
+      <!-- Humanitarian: https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png -->
+      <!-- Dark: https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png -->
+      <!-- Light: https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png -->
+      
+      <LTileLayer url="https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png" layer-type="base" name="OSM"></LTileLayer>
+      <!-- <LTileLayer url="https://c.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png" layer-type="overlay" name="OSM"></LTileLayer> -->
       <LCircleMarker v-for="marker, i in stations" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
-        :fill="true" :fill-color="num_to_color(marker.available)" :fill-opacity="1" :stroke="true" :radius="8"
+        :fill="true" :fill-color="num_to_color(marker.available)" :fill-opacity="1" :stroke="false" :radius="8"
         color="black"></LCircleMarker>
 
       <LCircleMarker v-for="marker, i in scooters" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
-        :fill="true" fill-color="blue" :fill-opacity="1" :stroke="false" :radius="5"></LCircleMarker>
+        :fill="true" fill-color="#398888" :fill-opacity="1" :stroke="false" :radius="5"></LCircleMarker>
     </LMap>
   </div>
   <Teleport to="#view-controls">
