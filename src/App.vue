@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import DebugView from './view/DebugView.vue'
+import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
 import * as provider from './provider/provider'
 
@@ -14,7 +14,7 @@ onMounted(() => {
   <FooterBar></FooterBar>
 
   <main>
-    <DebugView></DebugView>
+    <TimelapseView></TimelapseView>
   </main>
 
   
