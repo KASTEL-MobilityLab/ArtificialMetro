@@ -1,18 +1,21 @@
 import { ref, watch, type Ref } from 'vue'
 
 export class TimeSimulator {
-    private simulatedTime: Ref<Date> = ref(new Date())
-    private startTime: Ref<Date> = ref(new Date())
-    private endTime: Ref<Date> = ref(new Date())
+    private time: Ref<Date> = ref(new Date())
+    private start: Ref<Date> = ref(new Date())
+    private end: Ref<Date> = ref(new Date())
+    private delay: number /*s*/
 
     private resetHandler: () => void = () => {}
     private startHandler: () => void = () => {}
+    private stopHandler: () => void = () => {}
     private tickHandler: (time: Date) => void = () => {}
 
-    constructor() {
+    constructor(delay: number) {
+        this.delay = delay
         this.resetTimeBounds()
 
-        watch(this.simulatedTime, time => {
+        watch(this.time, time => {
             this.tickHandler(time)
         })
     }
@@ -25,6 +28,10 @@ export class TimeSimulator {
         this.startHandler = handler
     }
 
+    onStop(handler: () => void) {
+        this.stopHandler = handler
+    }
+
     onTick(handler: ((time: Date) => void)) {
         this.tickHandler = handler
     }
@@ -33,34 +40,33 @@ export class TimeSimulator {
         const currentTime = new Date()
         const start = new Date(currentTime.getTime() - 1 * 60 * 60 * 1000 /*1h*/)
         normalizeTimestamp(start)
-        this.startTime.value = start
-        this.endTime.value = currentTime
+        
+        this.start.value = start
+        this.end.value = currentTime
     }
 
     startSimulation() {
         this.resetHandler()
-        this.simulatedTime.value = this.startTime.value
+        this.time.value = this.start.value
         this.startHandler()
-        const ticker = setInterval(() => {
-            const current = this.simulatedTime.value
-            if (current == null) {
-                clearInterval(ticker)
-                this.reinitSimulation()
-            }
-            const newTime = new Date(current!.getTime() + 5 * 60 * 1000 /*5m*/)
-            this.simulatedTime.value = newTime
 
-            if (this.endTime.value == null || newTime >= this.endTime.value) {
-                clearInterval(ticker)
-                this.reinitSimulation()
+        let timer = 0 // reference to interval timer; set later
+        const tick = () => {
+            const overflow = this.advanceTime(5)
+            if (overflow) {
+                clearInterval(timer)
+                this.stopHandler()
             }
-        },
-            5 * 1000 /*5s*/)
+        }
+        timer = setInterval(tick, this.delay * 1000)
     }
 
-    reinitSimulation() {
-        this.resetTimeBounds()
-        this.startSimulation()
+    advanceTime(mins: number): boolean {
+        const current = this.time.value
+        const newTime = new Date(current.getTime() + mins * 60 * 1000)
+        this.time.value = newTime
+        const overflow = newTime >= this.end.value
+        return overflow
     }
 }
 

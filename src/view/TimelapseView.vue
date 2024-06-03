@@ -44,17 +44,13 @@ let center = computed(() => PRESETS[currentPreset.value].position)
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
 
-let simulator = new TimeSimulator()
+let simulator = new TimeSimulator(2 /*s*/)
 
 let attribution = computed(() => {
   return `Carsharing: ${carsharing.attribution}, Scooter: ${scooter.attribution}`
 })
 
 onMounted(async () => {
-  let store = await BaseStore.open()
-  let carsharingRepo = store.repo<CarsharingStation>(BaseRepo.CarsharingStations)
-  let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
-
   simulator.resetTimeBounds()
   simulator.startSimulation()
 })
@@ -79,9 +75,12 @@ simulator.onReset(() => {
     scooters.value.splice(0, scooters.value.length)
 })
 
+simulator.onStop(() => {
+    simulator.resetTimeBounds()
+    simulator.startSimulation()
+})
+
 simulator.onTick(async time => {
-    if (time == null) return
-    console.log('time:', time)
     let store = await BaseStore.open()
     let carsharingRepo = store.repo<CarsharingStation>(BaseRepo.CarsharingStations)
     let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
@@ -108,7 +107,7 @@ simulator.onTick(async time => {
       <!-- Dark: https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png -->
       <!-- Light: https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png -->
       
-      <LTileLayer url="https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png" layer-type="base" name="OSM"></LTileLayer>
+      <LTileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png" layer-type="base" name="OSM"></LTileLayer>
       <!-- <LTileLayer url="https://c.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png" layer-type="overlay" name="OSM"></LTileLayer> -->
       <LCircleMarker v-for="marker, i in stations" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
         :fill="true" :fill-color="num_to_color(marker.available)" :fill-opacity="1" :stroke="false" :radius="8"
