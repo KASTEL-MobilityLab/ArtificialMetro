@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import ViewSwitcher from './ViewSwitcher.vue'
-import { GlobeIcon, MapIcon } from 'lucide-vue-next'
+import { GlobeIcon, MapIcon, TimerIcon } from 'lucide-vue-next'
 
 const views = [
     { title: "Map", icon: MapIcon },
+    { title: "Timelapse", icon: TimerIcon },
     { title: "Other", icon: GlobeIcon },
 ]
 
@@ -11,7 +12,7 @@ const views = [
 
 <template>
     <footer>
-        <ViewSwitcher :views="views" :active="0"></ViewSwitcher>
+        <ViewSwitcher :views="views" :active="1"></ViewSwitcher>
         <div id="view-controls"></div>
     </footer>
 </template>

@@ -27,6 +27,7 @@ export class Repo<T extends Storeable, R extends string> {
     async store(stations: T[]) {
         const transaction = this.db.transaction(this.name, 'readwrite')
         const commits = stations.map(station => {
+            station.timestamp = normalizeTimestamp(station.timestamp)
             const key = `${station.id}-${station.timestamp.getTime()}`
             transaction.store.put(station, key)
         })
@@ -42,7 +43,7 @@ export class Repo<T extends Storeable, R extends string> {
     }
 
     async current(): Promise<T[]> {
-        const currentTimestamp = await this.getMaxDate()
+        const currentTimestamp = await this.getMaxTimestamp()
         if (currentTimestamp == null) {
             return []
         } else {
@@ -50,7 +51,11 @@ export class Repo<T extends Storeable, R extends string> {
         }
     }
 
-    async getMaxDate(): Promise<Date | null> {
+    async forTimestamp(timestamp: Date): Promise<T[]> {
+        return await this.db.getAllFromIndex(this.name, "timestamp", IDBKeyRange.only(timestamp))
+    }
+
+    async getMaxTimestamp(): Promise<Date | null> {
         const tx = this.db.transaction(this.name, 'readonly')
         // reverse-sort on the timestamp index. 
         // The first item is the current timestamp
@@ -65,4 +70,28 @@ export class Repo<T extends Storeable, R extends string> {
         return null
     }
 
+    async getAvailableTimestamps(): Promise<Date[]> {
+        const tx = this.db.transaction(this.name, 'readonly')
+        const timestamps = []
+        // reverse-sort on the timestamp index. 
+        // only return unique timestamps
+        const index = tx.store.index("timestamp")
+        const cursor = index.iterate(null, 'prevunique')
+        for await (const item of cursor) {
+            const timestamp = item.value.timestamp as Date
+            timestamps.push(timestamp)
+        }
+        await tx.done
+
+        return timestamps
+    }
+
+}
+
+function normalizeTimestamp(timestamp: Date): Date {
+    const minutes = timestamp.getMinutes()
+    timestamp.setMinutes(Math.floor(minutes / 5) * 5)
+    timestamp.setSeconds(0)
+    timestamp.setMilliseconds(0)
+    return timestamp
 }

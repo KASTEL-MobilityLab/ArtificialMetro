@@ -12,5 +12,11 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-  }
+  },
+  worker: {
+    format: 'es',
+  },
+  build: {
+    target: 'esnext',
+  },
 })
