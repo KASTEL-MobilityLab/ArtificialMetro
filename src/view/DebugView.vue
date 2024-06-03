@@ -59,7 +59,7 @@ onMounted(async () => {
 
   scooterRepo.onUpdate(async repo => {
     const new_scooters = await repo.current()
-    repo.getMaxDate()
+    repo.getMaxTimestamp()
     scooters.value.splice(0, scooters.value.length, ...new_scooters)
   })
 })
