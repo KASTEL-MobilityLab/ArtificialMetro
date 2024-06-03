@@ -79,6 +79,8 @@ const endTime: Ref<null|Date> = ref(null)
 function setSimulationBounds() {
     const currentTime = new Date()
     const start = new Date(currentTime.getTime() - 1 * 60 * 60 * 1000 /*1h*/)
+    // const start = new Date(currentTime.getTime() - 20 * 60 * 1000 /*20m*/)
+    start.setMinutes(Math.floor(start.getMinutes() / 5) * 5)
     start.setSeconds(0)
     start.setMilliseconds(0)
     startTime.value = start
@@ -86,24 +88,53 @@ function setSimulationBounds() {
 }
 
 function startSimulation() {
+    resetSimulation()
     simulatedTime.value = startTime.value
     let ticker = setInterval(() => {
         const current = simulatedTime.value
         if (current == null) { 
             clearInterval(ticker) 
+            reinitSimulation()
         }
-        const newTime = new Date(current!.getTime() + 1 * 60 * 1000 /*1m*/)
+        const newTime = new Date(current!.getTime() + 5 * 60 * 1000 /*5m*/)
         simulatedTime.value = newTime
 
-        if (newTime == endTime.value) { 
+        if (endTime.value == null || newTime >= endTime.value) { 
             clearInterval(ticker) 
+            reinitSimulation()
         }
     },
     5 * 1000 /*5s*/)
 }
 
-watch(simulatedTime, (time) => {
+function reinitSimulation() {
+    setSimulationBounds()
+    startSimulation()
+}
+
+function resetSimulation() {
+    stations.value.splice(0, stations.value.length)
+    scooters.value.splice(0, scooters.value.length)
+}
+
+watch(simulatedTime, async (time) => {
+    if (time == null) return
     console.log('time:', time)
+    let store = await BaseStore.open()
+    let carsharingRepo = store.repo<CarsharingStation>(BaseRepo.CarsharingStations)
+    let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
+
+    const new_stations = await carsharingRepo.forTimestamp(time)
+    const new_scooter = await scooterRepo.forTimestamp(time)
+
+    if (new_stations.length > 0) {
+        // only show new stations if there was a chnage found in the DB
+        stations.value.splice(0, stations.value.length, ...new_stations)
+    }
+    if (new_scooter.length > 0) {
+        // only show new stations if there was a chnage found in the DB
+        scooters.value.splice(0, scooters.value.length, ...new_scooter)
+    }
 })
 
 </script>
