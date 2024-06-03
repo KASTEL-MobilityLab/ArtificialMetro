@@ -12,6 +12,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@types/leaflet": "^1.9.12",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
     "idb": "^8.0.0",
     "lucide-vue-next": "^0.378.0",

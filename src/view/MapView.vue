@@ -62,7 +62,7 @@ function setToPreset(num: number) {
 
 <template>
   <div style="height: calc(100vh - 100px); width: 100%">
-    <LMap v-model:zoom="zoom" :center="center">
+    <LMap :zoom="zoom" :center="[center.lat, center.lon]">
       <!-- Humanitarian: https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png -->
       <!-- Dark: https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png -->
       <!-- Light: https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png -->
