@@ -19,7 +19,7 @@ const PRESETS = [
       lat: 49.006889,
       lon: 8.403653,
     },
-    zoom: 15,
+    zoom: 14,
   },
   {
     position: {
@@ -39,7 +39,7 @@ const PRESETS = [
 
 let currentPreset = ref(1)
 let zoom = computed(() => PRESETS[currentPreset.value].zoom)
-let center = computed(() => PRESETS[0].position)
+let center = computed(() => PRESETS[currentPreset.value].position)
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
 
@@ -74,6 +74,10 @@ function num_to_color(num: number): string {
   }
 }
 
+function setToPreset(num: number) {
+  currentPreset.value = num - 1
+}
+
 </script>
 
 <template>
@@ -93,7 +97,7 @@ function num_to_color(num: number): string {
         :fill="true" fill-color="#398888" :fill-opacity="1" :stroke="false" :radius="5"></LCircleMarker>
     </LMap>
   </div>
-  <PresetScaler :current-preset="currentPreset" :num-presets="PRESETS.length"></PresetScaler>
+  <PresetScaler :current-preset="currentPreset" :num-presets="PRESETS.length" @click="setToPreset"></PresetScaler>
   <Teleport to="#view-controls">
     <span>{{ attribution }}</span>
   </Teleport>

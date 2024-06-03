@@ -3,11 +3,21 @@ const props = defineProps<{
     currentPreset: number,
     numPresets: number,
 }>()
+
+const emit = defineEmits<{
+    click: [preset: number],
+}>()
+
 </script>
 
 <template>
     <ul>
-        <li v-for="i in props.numPresets" :key="i" :active="i-1 == props.currentPreset"></li>
+        <li 
+            v-for="i in props.numPresets" 
+            :key="i" 
+            :active="i-1 == props.currentPreset"
+            @click="emit('click', i)"
+            ></li>
     </ul>
 </template>
 
