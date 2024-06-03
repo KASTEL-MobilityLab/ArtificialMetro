@@ -8,6 +8,7 @@ import * as carsharing from '../provider/carsharing'
 import * as scooter from '../provider/scooter'
 import { BaseStore, BaseRepo } from "@/storage/base_store"
 import PresetScaler from "./PresetScaler.vue"
+import { TimeSimulator } from "@/model/simulator"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -43,6 +44,8 @@ let center = computed(() => PRESETS[currentPreset.value].position)
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
 
+let simulator = new TimeSimulator()
+
 let attribution = computed(() => {
   return `Carsharing: ${carsharing.attribution}, Scooter: ${scooter.attribution}`
 })
@@ -52,8 +55,8 @@ onMounted(async () => {
   let carsharingRepo = store.repo<CarsharingStation>(BaseRepo.CarsharingStations)
   let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
 
-  setSimulationBounds()
-  startSimulation()
+  simulator.resetTimeBounds()
+  simulator.startSimulation()
 })
 
 function num_to_color(num: number): string {
@@ -71,53 +74,12 @@ function setToPreset(num: number) {
 }
 
 
-// This is the current time the simulation is in
-const simulatedTime: Ref<null|Date> = ref(null)
-const startTime: Ref<null|Date> = ref(null)
-const endTime: Ref<null|Date> = ref(null)
-
-function setSimulationBounds() {
-    const currentTime = new Date()
-    const start = new Date(currentTime.getTime() - 1 * 60 * 60 * 1000 /*1h*/)
-    // const start = new Date(currentTime.getTime() - 20 * 60 * 1000 /*20m*/)
-    start.setMinutes(Math.floor(start.getMinutes() / 5) * 5)
-    start.setSeconds(0)
-    start.setMilliseconds(0)
-    startTime.value = start
-    endTime.value = currentTime
-}
-
-function startSimulation() {
-    resetSimulation()
-    simulatedTime.value = startTime.value
-    let ticker = setInterval(() => {
-        const current = simulatedTime.value
-        if (current == null) { 
-            clearInterval(ticker) 
-            reinitSimulation()
-        }
-        const newTime = new Date(current!.getTime() + 5 * 60 * 1000 /*5m*/)
-        simulatedTime.value = newTime
-
-        if (endTime.value == null || newTime >= endTime.value) { 
-            clearInterval(ticker) 
-            reinitSimulation()
-        }
-    },
-    5 * 1000 /*5s*/)
-}
-
-function reinitSimulation() {
-    setSimulationBounds()
-    startSimulation()
-}
-
-function resetSimulation() {
+simulator.onReset(() => {
     stations.value.splice(0, stations.value.length)
     scooters.value.splice(0, scooters.value.length)
-}
+})
 
-watch(simulatedTime, async (time) => {
+simulator.onTick(async time => {
     if (time == null) return
     console.log('time:', time)
     let store = await BaseStore.open()
