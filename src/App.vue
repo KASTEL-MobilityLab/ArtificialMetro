@@ -15,14 +15,14 @@ const activeView = ref(0)
 const viewComponent = computed(() => views[activeView.value].component)
 
 onMounted(() => {
-  provider.startCarsharingProvider()
-  provider.startScooterProvider()
+  provider.startAll()
   registerKeyboardSwitcher()
 })
 
 function switchView(view: number) {
   activeView.value = view
 }
+
 
 function registerKeyboardSwitcher() {
   window.addEventListener('keyup', evt => {

@@ -1,3 +1,8 @@
+export function startAll() {
+    startCarsharingProvider()
+    startScooterProvider()
+}
+
 export function startCarsharingProvider() {
     return new Worker(new URL("./carsharing_worker.ts", import.meta.url), { type: "module" })
 }
