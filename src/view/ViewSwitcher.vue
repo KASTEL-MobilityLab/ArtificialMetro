@@ -10,11 +10,19 @@ const props = defineProps<{
     views: View[],
     active: number,
 }>()
+const emit = defineEmits<{
+    switch: [view: number],
+}>()
 </script>
 
 <template>
     <ul class="view-switcher">
-        <li v-for="view, id in props.views" :key="id" :active="id == props.active">
+        <li 
+            v-for="view, id in props.views" 
+            :key="id" 
+            :active="id == props.active"
+            @click="emit('switch', id)"
+            >
             <component :is="view.icon" :height="30" :width="30"></component>
             {{ view.title }}
             <span class="active-indicator"></span>
@@ -23,6 +31,9 @@ const props = defineProps<{
 </template>
 
 <style scoped>
+.view-switcher {
+    width: 50%;
+}
 ul {
     display: flex;
 
