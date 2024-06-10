@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
 import * as provider from './provider/provider'
 import ViewSwitcher from './view/ViewSwitcher.vue';
-import { GlobeIcon, MapIcon, TimerIcon } from 'lucide-vue-next';
+import { MapIcon, TimerIcon } from 'lucide-vue-next';
+import DebugView from './view/DebugView.vue';
 
 const views = [
-    { title: "Map", icon: MapIcon },
-    { title: "Timelapse", icon: TimerIcon },
-    { title: "Other", icon: GlobeIcon },
+    { title: "Map", icon: MapIcon, component: DebugView },
+    { title: "Timelapse", icon: TimerIcon, component: TimelapseView },
 ]
-const activeView = ref(1)
+const activeView = ref(0)
+const viewComponent = computed(() => views[activeView.value].component)
 
 onMounted(() => {
   provider.startCarsharingProvider()
@@ -22,12 +23,18 @@ onMounted(() => {
 <template>
   <FooterBar>
     <template #left>
-      <ViewSwitcher :views="views" :active="activeView"></ViewSwitcher>
+      <ViewSwitcher 
+        :views="views" 
+        :active="activeView" 
+        @switch="view => activeView = view"
+        ></ViewSwitcher>
     </template>
   </FooterBar>
 
   <main>
-    <TimelapseView></TimelapseView>
+    <KeepAlive>
+      <component :is="viewComponent"></component>
+    </KeepAlive>
   </main>
 
   
