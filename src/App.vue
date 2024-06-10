@@ -64,7 +64,8 @@ function stopKioskMode() {
     <template #left>
       <ViewSwitcher 
         :views="views" 
-        :active="activeView" 
+        :active="activeView"
+        :automatic="kioskMode"
         @switch="switchView"
         ></ViewSwitcher>
     </template>

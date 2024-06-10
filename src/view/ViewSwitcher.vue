@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { LucideProps } from 'lucide-vue-next';
+import { RepeatIcon } from 'lucide-vue-next';
 import type { FunctionalComponent } from 'vue';
 
 type View = {
@@ -9,6 +10,7 @@ type View = {
 const props = defineProps<{
     views: View[],
     active: number,
+    automatic: boolean,
 }>()
 const emit = defineEmits<{
     switch: [view: number],
@@ -28,6 +30,7 @@ const emit = defineEmits<{
             <span class="active-indicator"></span>
         </li>
     </ul>
+    <span class="automatic" v-if="automatic"><RepeatIcon></RepeatIcon></span>
 </template>
 
 <style scoped>
@@ -84,5 +87,20 @@ ul li .active-indicator {
 }
 ul li[active="true"] .active-indicator {
     visibility: visible;
+}
+.automatic {
+    display: flex;
+    position: absolute;
+
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    left: 5px;
+    top: 5px;
+    background: var(--accent-bg-color);
+
+    border-radius: 5px;
+    padding: 2px 5px;
 }
 </style>
