@@ -17,7 +17,26 @@ const viewComponent = computed(() => views[activeView.value].component)
 onMounted(() => {
   provider.startCarsharingProvider()
   provider.startScooterProvider()
+  registerKeyboardSwitcher()
 })
+
+function switchView(view: number) {
+  activeView.value = view
+}
+
+function registerKeyboardSwitcher() {
+  window.addEventListener('keyup', evt => {
+    if (!evt.key.match(/[0-9]/)) return
+    if (evt.key == "0") {
+      // enter automatic kiosk mode
+      // TODO
+    } else {
+      // switchView is 0-indexed,
+      // but key 0 is special, therefore, we start at key 1
+      switchView(parseInt(evt.key) - 1)
+    }
+  })
+}
 </script>
 
 <template>
@@ -26,7 +45,7 @@ onMounted(() => {
       <ViewSwitcher 
         :views="views" 
         :active="activeView" 
-        @switch="view => activeView = view"
+        @switch="switchView"
         ></ViewSwitcher>
     </template>
   </FooterBar>
@@ -36,8 +55,6 @@ onMounted(() => {
       <component :is="viewComponent"></component>
     </KeepAlive>
   </main>
-
-  
 </template>
 
 <style scoped></style>
