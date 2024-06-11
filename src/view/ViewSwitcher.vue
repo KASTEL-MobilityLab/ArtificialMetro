@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { LucideProps } from 'lucide-vue-next';
-import { RepeatIcon } from 'lucide-vue-next';
 import type { FunctionalComponent } from 'vue';
 
 type View = {
