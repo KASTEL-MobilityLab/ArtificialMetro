@@ -76,7 +76,7 @@ watch(() => props.bus, (bus) => {
 </script>
 
 <template>
-  <div style="height: calc(100vh - 100px); width: 100%">
+  <div style="height: calc(100vh); width: 100%">
     <LMap :zoom="zoom" :center="[center.lat, center.lon]">
       <!-- Humanitarian: https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png -->
       <!-- Dark: https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png -->

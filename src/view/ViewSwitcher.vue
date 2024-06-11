@@ -25,9 +25,8 @@ const emit = defineEmits<{
             :active="id == props.active"
             @click="emit('switch', id)"
             >
-            <component :is="view.icon" :height="30" :width="30"></component>
+            <component :is="view.icon" :height="20" :width="20"></component>
             {{ view.title }}
-            <span class="active-indicator"></span>
         </li>
     </ul>
     <span class="automatic" v-if="automatic"><RepeatIcon></RepeatIcon></span>
@@ -42,11 +41,10 @@ ul {
 
     flex-direction: row;
     justify-content: flex-start;
-    align-items: stretch;
+    align-items: center;
 
     gap: 10px;
 
-    height: 100%;
     padding: 0;
     margin: 0;
 
@@ -57,36 +55,21 @@ ul li {
     display: flex;
     position: relative;
 
-    flex-direction: column;
-    justify-content: space-between;
+    flex-direction: row;
+    justify-content: center;
     align-items: center;
-    flex-grow: 1;
 
-    gap: 5px;
+    gap: 7px;
 
-    padding: 0;
-    padding-top: 20px;
-    padding-bottom: 5px;
+    padding: 5px 10px;
+    border-radius: 5px;
 
     cursor: pointer;
+    transition: 0.5s ease-in-out;
 }
 
 ul li[active="true"] {
-    color: var(--accent-color);
-}
-
-ul li .active-indicator {
-    display: block;
-
-    width: 10px;
-    height: 10px;
-    border-radius: 100%;
-
-    background-color: var(--accent-bg-color);
-    visibility: hidden;
-}
-ul li[active="true"] .active-indicator {
-    visibility: visible;
+    background: var(--accent-bg-color);
 }
 .automatic {
     display: flex;
