@@ -98,23 +98,4 @@ simulator.onTick(async time => {
     color: var(--card-fg-color);
     box-shadow: 0 0 5px var(--card-shade-color);
 }
-
-.live-dot {
-    display: block;
-
-    width: 10px;
-    height: 10px;
-    border-radius: 100%;
-
-    background: var(--accent-color);
-    animation: live-dot 1s ease-in-out infinite alternate-reverse;
-}
-@keyframes live-dot {
-    0% {
-        background: var(--accent-color);
-    }
-    100% {
-        background: transparent;
-    }
-}
 </style>

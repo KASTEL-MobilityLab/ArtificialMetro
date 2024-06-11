@@ -23,7 +23,7 @@ footer {
     border-radius: 10px;
     max-width: 50%;
 
-    padding: 5px 10px;
+    padding: 5px 5px;
 
     background-color: var(--view-bg-color);
     color: var(--view-fg-color);

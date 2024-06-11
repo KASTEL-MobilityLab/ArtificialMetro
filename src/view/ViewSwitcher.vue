@@ -19,6 +19,9 @@ const emit = defineEmits<{
 
 <template>
     <ul class="view-switcher">
+        <li class="automatic" :active="automatic">
+            <span class="live-dot"></span>
+        </li>
         <li 
             v-for="view, id in props.views" 
             :key="id" 
@@ -29,7 +32,6 @@ const emit = defineEmits<{
             {{ view.title }}
         </li>
     </ul>
-    <span class="automatic" v-if="automatic"><RepeatIcon></RepeatIcon></span>
 </template>
 
 <style scoped>
@@ -41,9 +43,9 @@ ul {
 
     flex-direction: row;
     justify-content: flex-start;
-    align-items: center;
+    align-items: stretch;
 
-    gap: 10px;
+    gap: 5px;
 
     padding: 0;
     margin: 0;
@@ -73,17 +75,16 @@ ul li[active="true"] {
 }
 .automatic {
     display: flex;
-    position: absolute;
 
-    flex-direction: column;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
+    padding: 0 5px;
     
-    left: 5px;
-    top: 5px;
-    background: var(--accent-bg-color);
-
-    border-radius: 5px;
-    padding: 2px 5px;
+    visibility: hidden;
+}
+.automatic[active="true"] {
+    background: none;
+    visibility: visible;
 }
 </style>
