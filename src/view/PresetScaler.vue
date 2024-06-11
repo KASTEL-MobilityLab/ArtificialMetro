@@ -24,7 +24,7 @@ const emit = defineEmits<{
 <style scoped>
 ul {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: center;
     align-items: flex-start;
 
@@ -32,38 +32,33 @@ ul {
 
     position: absolute;
     z-index: 1000;
-    left: 0;
-    top: calc(50% - 25px);
+    left: 5px;
+    top: 5px;
+    border-radius: 15px;
 
     margin: 0;
-    padding: 0;
+    padding: 5px;
+
+    background: var(--card-bg-color);
+    color: var(--card-fg-color);
+    box-shadow: 0 0 5px var(--card-shade-color);
+    
 }
 
 li {
-    display: block;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
 
-    width: 20px;
-    height: 20px;
-    border-radius: 0 100% 100% 0;
-
-    background: var(--card-bg-color);
-    box-shadow: 0 0 5px var(--card-shade-color);
-}
-li:nth-child(1) {
-    width: 10px;
-    height: 10px;
-}
-li:nth-child(2) {
     width: 15px;
     height: 15px;
-}
-li:nth-child(3) {
-    width: 20px;
-    height: 20px;
-}
-li:nth-child(4) {
-    width: 25px;
-    height: 25px;
+    border-radius: 100%;
+
+    background: transparent;
+    transition: 0.2s ease-in-out;
+
+    font-size: 9px;
 }
 li[active="true"] {
     background: var(--accent-bg-color);
