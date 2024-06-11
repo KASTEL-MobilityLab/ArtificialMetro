@@ -71,31 +71,11 @@ simulator.onTick(async time => {
 <template>
     <MapView :scooters="scooters" :stations="stations" :attribution="attribution" :bus="bus"></MapView>
     <div class="current-time">
-        <span class="live-dot" v-if="simulationRunning"></span>
+        <span class="live-dot" active="false"></span>
         {{ currentTime }}
     </div>
 </template>
 
 <style scoped>
-.current-time {
-    position: absolute;
-    z-index: 1000;
 
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 10px;
-
-    top: 5px;
-    right: 5px;
-    min-width: 80px;
-    
-    padding: 5px 10px;
-    border-radius: 5px;
-
-    background: var(--card-bg-color);
-    color: var(--card-fg-color);
-    box-shadow: 0 0 5px var(--card-shade-color);
-}
 </style>

@@ -1,6 +1,7 @@
 export function startAll() {
     startCarsharingProvider()
     startScooterProvider()
+    startCleanupProvider()
 }
 
 export function startCarsharingProvider() {
@@ -9,4 +10,8 @@ export function startCarsharingProvider() {
 
 export function startScooterProvider() {
     return new SharedWorker(new URL("./scooter_worker.ts", import.meta.url), { type: "module" })
+}
+
+export function startCleanupProvider() {
+    return new SharedWorker(new URL("./cleanup_worker.ts", import.meta.url), { type: "module" })
 }

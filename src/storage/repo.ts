@@ -24,12 +24,12 @@ export class Repo<T extends Storeable, R extends string> {
         }
     }
 
-    async store(stations: T[]) {
+    async store(entries: T[]) {
         const transaction = this.db.transaction(this.name, 'readwrite')
-        const commits = stations.map(station => {
-            station.timestamp = normalizeTimestamp(station.timestamp)
-            const key = `${station.id}-${station.timestamp.getTime()}`
-            transaction.store.put(station, key)
+        const commits = entries.map(entity => {
+            entity.timestamp = normalizeTimestamp(entity.timestamp)
+            const key = `${entity.id}-${entity.timestamp.getTime()}`
+            transaction.store.put(entity, key)
         })
         await Promise.all([
             ...commits,
@@ -43,7 +43,7 @@ export class Repo<T extends Storeable, R extends string> {
     }
 
     async current(): Promise<T[]> {
-        const currentTimestamp = await this.getMaxTimestamp()
+        const currentTimestamp = await this.getLatestTimestamp()
         if (currentTimestamp == null) {
             return []
         } else {
@@ -55,7 +55,7 @@ export class Repo<T extends Storeable, R extends string> {
         return await this.db.getAllFromIndex(this.name, "timestamp", IDBKeyRange.only(timestamp))
     }
 
-    async getMaxTimestamp(): Promise<Date | null> {
+    async getLatestTimestamp(): Promise<Date | null> {
         const tx = this.db.transaction(this.name, 'readonly')
         // reverse-sort on the timestamp index. 
         // The first item is the current timestamp
@@ -84,6 +84,16 @@ export class Repo<T extends Storeable, R extends string> {
         await tx.done
 
         return timestamps
+    }
+
+    async cleanupSince(time: Date) {
+        const tx = this.db.transaction(this.name, 'readwrite')
+        const index = tx.store.index("timestamp")
+        const cursor = index.iterate(IDBKeyRange.upperBound(time))
+        for await (const item of cursor) {
+            item.delete()
+        }
+        await tx.done
     }
 
 }

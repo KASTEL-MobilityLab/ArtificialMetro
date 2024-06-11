@@ -5,8 +5,6 @@ export interface Coordinate {
 
 export interface CarsharingStation {
     id: string,
-    provider: string,
-    name: string,
     available: number,
     timestamp: Date,
     position: Coordinate,
@@ -14,7 +12,6 @@ export interface CarsharingStation {
 
 export interface Scooter {
     id: string,
-    provider: string,
     timestamp: Date,
     position: Coordinate,
 }

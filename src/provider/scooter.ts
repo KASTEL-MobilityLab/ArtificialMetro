@@ -26,7 +26,6 @@ async function extractScooter(response: Response): Promise<Scooter[]> {
         }
         const station: Scooter = {
             id: record.FID,
-            provider: record.feed_id,
             timestamp: currentTime,
             position: coordinate
         }

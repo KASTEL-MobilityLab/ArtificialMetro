@@ -26,8 +26,6 @@ async function extractStations(response: Response): Promise<CarsharingStation[]>
         }
         const station: CarsharingStation = {
             id: record.FID,
-            provider: record.feed_id,
-            name: record.name,
             available: parseInt(record.num_vehicles_available),
             timestamp: currentTime,
             position: coordinate
