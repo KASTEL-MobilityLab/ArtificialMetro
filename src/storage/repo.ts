@@ -24,12 +24,12 @@ export class Repo<T extends Storeable, R extends string> {
         }
     }
 
-    async store(stations: T[]) {
+    async store(entries: T[]) {
         const transaction = this.db.transaction(this.name, 'readwrite')
-        const commits = stations.map(station => {
-            station.timestamp = normalizeTimestamp(station.timestamp)
-            const key = `${station.id}-${station.timestamp.getTime()}`
-            transaction.store.put(station, key)
+        const commits = entries.map(entity => {
+            entity.timestamp = normalizeTimestamp(entity.timestamp)
+            const key = `${entity.id}-${entity.timestamp.getTime()}`
+            transaction.store.put(entity, key)
         })
         await Promise.all([
             ...commits,
