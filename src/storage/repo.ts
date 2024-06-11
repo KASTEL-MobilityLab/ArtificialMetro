@@ -86,6 +86,16 @@ export class Repo<T extends Storeable, R extends string> {
         return timestamps
     }
 
+    async cleanupSince(time: Date) {
+        const tx = this.db.transaction(this.name, 'readwrite')
+        const index = tx.store.index("timestamp")
+        const cursor = index.iterate(IDBKeyRange.upperBound(time))
+        for await (const item of cursor) {
+            item.delete()
+        }
+        await tx.done
+    }
+
 }
 
 function normalizeTimestamp(timestamp: Date): Date {
