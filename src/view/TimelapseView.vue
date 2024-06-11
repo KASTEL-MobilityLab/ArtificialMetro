@@ -6,11 +6,11 @@ import * as scooter from '../provider/scooter'
 import { BaseStore, BaseRepo } from "@/storage/base_store"
 import { TimeSimulator } from "@/model/simulator"
 import MapView from "./MapView.vue"
-import type { SwitchBus } from "./switch_bus"
+import type { SwitchBusReceiver } from "./switch_bus"
 
 
 defineProps<{
-  bus: SwitchBus,
+  bus: SwitchBusReceiver,
 }>()
 
 let stations: Ref<CarsharingStation[]> = ref([])

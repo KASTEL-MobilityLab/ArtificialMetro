@@ -11,12 +11,14 @@ import { SwitchBus } from './view/switch_bus';
 const KIOSK_INTERVAL = 15 * 1000 /*15s*/
 
 const views = [
-    { title: "Map", icon: MapIcon, component: DebugView, bus: new SwitchBus(0) },
-    { title: "Timelapse", icon: TimerIcon, component: TimelapseView, bus: new SwitchBus(1) },
-]
+  { title: "Map", icon: MapIcon, component: DebugView },
+  { title: "Timelapse", icon: TimerIcon, component: TimelapseView },
+].map(view => {
+  return { ...view, bus: new SwitchBus() }
+})
 const activeView = ref(0)
 const viewComponent = computed(() => views[activeView.value].component)
-const switchBus = computed(() => views[activeView.value].bus)
+const currentSwitchBus = computed(() => views[activeView.value].bus.getReceiver())
 const kioskMode = ref(false)
 let kioskModeTicker: number | undefined = undefined
 
@@ -56,7 +58,6 @@ function registerKeyboardSwitcher() {
 }
 
 function switchPresetForView(view: number) {
-  console.log('switch preset', view)
   views[view].bus.nextPreset()
 }
 
@@ -75,18 +76,13 @@ function stopKioskMode() {
 <template>
   <FooterBar>
     <template #left>
-      <ViewSwitcher 
-        :views="views" 
-        :active="activeView"
-        :automatic="kioskMode"
-        @switch="switchView"
-        ></ViewSwitcher>
+      <ViewSwitcher :views="views" :active="activeView" :automatic="kioskMode" @switch="switchView"></ViewSwitcher>
     </template>
   </FooterBar>
 
   <main>
     <KeepAlive>
-      <component :is="viewComponent" :bus="switchBus"></component>
+      <component :is="viewComponent" :bus="currentSwitchBus"></component>
     </KeepAlive>
   </main>
 </template>

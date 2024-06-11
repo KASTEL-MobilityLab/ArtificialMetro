@@ -5,10 +5,10 @@ import * as carsharing from '../provider/carsharing'
 import * as scooter from '../provider/scooter'
 import { BaseStore, BaseRepo } from "@/storage/base_store"
 import MapView from "./MapView.vue"
-import { SwitchBus } from "./switch_bus"
+import { SwitchBusReceiver } from "./switch_bus"
 
 defineProps<{
-  bus: SwitchBus,
+  bus: SwitchBusReceiver,
 }>()
 
 let stations: Ref<CarsharingStation[]> = ref([])

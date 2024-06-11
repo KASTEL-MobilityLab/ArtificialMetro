@@ -5,7 +5,7 @@ import { LMap, LTileLayer, LCircleMarker } from "@vue-leaflet/vue-leaflet"
 import { computed, onMounted, ref, watch } from "vue"
 import type { CarsharingStation, Scooter } from "@/model/vehicles"
 import PresetScaler from "./PresetScaler.vue"
-import type { SwitchBus } from "./switch_bus"
+import type { SwitchBusReceiver } from "./switch_bus"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -39,7 +39,7 @@ const props = defineProps<{
   stations: CarsharingStation[],
   scooters: Scooter[],
   attribution: string,
-  bus: SwitchBus,
+  bus: SwitchBusReceiver,
 }>()
 
 let currentPreset = ref(1)

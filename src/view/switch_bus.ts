@@ -1,35 +1,53 @@
-const CHANNEL_NAME = "switch-bus"
 
-type Action = { action: "next-preset", view: number }
+type Action = { action: "next-preset" }
 
-export class SwitchBus {
-    private channel: BroadcastChannel
-    private viewId: number
-    private nextPresetHandler: () => void = () => { }
+export class SwitchBusReceiver {
+    private port: MessagePort
+    private nextPresetHandler = () => { }
 
-    constructor(viewId: number) {
-        this.channel = new BroadcastChannel(CHANNEL_NAME)
-        this.viewId = viewId
-
-        this.channel.onmessage = (evt: MessageEvent<Action>) => this.handleAction(evt.data)
-
-        console.log('new switch bus for', viewId)
-    }
-
-    nextPreset() {
-        this.channel.postMessage({ action: 'next-preset', view: this.viewId } as Action)
+    constructor(port: MessagePort) {
+        this.port = port
+        this.port.onmessage = (evt: MessageEvent<Action>) => this.handleAction(evt.data)
     }
 
     onNextPreset(handler: () => void) {
         this.nextPresetHandler = handler
     }
 
-    handleAction(action: Action) {
-        if (action.view != this.viewId) return 
-
+    private handleAction(action: Action) {
         if (action.action == 'next-preset') {
             this.nextPresetHandler()
         }
     }
+}
 
+class SwitchBusSender {
+    private port: MessagePort
+
+    constructor(port: MessagePort) {
+        this.port = port
+    }
+
+    nextPreset() {
+        this.port.postMessage({ action: 'next-preset' } as Action)
+    }
+}
+
+export class SwitchBus {
+    private sender: SwitchBusSender
+    private receiver: SwitchBusReceiver
+
+    constructor() {
+        const channel = new MessageChannel()
+        this.sender = new SwitchBusSender(channel.port1)
+        this.receiver = new SwitchBusReceiver(channel.port2)
+    }
+
+    getReceiver(): SwitchBusReceiver {
+        return this.receiver
+    }
+
+    nextPreset() {
+        this.sender.nextPreset()
+    }
 }
