@@ -17,14 +17,20 @@ let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
 
 let simulator = new TimeSimulator(2 /*s*/)
+let currentTime = computed(() => {
+    const time = simulator.time.value
+    const format = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
+    return format.format(time)
+})
+let simulationRunning = ref(false)
 
 let attribution = computed(() => {
-  return `Carsharing: ${carsharing.attribution}, Scooter: ${scooter.attribution}`
+    return `Carsharing: ${carsharing.attribution}, Scooter: ${scooter.attribution}`
 })
 
 onMounted(async () => {
-  simulator.resetTimeBounds()
-  simulator.startSimulation()
+    simulator.resetTimeBounds()
+    simulator.startSimulation()
 })
 
 simulator.onReset(() => {
@@ -33,8 +39,13 @@ simulator.onReset(() => {
 })
 
 simulator.onStop(() => {
+    simulationRunning.value = false
     simulator.resetTimeBounds()
     simulator.startSimulation()
+})
+
+simulator.onStart(() => {
+    simulationRunning.value = true
 })
 
 simulator.onTick(async time => {
@@ -59,6 +70,51 @@ simulator.onTick(async time => {
 
 <template>
     <MapView :scooters="scooters" :stations="stations" :attribution="attribution" :bus="bus"></MapView>
+    <div class="current-time">
+        <span class="live-dot" v-if="simulationRunning"></span>
+        {{ currentTime }}
+    </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.current-time {
+    position: absolute;
+    z-index: 1000;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+
+    top: 5px;
+    right: 5px;
+    min-width: 80px;
+    
+    padding: 5px 10px;
+    border-radius: 5px;
+
+    background: var(--card-bg-color);
+    color: var(--card-fg-color);
+    box-shadow: 0 0 5px var(--card-shade-color);
+}
+
+.live-dot {
+    display: block;
+
+    width: 10px;
+    height: 10px;
+    border-radius: 100%;
+
+    background: var(--accent-color);
+    animation: live-dot 1s ease-in-out infinite alternate-reverse;
+}
+@keyframes live-dot {
+    0% {
+        background: var(--accent-color);
+    }
+    100% {
+        background: transparent;
+    }
+}
+</style>

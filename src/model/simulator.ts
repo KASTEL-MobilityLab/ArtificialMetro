@@ -1,7 +1,7 @@
 import { ref, watch, type Ref } from 'vue'
 
 export class TimeSimulator {
-    private time: Ref<Date> = ref(new Date())
+    time: Ref<Date> = ref(new Date())
     private start: Ref<Date> = ref(new Date())
     private end: Ref<Date> = ref(new Date())
     private delay: number /*s*/
