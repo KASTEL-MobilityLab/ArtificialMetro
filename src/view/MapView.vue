@@ -76,7 +76,7 @@ watch(() => props.bus, (bus) => {
 </script>
 
 <template>
-  <div style="height: calc(100vh - 100px); width: 100%">
+  <div style="height: calc(100vh); width: 100%">
     <LMap :zoom="zoom" :center="[center.lat, center.lon]">
       <!-- Humanitarian: https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png -->
       <!-- Dark: https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png -->
@@ -93,9 +93,30 @@ watch(() => props.bus, (bus) => {
     </LMap>
   </div>
   <PresetScaler :current-preset="currentPreset" :num-presets="PRESETS.length" @click="setToPreset"></PresetScaler>
-  <Teleport to="#view-controls">
-    <span>{{ attribution }}</span>
-  </Teleport>
+  <div class="attribution">
+    {{ attribution }}
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.attribution {
+    position: absolute;
+    z-index: 1000;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+
+    bottom: 5px;
+    right: 5px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    max-width: 50%;
+
+    background: var(--card-bg-color);
+    color: var(--card-fg-color);
+    box-shadow: 0 0 5px var(--card-shade-color);
+}
+</style>

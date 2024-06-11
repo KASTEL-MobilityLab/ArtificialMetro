@@ -12,19 +12,21 @@
 footer {
     display: flex;
     position: fixed;
+    z-index: 1000;
 
     flex-direction: row;
     justify-content: stretch;
     align-items: stretch;
 
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 100px;
+    left: 5px;
+    bottom: 5px;
+    border-radius: 10px;
+    max-width: 50%;
 
-    padding: 0 20px;
+    padding: 5px 5px;
 
     background-color: var(--view-bg-color);
     color: var(--view-fg-color);
+    box-shadow: 0 0 5px var(--card-shade-color);
 }
 </style>

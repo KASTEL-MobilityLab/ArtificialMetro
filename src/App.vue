@@ -29,6 +29,7 @@ onMounted(() => {
 })
 
 function switchView(view: number) {
+  if (view >= views.length) return
   activeView.value = view
 }
 function nextView() {

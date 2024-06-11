@@ -1,2 +1,26 @@
 @import './base.css';
 
+/* Hide leaflet controls here, as they cannot be 
+   controlled by the leaflet vue component */
+.leaflet-control-container {
+    display: none;
+}
+
+.live-dot {
+    display: block;
+
+    width: 10px;
+    height: 10px;
+    border-radius: 100%;
+
+    background: var(--accent-color);
+    animation: live-dot 1s ease-in-out infinite alternate-reverse;
+}
+@keyframes live-dot {
+    0% {
+        background: var(--accent-color);
+    }
+    100% {
+        background: transparent;
+    }
+}
