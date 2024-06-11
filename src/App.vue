@@ -8,7 +8,7 @@ import { MapIcon, TimerIcon } from 'lucide-vue-next';
 import LiveView from './view/LiveView.vue';
 import { SwitchBus } from './view/switch_bus';
 
-const KIOSK_INTERVAL = 15 * 1000 /*15s*/
+const KIOSK_INTERVAL = 30 * 1000 /*30s*/
 
 const views = [
   { title: "Live", icon: MapIcon, component: LiveView },
