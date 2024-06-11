@@ -2,9 +2,10 @@
 import "leaflet/dist/leaflet.css"
 import L from "leaflet"
 import { LMap, LTileLayer, LCircleMarker } from "@vue-leaflet/vue-leaflet"
-import { computed, ref } from "vue"
+import { computed, onMounted, ref, watch } from "vue"
 import type { CarsharingStation, Scooter } from "@/model/vehicles"
 import PresetScaler from "./PresetScaler.vue"
+import type { SwitchBus } from "./switch_bus"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -34,10 +35,11 @@ const PRESETS = [
   }
 ]
 
-defineProps<{
+const props = defineProps<{
   stations: CarsharingStation[],
   scooters: Scooter[],
   attribution: string,
+  bus: SwitchBus,
 }>()
 
 let currentPreset = ref(1)
@@ -57,6 +59,19 @@ function num_to_color(num: number): string {
 function setToPreset(num: number) {
   currentPreset.value = num - 1
 }
+
+function nextPreset() {
+  const next = (currentPreset.value + 1) % PRESETS.length
+  currentPreset.value = next
+}
+
+onMounted(() => {
+  props.bus.onNextPreset(nextPreset)
+})
+
+watch(() => props.bus, (bus) => {
+  bus.onNextPreset(nextPreset)
+})
 
 </script>
 

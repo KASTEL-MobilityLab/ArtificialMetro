@@ -6,6 +6,12 @@ import * as scooter from '../provider/scooter'
 import { BaseStore, BaseRepo } from "@/storage/base_store"
 import { TimeSimulator } from "@/model/simulator"
 import MapView from "./MapView.vue"
+import type { SwitchBus } from "./switch_bus"
+
+
+defineProps<{
+  bus: SwitchBus,
+}>()
 
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
@@ -52,7 +58,7 @@ simulator.onTick(async time => {
 </script>
 
 <template>
-    <MapView :scooters="scooters" :stations="stations" :attribution="attribution"></MapView>
+    <MapView :scooters="scooters" :stations="stations" :attribution="attribution" :bus="bus"></MapView>
 </template>
 
 <style scoped></style>

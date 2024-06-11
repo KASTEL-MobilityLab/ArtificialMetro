@@ -6,15 +6,17 @@ import * as provider from './provider/provider'
 import ViewSwitcher from './view/ViewSwitcher.vue';
 import { MapIcon, TimerIcon } from 'lucide-vue-next';
 import DebugView from './view/DebugView.vue';
+import { SwitchBus } from './view/switch_bus';
 
 const KIOSK_INTERVAL = 15 * 1000 /*15s*/
 
 const views = [
-    { title: "Map", icon: MapIcon, component: DebugView },
-    { title: "Timelapse", icon: TimerIcon, component: TimelapseView },
+    { title: "Map", icon: MapIcon, component: DebugView, bus: new SwitchBus(0) },
+    { title: "Timelapse", icon: TimerIcon, component: TimelapseView, bus: new SwitchBus(1) },
 ]
 const activeView = ref(0)
 const viewComponent = computed(() => views[activeView.value].component)
+const switchBus = computed(() => views[activeView.value].bus)
 const kioskMode = ref(false)
 let kioskModeTicker: number | undefined = undefined
 
@@ -41,10 +43,21 @@ function registerKeyboardSwitcher() {
     } else {
       // switchView is 0-indexed,
       // but key 0 is special, therefore, we start at key 1
+      const view = parseInt(evt.key) - 1
       stopKioskMode()
-      switchView(parseInt(evt.key) - 1)
+
+      if (activeView.value == view) {
+        switchPresetForView(view)
+      } else {
+        switchView(view)
+      }
     }
   })
+}
+
+function switchPresetForView(view: number) {
+  console.log('switch preset', view)
+  views[view].bus.nextPreset()
 }
 
 function startKioskMode() {
@@ -73,7 +86,7 @@ function stopKioskMode() {
 
   <main>
     <KeepAlive>
-      <component :is="viewComponent"></component>
+      <component :is="viewComponent" :bus="switchBus"></component>
     </KeepAlive>
   </main>
 </template>
