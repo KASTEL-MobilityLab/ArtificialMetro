@@ -5,13 +5,13 @@ import FooterBar from './view/FooterBar.vue'
 import * as provider from './provider/provider'
 import ViewSwitcher from './view/ViewSwitcher.vue';
 import { MapIcon, TimerIcon } from 'lucide-vue-next';
-import DebugView from './view/DebugView.vue';
+import LiveView from './view/LiveView.vue';
 import { SwitchBus } from './view/switch_bus';
 
 const KIOSK_INTERVAL = 15 * 1000 /*15s*/
 
 const views = [
-  { title: "Map", icon: MapIcon, component: DebugView },
+  { title: "Live", icon: MapIcon, component: LiveView },
   { title: "Timelapse", icon: TimerIcon, component: TimelapseView },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }

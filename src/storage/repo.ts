@@ -43,7 +43,7 @@ export class Repo<T extends Storeable, R extends string> {
     }
 
     async current(): Promise<T[]> {
-        const currentTimestamp = await this.getMaxTimestamp()
+        const currentTimestamp = await this.getLatestTimestamp()
         if (currentTimestamp == null) {
             return []
         } else {
@@ -55,7 +55,7 @@ export class Repo<T extends Storeable, R extends string> {
         return await this.db.getAllFromIndex(this.name, "timestamp", IDBKeyRange.only(timestamp))
     }
 
-    async getMaxTimestamp(): Promise<Date | null> {
+    async getLatestTimestamp(): Promise<Date | null> {
         const tx = this.db.transaction(this.name, 'readonly')
         // reverse-sort on the timestamp index. 
         // The first item is the current timestamp
