@@ -1,31 +1,16 @@
 /* Colors are taken from Adwaita theme */
-:root {
-  --view-bg-color: #fff;
-  --view-fg-color: #040404;
 
-  --accent-color: #1c71d8;
+:root {
+  --view-bg-color: #1e1e1e;
+  --view-fg-color: #fff;
+
+  --accent-color: #78aeed;
   --accent-bg-color: #3584e4;
   --accent-fg-color: #fff;
 
-  --card-bg-color: #fff;
-  --card-fg-color: #040404;
-  --card-shade-color: rgba(0,0,0,0.07);
-}
-
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --view-bg-color: #1e1e1e;
-    --view-fg-color: #fff;
-
-    --accent-color: #78aeed;
-    --accent-bg-color: #3584e4;
-    --accent-fg-color: #fff;
-
-    --card-bg-color: #252525;
-    --card-fg-color: #fff;
-    --card-shade-color: rgba(0,0,0,0.36);
-  }
+  --card-bg-color: #252525;
+  --card-fg-color: #fff;
+  --card-shade-color: rgba(0,0,0,0.36);
 }
 
 *,
