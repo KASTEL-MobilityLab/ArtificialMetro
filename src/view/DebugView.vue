@@ -5,6 +5,11 @@ import * as carsharing from '../provider/carsharing'
 import * as scooter from '../provider/scooter'
 import { BaseStore, BaseRepo } from "@/storage/base_store"
 import MapView from "./MapView.vue"
+import { SwitchBusReceiver } from "./switch_bus"
+
+defineProps<{
+  bus: SwitchBusReceiver,
+}>()
 
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
@@ -33,7 +38,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MapView :scooters="scooters" :stations="stations" :attribution="attribution"></MapView>
+  <MapView :scooters="scooters" :stations="stations" :attribution="attribution" :bus="bus"></MapView>
 </template>
 
 <style scoped></style>
