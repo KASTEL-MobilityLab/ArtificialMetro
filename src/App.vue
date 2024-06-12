@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
 import * as provider from './provider/provider'
@@ -10,15 +10,17 @@ import { SwitchBus } from './view/switch_bus';
 
 const KIOSK_INTERVAL = 30 * 1000 /*30s*/
 
-const views = [
+type View = {title: string, icon: any, component: any, bus: SwitchBus }
+
+const views: View[] = [
   { title: "Live", icon: MapIcon, component: LiveView },
   { title: "Timelapse", icon: TimerIcon, component: TimelapseView },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
 })
 const activeView = ref(0)
-const viewComponent = computed(() => views[activeView.value]?.component ?? null)
-const currentSwitchBus = computed(() => views[activeView.value]?.bus.getReceiver() ?? null)
+const viewComponent = computed(() => views[activeView.value]?.component)
+const currentSwitchBus = computed(() => views[activeView.value]?.bus?.getReceiver())
 const kioskMode = ref(false)
 let kioskModeTicker: number | undefined = undefined
 
@@ -26,6 +28,17 @@ onMounted(() => {
   provider.startAll()
   registerKeyboardSwitcher()
   startKioskMode()
+})
+
+function getView(id: number): View | undefined {
+  return views[id]
+}
+
+watch(() => activeView.value, (next, old) => {
+  const oldView = getView(old)
+  const nextView = getView(next)
+  oldView?.bus?.suspend()
+  nextView?.bus?.resume()
 })
 
 function switchView(view: number) {

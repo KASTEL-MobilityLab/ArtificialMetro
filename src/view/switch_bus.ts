@@ -1,9 +1,11 @@
 
-type Action = { action: "next-preset" }
+type Action = "next-preset" | "suspend" | "resume"
 
 export class SwitchBusReceiver {
     private port: MessagePort
     private nextPresetHandler = () => { }
+    private suspendHandler = () => { }
+    private resumeHandler = () => { }
 
     constructor(port: MessagePort) {
         this.port = port
@@ -14,9 +16,19 @@ export class SwitchBusReceiver {
         this.nextPresetHandler = handler
     }
 
+    onSuspend(handler: () => void) {
+        this.suspendHandler = handler
+    }
+
+    onResume(handler: () => void) {
+        this.resumeHandler = handler
+    }
+
     private handleAction(action: Action) {
-        if (action.action == 'next-preset') {
-            this.nextPresetHandler()
+        switch (action) {
+            case "next-preset": this.nextPresetHandler(); break;
+            case "suspend": this.suspendHandler(); break;
+            case "resume": this.resumeHandler(); break;
         }
     }
 }
@@ -29,7 +41,19 @@ class SwitchBusSender {
     }
 
     nextPreset() {
-        this.port.postMessage({ action: 'next-preset' } as Action)
+        this.send('next-preset')
+    }
+
+    suspend() {
+        this.send('suspend')
+    }
+
+    resume() {
+        this.send('resume')
+    }
+
+    private send(action: Action) {
+        this.port.postMessage(action)
     }
 }
 
@@ -49,5 +73,13 @@ export class SwitchBus {
 
     nextPreset() {
         this.sender.nextPreset()
+    }
+
+    suspend() {
+        this.sender.suspend()
+    }
+
+    resume() {
+        this.sender.resume()
     }
 }

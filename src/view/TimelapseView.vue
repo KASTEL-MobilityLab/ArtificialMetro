@@ -9,7 +9,7 @@ import MapView from "./MapView.vue"
 import type { SwitchBusReceiver } from "./switch_bus"
 
 
-defineProps<{
+const props = defineProps<{
   bus: SwitchBusReceiver,
 }>()
 
@@ -29,8 +29,14 @@ let attribution = computed(() => {
 })
 
 onMounted(async () => {
-    simulator.resetTimeBounds()
-    simulator.startSimulation()
+    props.bus.onResume(() => {
+        simulator.resetTimeBounds()
+        simulator.startSimulation()
+    })
+
+    props.bus.onSuspend(() => {
+        simulator.stopSimulation()
+    })
 })
 
 simulator.onReset(() => {
@@ -38,7 +44,7 @@ simulator.onReset(() => {
     scooters.value.splice(0, scooters.value.length)
 })
 
-simulator.onStop(() => {
+simulator.onContinue(() => {
     simulationRunning.value = false
     simulator.resetTimeBounds()
     simulator.startSimulation()
