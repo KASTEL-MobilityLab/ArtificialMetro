@@ -17,8 +17,8 @@ const views = [
   return { ...view, bus: new SwitchBus() }
 })
 const activeView = ref(0)
-const viewComponent = computed(() => views[activeView.value].component)
-const currentSwitchBus = computed(() => views[activeView.value].bus.getReceiver())
+const viewComponent = computed(() => views[activeView.value]?.component ?? null)
+const currentSwitchBus = computed(() => views[activeView.value]?.bus.getReceiver() ?? null)
 const kioskMode = ref(false)
 let kioskModeTicker: number | undefined = undefined
 
