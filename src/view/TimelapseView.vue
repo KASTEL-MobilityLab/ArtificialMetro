@@ -10,17 +10,17 @@ import type { SwitchBusReceiver } from "./switch_bus"
 
 
 const props = defineProps<{
-  bus: SwitchBusReceiver,
+    bus: SwitchBusReceiver,
 }>()
 
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
 
 let simulator = new TimeSimulator(2 /*s*/)
+const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
 let currentTime = computed(() => {
     const time = simulator.time.value
-    const format = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
-    return format.format(time)
+    return timeFormat.format(time)
 })
 let simulationRunning = ref(false)
 
@@ -40,8 +40,8 @@ onMounted(async () => {
 })
 
 simulator.onReset(() => {
-    stations.value.splice(0, stations.value.length)
-    scooters.value.splice(0, scooters.value.length)
+    stations.value = []
+    scooters.value = []
 })
 
 simulator.onContinue(() => {
@@ -60,15 +60,14 @@ simulator.onTick(async time => {
     let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
 
     const new_stations = await carsharingRepo.forTimestamp(time)
-    const new_scooter = await scooterRepo.forTimestamp(time)
+    const new_scooters = await scooterRepo.forTimestamp(time)
 
+    // only show new data if there was a change found in the DB
     if (new_stations.length > 0) {
-        // only show new stations if there was a chnage found in the DB
-        stations.value.splice(0, stations.value.length, ...new_stations)
+        stations.value = new_stations
     }
-    if (new_scooter.length > 0) {
-        // only show new stations if there was a chnage found in the DB
-        scooters.value.splice(0, scooters.value.length, ...new_scooter)
+    if (new_scooters.length > 0) {
+        scooters.value = new_scooters
     }
 })
 
@@ -82,6 +81,4 @@ simulator.onTick(async time => {
     </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
