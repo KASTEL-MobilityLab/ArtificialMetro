@@ -14,8 +14,10 @@
   "dependencies": {
     "@types/leaflet": "^1.9.12",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
+    "express": "^4.19.2",
     "idb": "^8.0.0",
     "lucide-vue-next": "^0.378.0",
+    "vite-express": "^0.17.0",
     "vue": "^3.4.21",
     "web-csv-toolbox": "^0.8.0"
   },
