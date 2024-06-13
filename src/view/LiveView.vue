@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, type Ref } from "vue"
+import { computed, onMounted, ref, watch, type Ref } from "vue"
 import type { CarsharingStation, Scooter } from "@/model/vehicles"
 import * as carsharing from '../provider/carsharing'
 import * as scooter from '../provider/scooter'
@@ -16,9 +16,10 @@ let currentTimestamp = ref(new Date())
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
 
+const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
+
 let currentTime = computed(() => {
-    const format = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
-    return format.format(currentTimestamp.value)
+    return timeFormat.format(currentTimestamp.value)
 })
 
 let attribution = computed(() => {
@@ -39,13 +40,13 @@ onMounted(async () => {
 
 async function updateScooters(repo: Repo<Scooter, BaseRepo>) {
   const new_scooters = await repo.current()
-  scooters.value.splice(0, scooters.value.length, ...new_scooters)
+  scooters.value = new_scooters
   updateTimestamp(repo)
 }
 
 async function updateCarsharing(repo: Repo<CarsharingStation, BaseRepo>) {
   let new_stations = await repo.current()
-  stations.value.splice(0, stations.value.length, ...new_stations)
+  stations.value = new_stations
   updateTimestamp(repo)
 }
 
@@ -53,9 +54,6 @@ async function updateTimestamp(repo: Repo<any,any>) {
   let timestamp = await repo.getLatestTimestamp()
   if (timestamp != null) currentTimestamp.value = timestamp
 }
-
-
-
 </script>
 
 <template>

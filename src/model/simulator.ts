@@ -5,10 +5,12 @@ export class TimeSimulator {
     private start: Ref<Date> = ref(new Date())
     private end: Ref<Date> = ref(new Date())
     private delay: number /*s*/
+    private timer: number | undefined = undefined // reference to interval timer; set later
 
     private resetHandler: () => void = () => {}
     private startHandler: () => void = () => {}
     private stopHandler: () => void = () => {}
+    private continueHandler: () => void = () => {}
     private tickHandler: (time: Date) => void = () => {}
 
     constructor(delay: number) {
@@ -32,6 +34,10 @@ export class TimeSimulator {
         this.stopHandler = handler
     }
 
+    onContinue(handler: () => void) {
+        this.continueHandler = handler
+    }
+
     onTick(handler: ((time: Date) => void)) {
         this.tickHandler = handler
     }
@@ -50,15 +56,22 @@ export class TimeSimulator {
         this.time.value = this.start.value
         this.startHandler()
 
-        let timer = 0 // reference to interval timer; set later
+        clearInterval(this.timer)
+
         const tick = () => {
             const overflow = this.advanceTime(5)
             if (overflow) {
-                clearInterval(timer)
-                this.stopHandler()
+                this.stopSimulation()
+                this.continueHandler()
             }
         }
-        timer = setInterval(tick, this.delay * 1000)
+        this.timer = setInterval(tick, this.delay * 1000)
+    }
+
+    stopSimulation() {
+        clearInterval(this.timer)
+        this.timer = undefined
+        this.stopHandler()
     }
 
     advanceTime(mins: number): boolean {
