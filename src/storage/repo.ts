@@ -1,4 +1,5 @@
 import type { Storeable } from "@/model/storeable";
+import { normalizeTimestamp } from "@/model/timestamp";
 import { type IDBPDatabase } from "idb";
 
 export class Repo<T extends Storeable, R extends string> {
@@ -96,12 +97,4 @@ export class Repo<T extends Storeable, R extends string> {
         await tx.done
     }
 
-}
-
-function normalizeTimestamp(timestamp: Date): Date {
-    const minutes = timestamp.getMinutes()
-    timestamp.setMinutes(Math.floor(minutes / 5) * 5)
-    timestamp.setSeconds(0)
-    timestamp.setMilliseconds(0)
-    return timestamp
 }

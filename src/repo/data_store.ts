@@ -1,10 +1,10 @@
 import type { Storeable } from "@/model/storeable";
 import { Level } from "level";
-import { normalizeTimestamp } from "./timestamp";
+import { normalizeTimestamp } from "@/model/timestamp";
 
 type Timestamp = string
 
-export class Container<T extends Storeable, R extends string> {
+export class DataStore<T extends Storeable, R extends string> {
     private database: Level<string, T>
     private index: Index<Timestamp>
 
@@ -17,8 +17,8 @@ export class Container<T extends Storeable, R extends string> {
         this.database.close()
     }
 
-    static async open<T extends Storeable, R extends string>(store: R, callback: (self: Container<T, R>) => Promise<void>) {
-        const container = new Container<T, R>(store)
+    static async open<T extends Storeable, R extends string>(store: R, callback: (self: DataStore<T, R>) => Promise<void>) {
+        const container = new DataStore<T, R>(store)
         await callback(container)
         container.close()
     }
