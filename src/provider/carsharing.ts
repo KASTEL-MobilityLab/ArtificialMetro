@@ -1,18 +1,15 @@
 import { geometryToCoordinate, type CarsharingStation } from "@/model/vehicles";
-import { BaseRepo, BaseStore } from "@/storage/base_store";
 import * as csv from "web-csv-toolbox"
 import { isInBounds } from "./bounds";
 
 const endpoint = "https://api.mobidata-bw.de/geoserver/MobiData-BW/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=MobiData-BW%3Asharing_stations_car&maxFeatures=20000&outputFormat=csv"
 export const attribution = "NVBW MobiData BW"
 
-const store = await BaseStore.open()
-
-export async function load() {
-    const response = await fetch(endpoint)
+export async function load(): Promise<CarsharingStation[]> {
+    // Force deflate encoding, because gzip has errors in node.js implementation
+    const response = await fetch(endpoint, {headers: { 'accept-encoding': 'deflate'}})
     const stations = await extractStations(response)
-
-    store.repo<CarsharingStation>(BaseRepo.CarsharingStations).store(stations)
+    return stations
 }
 
 async function extractStations(response: Response): Promise<CarsharingStation[]> {

@@ -48,8 +48,9 @@ export class Container<T extends Storeable, R extends string> {
 
     private async loadData(partition: Level<Timestamp, T>): Promise<T[]> {
         const data: T[] = []
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for await (const [_, item] of partition.iterator()) {
-            // remove index entries
+            // ignore index entries
             if (typeof item != 'boolean') data.push(item)
         }
         return data

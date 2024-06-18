@@ -1,8 +1,8 @@
-import type { CarsharingStation } from "@/model/vehicles";
-import type { Express } from "express";
-import { Level } from "level";
-import { Container } from "./container";
-import { BaseRepo } from "../storage/base_store";
+import { type CarsharingStation } from "@/model/vehicles"
+import type { Express } from "express"
+import { Container } from "./container"
+import { BaseRepo } from "@/storage/base_store"
+import * as carsharing from "@/provider/carsharing"
 
 export function use(app: Express) {
     app.get('/v1/sample', (_, res) => {
@@ -59,6 +59,16 @@ export function use(app: Express) {
             const items = await c.all()
             res.type('json')
             res.send(JSON.stringify(items))
+        })
+    })
+
+    app.get('/v1/update', async (_, res) => {
+        const stations = await carsharing.load()
+        Container.open<CarsharingStation, BaseRepo>(BaseRepo.CarsharingStations, async c => {
+            await c.store(stations)
+
+            res.type('json')
+            res.send(JSON.stringify(true))
         })
     })
 }
