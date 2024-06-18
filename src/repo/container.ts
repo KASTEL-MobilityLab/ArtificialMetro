@@ -23,8 +23,9 @@ export class Container<T extends Storeable, R extends string> {
         container.close()
     }
 
-    private partition(timestamp: Timestamp) {
-        return this.database.sublevel<string, T>(timestamp, { valueEncoding: 'json' })
+    private getPartition(timestamp: Timestamp | Date): Level<Timestamp, T> {
+        const partition = typeof timestamp == 'string' ? timestamp : timestamp.toISOString()
+        return this.database.sublevel<string, T>(partition, { valueEncoding: 'json' }) as any as Level<Timestamp, T>
     }
 
     async store(entries: T[]) {
@@ -37,7 +38,7 @@ export class Container<T extends Storeable, R extends string> {
     }
 
     private async storeGroup(timestamp: Timestamp, group: T[]) {
-        const db = this.partition(timestamp)
+        const db = this.getPartition(timestamp)
         const transactions = group.map(item => {
             db.put(item.id, item)
         })
@@ -45,21 +46,63 @@ export class Container<T extends Storeable, R extends string> {
         await Promise.all(transactions)
     }
 
+    private async loadData(partition: Level<Timestamp, T>): Promise<T[]> {
+        const data: T[] = []
+        for await (const [_, item] of partition.iterator()) {
+            // remove index entries
+            if (typeof item != 'boolean') data.push(item)
+        }
+        return data
+    }
+
     async forTimestamp(time: Date): Promise<T[]> {
         await this.database.open()
         const normalizedTime = normalizeTimestamp(time).toISOString()
-        const db = this.partition(normalizedTime)
-        const data: T[] = []
-        for await (const [_, item] of db.iterator()) {
-            data.push(item)
-        }
-        return data
+        const db = this.getPartition(normalizedTime)
+        return this.loadData(db)
     }
 
     async getAvailableTimestamps(): Promise<Date[]> {
         await this.database.open()
         const timestamps = await this.index.list()
         return timestamps.map(timestamp => new Date(timestamp))
+    }
+
+    async getLatestTimestamp(): Promise<Date | null> {
+        await this.database.open()
+        const timestamps = await this.getAvailableTimestamps()
+        if (timestamps.length == 0) return null
+
+        timestamps.sort()
+        timestamps.reverse()
+        return timestamps[0]
+    }
+
+    async all(): Promise<T[]> {
+        await this.database.open()
+        return this.loadData(this.database)
+    }
+
+    async current(): Promise<T[]> {
+        const timestamp = await this.getLatestTimestamp()
+        if (timestamp == null) return []
+        const partition = this.getPartition(timestamp)
+        return this.loadData(partition)
+    }
+
+    async cleanupSince(time: Date) {
+        await this.database.open()
+        const timestamps = await this.getAvailableTimestamps()
+        const relevantTimestamps = timestamps.filter(t => t < time)
+        for (const timestamp of relevantTimestamps) {
+            await this.cleanPartition(timestamp)
+        }
+    }
+
+    private async cleanPartition(timestamp: Date) {
+        const partition = this.getPartition(timestamp)
+        await partition.clear()
+        await this.index.drop(timestamp.toISOString())
     }
 }
 
@@ -90,6 +133,10 @@ class Index<T> {
             if (valid) keys.push(key)
         }
         return keys
+    }
+
+    async drop(value: T) {
+        await this.database.del(value)
     }
 
 }

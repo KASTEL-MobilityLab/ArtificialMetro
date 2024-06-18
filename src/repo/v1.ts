@@ -46,4 +46,19 @@ export function use(app: Express) {
             res.send(JSON.stringify(timestamps))
         })
     })
+    app.get('/v1/current', async (_, res) => {
+        Container.open<CarsharingStation, BaseRepo>(BaseRepo.CarsharingStations, async c => {
+            const items = await c.current()
+            res.type('json')
+            res.send(JSON.stringify(items))
+        })
+    })
+
+    app.get('/v1/all', async (_, res) => {
+        Container.open<CarsharingStation, BaseRepo>(BaseRepo.CarsharingStations, async c => {
+            const items = await c.all()
+            res.type('json')
+            res.send(JSON.stringify(items))
+        })
+    })
 }
