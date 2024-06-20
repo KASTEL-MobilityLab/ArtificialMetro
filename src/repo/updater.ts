@@ -8,7 +8,7 @@ import { BaseRepo } from "@/storage/base_store"
 async function updateCarsharing() {
     console.log('== Update Carsharing')
     const stations = await carsharing.load()
-    DataStore.open<CarsharingStation, BaseRepo>(BaseRepo.CarsharingStations, async c => {
+    await DataStore.open<CarsharingStation, BaseRepo>(BaseRepo.CarsharingStations, async c => {
         await c.store(stations)
     })
 }
@@ -16,14 +16,14 @@ async function updateCarsharing() {
 async function updateScooters() {
     console.log("== Update Scooters")
     const scooters = await scooter.load()
-    DataStore.open<Scooter, BaseRepo>(BaseRepo.Scooters, async c => {
+    await DataStore.open<Scooter, BaseRepo>(BaseRepo.Scooters, async c => {
         await c.store(scooters)
     })
 }
 
 async function updateAll() {
-    updateCarsharing()
-    updateScooters()
+    await updateCarsharing()
+    await updateScooters()
 }
 
 updateAll()
