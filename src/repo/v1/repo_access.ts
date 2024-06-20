@@ -3,7 +3,7 @@ import { BaseRepo } from "@/storage/base_store";
 import { Router } from "express";
 import { DataStore } from "../data_store";
 
-const dateTimeRegex = /[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}Z/
+const timestampRegex = /[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9][0,5]:00.000Z/
 
 export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
     const router = Router()
@@ -18,7 +18,7 @@ export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
 
     router.get('/:timestamp', (req, res) => {
         const timestamp = req.params.timestamp
-        if (timestamp.match(dateTimeRegex)) {
+        if (timestamp.match(timestampRegex)) {
             sendDataForTimestamp<T>(res, timestamp);
         } else {
             sendNotFound(res)
@@ -28,7 +28,7 @@ export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
     router.get('/:from/:until', (req, res) => {
         const from = req.params.from
         const until = req.params.until
-        if (from.match(dateTimeRegex) && until.match(dateTimeRegex)) {
+        if (from.match(timestampRegex) && until.match(timestampRegex)) {
             const fromDate = new Date(from)
             const untilDate = new Date(until)
             if (from <= until) {
