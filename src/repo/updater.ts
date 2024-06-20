@@ -5,7 +5,27 @@ import type { Provider } from "@/provider/provider"
 import { CarsharingProvider } from "@/provider/carsharing"
 import { ScooterProvider } from "@/provider/scooter"
 
-async function update(provider: Provider<Storeable>, repo: BaseRepo) {
+const providers: {
+    repo: BaseRepo,
+    provider: Provider<Storeable>
+}[] = [
+        {
+            repo: BaseRepo.CarsharingStations,
+            provider: new CarsharingProvider(),
+        }, {
+            repo: BaseRepo.Scooters,
+            provider: new ScooterProvider(),
+        }
+    ]
+
+
+async function updateAll() {
+    for (const provider of providers) {
+        await updateFromProvider(provider.provider, provider.repo)
+    }
+}
+
+async function updateFromProvider(provider: Provider<Storeable>, repo: BaseRepo) {
     console.log("Update")
     const data = await provider.fetch()
     await DataStore.open<Storeable, BaseRepo>(repo, async store => {
@@ -13,10 +33,7 @@ async function update(provider: Provider<Storeable>, repo: BaseRepo) {
     })
 }
 
-async function updateAll() {
-    await update(new CarsharingProvider(), BaseRepo.CarsharingStations)
-    await update(new ScooterProvider(), BaseRepo.Scooters)
-}
+
 
 updateAll()
 setInterval(updateAll, 5 * 60 * 1000 /* 5min */)
