@@ -26,7 +26,6 @@ async function updateAll() {
 }
 
 async function updateFromProvider(provider: Provider<Storeable>, repo: BaseRepo) {
-    console.log("Update")
     const data = await provider.fetch()
     await DataStore.open<Storeable, BaseRepo>(repo, async store => {
         await store.store(data)

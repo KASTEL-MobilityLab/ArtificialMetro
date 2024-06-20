@@ -6,11 +6,16 @@ import type { Provider } from "./provider";
 const endpoint = "https://api.mobidata-bw.de/geoserver/MobiData-BW/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=MobiData-BW%3Asharing_stations_car&maxFeatures=20000&outputFormat=csv"
 export const attribution = "NVBW MobiData BW"
 
-export async function load(): Promise<CarsharingStation[]> {
-    // Force deflate encoding, because gzip has errors in node.js implementation
-    const response = await fetch(endpoint, {headers: { 'accept-encoding': 'deflate'}})
-    const stations = await extractStations(response)
-    return stations
+export class CarsharingProvider implements Provider<CarsharingStation> {
+    attribution(): string {
+        return attribution
+    }
+    async fetch(): Promise<CarsharingStation[]> {
+        // Force deflate encoding, because gzip has errors in node.js implementation
+        const response = await fetch(endpoint, {headers: { 'accept-encoding': 'deflate'}})
+        const stations = await extractStations(response)
+        return stations
+    }
 }
 
 async function extractStations(response: Response): Promise<CarsharingStation[]> {
@@ -33,11 +38,3 @@ async function extractStations(response: Response): Promise<CarsharingStation[]>
     return stations
 }
 
-export class CarsharingProvider implements Provider<CarsharingStation> {
-    attribution(): string {
-        return attribution
-    }
-    fetch(): Promise<CarsharingStation[]> {
-        return load()
-    }
-}
