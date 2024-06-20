@@ -2,8 +2,12 @@ import type { Scooter, CarsharingStation } from "@/model/vehicles"
 import type { Express } from "express"
 import { DataStore } from "./data_store"
 import { BaseRepo } from "@/storage/base_store"
+import {repoAccess} from "./v1/repo_access"
 
 export function use(app: Express) {
+    app.use('/v1/carsharing_stations', repoAccess<CarsharingStation>(BaseRepo.CarsharingStations))
+    app.use('/v1/scooters', repoAccess<Scooter>(BaseRepo.Scooters))
+
     app.get('/v1/sample', (_, res) => {
 
         const sample: CarsharingStation[] = [
