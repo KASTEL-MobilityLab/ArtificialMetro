@@ -1,5 +1,5 @@
 import type { Storeable } from "@/model/storeable";
-import { BaseRepo } from "@/storage/base_store";
+import { BaseRepo } from "@/model/repos";
 import { Router } from "express";
 import { DataStore } from "../data_store";
 

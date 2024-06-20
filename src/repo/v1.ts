@@ -1,6 +1,6 @@
 import type { Scooter, CarsharingStation } from "@/model/vehicles"
 import { Router } from "express"
-import { BaseRepo } from "@/storage/base_store"
+import { BaseRepo } from "@/model/repos"
 import { repoAccess } from "./v1/repo_access"
 
 

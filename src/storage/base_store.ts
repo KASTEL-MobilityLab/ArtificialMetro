@@ -1,13 +1,9 @@
 import { openDB, type IDBPDatabase } from "idb";
 import { Repo } from "./repo";
 import type { Storeable } from "@/model/storeable";
+import { BaseRepo } from "../model/repos";
 
 const BASE_STORE = "base-store"
-export enum BaseRepo {
-    CarsharingStations = "carsharing_stations",
-    Scooters = "scooters",
-}
-
 export class BaseStore {
     private db: IDBPDatabase
 

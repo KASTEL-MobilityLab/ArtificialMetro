@@ -1,7 +1,7 @@
 import { DataStore } from "./data_store"
-import { BaseRepo } from "@/storage/base_store"
+import { BaseRepo } from "@/model/repos"
 import type { Storeable } from "@/model/storeable"
-import type { Provider } from "@/provider/provider"
+import type { Provider } from "@/model/provider"
 import { CarsharingProvider } from "@/provider/carsharing"
 import { ScooterProvider } from "@/provider/scooter"
 

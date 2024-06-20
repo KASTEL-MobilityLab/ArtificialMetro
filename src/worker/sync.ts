@@ -1,7 +1,8 @@
 import type { Storeable } from "@/model/storeable"
 import { normalizeTimestamp } from "@/model/timestamp"
 import type { CarsharingStation, Scooter } from "@/model/vehicles"
-import { BaseRepo, BaseStore } from "@/storage/base_store"
+import { BaseStore } from "@/storage/base_store"
+import { BaseRepo } from "@/model/repos"
 
 export async function sync() {
     loadIncrementalData<CarsharingStation>(BaseRepo.CarsharingStations)
