@@ -7,11 +7,7 @@ export interface Provider<T extends Storeable> {
 }
 
 export function startAll() {
-    // startCarsharingProvider()
-    // startScooterProvider()
-    // startCleanupProvider()
-    // startSyncProvider()
-    sync.initial_sync()
+    startSyncProvider()
 }
 
 export function startCarsharingProvider() {

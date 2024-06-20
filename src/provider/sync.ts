@@ -4,7 +4,8 @@ import type { CarsharingStation, Scooter } from "@/model/vehicles"
 import { BaseRepo, BaseStore } from "@/storage/base_store"
 
 export async function sync() {
-
+    loadIncrementalData<CarsharingStation>(BaseRepo.CarsharingStations)
+    loadIncrementalData<Scooter>(BaseRepo.Scooters)
 }
 
 export async function initial_sync() {
@@ -17,9 +18,19 @@ async function loadInitialData<T extends Storeable>(repo: BaseRepo) {
     const lastHour = new Date(currentDate.getTime() - 1 * 60 * 60 * 1000 /* 1h */)
 
     const url = `/v1/${repo}/${lastHour.toISOString()}/${currentDate.toISOString()}`
+    const data = await fetchData<T>(url)
+    storeData(data, repo)
+}
+
+async function loadIncrementalData<T extends Storeable>(repo: BaseRepo) {
+    const url = `/v1/${repo}/current`
+    const data = await fetchData<T>(url)
+    storeData(data, repo)
+}
+
+async function fetchData<T extends Storeable>(url: string) {
     const result = await fetch(url)
-    const json = await result.json() as T[]
-    storeData(json, repo)
+    return await result.json() as T[]
 }
 
 async function storeData<T extends Storeable>(data: T[], repo: BaseRepo) {
