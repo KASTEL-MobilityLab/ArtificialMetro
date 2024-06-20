@@ -4,7 +4,7 @@ import type { Storeable } from "@/model/storeable";
 
 const BASE_STORE = "base-store"
 export enum BaseRepo {
-    CarsharingStations = "carsharing-stations",
+    CarsharingStations = "carsharing_stations",
     Scooters = "scooters",
 }
 

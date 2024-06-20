@@ -1,4 +1,5 @@
 import type { Storeable } from "@/model/storeable"
+import * as sync from "./sync"
 
 export interface Provider<T extends Storeable> {
     attribution(): string
@@ -6,9 +7,11 @@ export interface Provider<T extends Storeable> {
 }
 
 export function startAll() {
-    startCarsharingProvider()
-    startScooterProvider()
-    startCleanupProvider()
+    // startCarsharingProvider()
+    // startScooterProvider()
+    // startCleanupProvider()
+    // startSyncProvider()
+    sync.initial_sync()
 }
 
 export function startCarsharingProvider() {
@@ -21,5 +24,9 @@ export function startScooterProvider() {
 
 export function startCleanupProvider() {
     return new SharedWorker(new URL("./cleanup_worker.ts", import.meta.url), { type: "module" })
+}
+
+export function startSyncProvider() {
+    return new SharedWorker(new URL("./sync_worker.ts", import.meta.url), { type: "module" })
 }
 
