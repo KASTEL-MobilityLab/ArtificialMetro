@@ -1,4 +1,4 @@
-import { type CarsharingStation } from "@/model/vehicles"
+import type { Scooter, CarsharingStation } from "@/model/vehicles"
 import type { Express } from "express"
 import { DataStore } from "./data_store"
 import { BaseRepo } from "@/storage/base_store"
@@ -47,6 +47,13 @@ export function use(app: Express) {
     })
     app.get('/v1/current', async (_, res) => {
         DataStore.open<CarsharingStation, BaseRepo>(BaseRepo.CarsharingStations, async c => {
+            const items = await c.current()
+            res.type('json')
+            res.send(JSON.stringify(items))
+        })
+    })
+    app.get('/v1/scooters', async (_, res) => {
+        DataStore.open<Scooter, BaseRepo>(BaseRepo.Scooters, async c => {
             const items = await c.current()
             res.type('json')
             res.send(JSON.stringify(items))
