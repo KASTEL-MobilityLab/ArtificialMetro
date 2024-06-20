@@ -1,5 +1,5 @@
 import { openDB, type IDBPDatabase } from "idb";
-import { Repo } from "./repo";
+import { CacheRepo } from "./cache_repo";
 import type { Storeable } from "@/model/storeable";
 import { BaseRepo } from "../model/repos";
 
@@ -18,8 +18,8 @@ export class BaseStore {
         return new BaseStore(db)
     }
 
-    repo<T extends Storeable>(repo: BaseRepo): Repo<T, BaseRepo> {
-        return new Repo(this.db, repo, BASE_STORE)
+    repo<T extends Storeable>(repo: BaseRepo): CacheRepo<T, BaseRepo> {
+        return new CacheRepo(this.db, repo, BASE_STORE)
     }
 }
 

@@ -7,7 +7,7 @@ import { BaseStore } from "@/storage/base_store"
 import { BaseRepo } from "@/model/repos"
 import MapView from "./MapView.vue"
 import { SwitchBusReceiver } from "./switch_bus"
-import type { Repo } from "@/storage/repo"
+import type { CacheRepo } from "@/storage/cache_repo"
 
 defineProps<{
   bus: SwitchBusReceiver,
@@ -39,19 +39,19 @@ onMounted(async () => {
   updateScooters(scooterRepo)
 })
 
-async function updateScooters(repo: Repo<Scooter, BaseRepo>) {
+async function updateScooters(repo: CacheRepo<Scooter, BaseRepo>) {
   const new_scooters = await repo.current()
   scooters.value = new_scooters
   updateTimestamp(repo)
 }
 
-async function updateCarsharing(repo: Repo<CarsharingStation, BaseRepo>) {
+async function updateCarsharing(repo: CacheRepo<CarsharingStation, BaseRepo>) {
   let new_stations = await repo.current()
   stations.value = new_stations
   updateTimestamp(repo)
 }
 
-async function updateTimestamp(repo: Repo<any,any>) {
+async function updateTimestamp(repo: CacheRepo<any,any>) {
   let timestamp = await repo.getLatestTimestamp()
   if (timestamp != null) currentTimestamp.value = timestamp
 }
