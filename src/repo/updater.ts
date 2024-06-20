@@ -1,29 +1,21 @@
-import * as carsharing from "@/provider/carsharing"
-import * as scooter from "@/provider/scooter"
 import { DataStore } from "./data_store"
-import type { Scooter, CarsharingStation } from "@/model/vehicles"
 import { BaseRepo } from "@/storage/base_store"
+import type { Storeable } from "@/model/storeable"
+import type { Provider } from "@/provider/provider"
+import { CarsharingProvider } from "@/provider/carsharing"
+import { ScooterProvider } from "@/provider/scooter"
 
-
-async function updateCarsharing() {
-    console.log('== Update Carsharing')
-    const stations = await carsharing.load()
-    await DataStore.open<CarsharingStation, BaseRepo>(BaseRepo.CarsharingStations, async c => {
-        await c.store(stations)
-    })
-}
-
-async function updateScooters() {
-    console.log("== Update Scooters")
-    const scooters = await scooter.load()
-    await DataStore.open<Scooter, BaseRepo>(BaseRepo.Scooters, async c => {
-        await c.store(scooters)
+async function update(provider: Provider<Storeable>, repo: BaseRepo) {
+    console.log("Update")
+    const data = await provider.fetch()
+    await DataStore.open<Storeable, BaseRepo>(repo, async store => {
+        await store.store(data)
     })
 }
 
 async function updateAll() {
-    await updateCarsharing()
-    await updateScooters()
+    await update(new CarsharingProvider(), BaseRepo.CarsharingStations)
+    await update(new ScooterProvider(), BaseRepo.Scooters)
 }
 
 updateAll()

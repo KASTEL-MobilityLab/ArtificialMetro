@@ -1,3 +1,10 @@
+import type { Storeable } from "@/model/storeable"
+
+export interface Provider<T extends Storeable> {
+    attribution(): string
+    fetch(): Promise<T[]>
+}
+
 export function startAll() {
     startCarsharingProvider()
     startScooterProvider()
@@ -15,3 +22,4 @@ export function startScooterProvider() {
 export function startCleanupProvider() {
     return new SharedWorker(new URL("./cleanup_worker.ts", import.meta.url), { type: "module" })
 }
+
