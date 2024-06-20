@@ -1,7 +1,7 @@
 import { geometryToCoordinate, type CarsharingStation } from "@/model/vehicles";
 import * as csv from "web-csv-toolbox"
 import { isInBounds } from "./bounds";
-import type { Provider } from "./provider";
+import type { Provider } from "../model/provider";
 
 const endpoint = "https://api.mobidata-bw.de/geoserver/MobiData-BW/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=MobiData-BW%3Asharing_stations_car&maxFeatures=20000&outputFormat=csv"
 export const attribution = "NVBW MobiData BW"
