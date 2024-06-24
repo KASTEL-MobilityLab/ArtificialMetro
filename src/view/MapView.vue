@@ -47,11 +47,19 @@ let currentPreset = ref(1)
 let zoom = computed(() => PRESETS[currentPreset.value].zoom)
 let center = computed(() => PRESETS[currentPreset.value].position)
 
-function num_to_color(num: number): string {
-  if (num <= 0) {
-    return "transparent"
+let colors: { [key: string]: string } = {
+  "nextbike": "#C30937",
+  "stadtmobil_karlsruhe": "#FF7C1E",
+  "bolt_karlsruhe": "#32BB78",
+  "voi_karlsruhe": "#F26961",
+}
+
+function providerColor(provider: string): string {
+  if (provider in colors) {
+    return colors[provider]
   }
-  return "#A5784F"
+  console.log(provider)
+  return "black"
 }
 
 function setToPreset(num: number) {
@@ -79,17 +87,20 @@ watch(() => props.bus, (bus) => {
       <!-- Humanitarian: https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png -->
       <!-- Dark: https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png -->
       <!-- Light: https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png -->
-      
-      <LTileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png" layer-type="base" name="OSM"></LTileLayer>
+
+      <LTileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png" layer-type="base"
+        name="OSM"></LTileLayer>
       <!-- <LTileLayer url="https://c.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png" layer-type="overlay" name="OSM"></LTileLayer> -->
       <LCircleMarker v-for="marker, i in stations" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
-        :fill="true" :fill-color="num_to_color(marker.available)" :fill-opacity="1" :stroke="false" :radius="8"
+        :fill="true" :fill-color="providerColor(marker.provider)" :fill-opacity="1" :stroke="false" :radius="8"
         color="black"></LCircleMarker>
 
       <LCircleMarker v-for="marker, i in scooters" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
-        :fill="true" fill-color="#398888" :fill-opacity="1" :stroke="false" :radius="5"></LCircleMarker>
+        :fill="true" :fill-color="providerColor(marker.provider)" :fill-opacity="1" :stroke="false" :radius="5">
+      </LCircleMarker>
       <LCircleMarker v-for="marker, i in bikes" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
-        :fill="true" fill-color="#6F8750" :fill-opacity="1" :stroke="false" :radius="5"></LCircleMarker>
+        :fill="true" :fill-color="providerColor(marker.provider)" :fill-opacity="1" :stroke="false" :radius="5">
+      </LCircleMarker>
     </LMap>
   </div>
   <PresetScaler :current-preset="currentPreset" :num-presets="PRESETS.length" @click="setToPreset"></PresetScaler>
@@ -100,23 +111,23 @@ watch(() => props.bus, (bus) => {
 
 <style scoped>
 .attribution {
-    position: absolute;
-    z-index: 1000;
+  position: absolute;
+  z-index: 1000;
 
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
 
-    bottom: 5px;
-    right: 5px;
-    padding: 5px 10px;
-    border-radius: 5px;
-    max-width: 50%;
+  bottom: 5px;
+  right: 5px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  max-width: 50%;
 
-    background: var(--card-bg-color);
-    color: var(--card-fg-color);
-    box-shadow: 0 0 5px var(--card-shade-color);
+  background: var(--card-bg-color);
+  color: var(--card-fg-color);
+  box-shadow: 0 0 5px var(--card-shade-color);
 }
 </style>
