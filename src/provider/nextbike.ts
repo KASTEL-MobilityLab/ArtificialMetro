@@ -28,7 +28,8 @@ async function extractBikes(response: Response): Promise<Bike[]> {
             position: {
                 lat: record.lat,
                 lon: record.lon,
-            }
+            },
+            provider: "nextbike",
         }
         bikes.push(bike)
     }

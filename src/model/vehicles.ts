@@ -8,18 +8,21 @@ export interface CarsharingStation {
     available: number,
     timestamp: Date,
     position: Coordinate,
+    provider: string,
 }
 
 export interface Scooter {
     id: string,
     timestamp: Date,
     position: Coordinate,
+    provider: string,
 }
 
 export interface Bike {
     id: string,
     timestamp: Date,
     position: Coordinate,
+    provider: string,
 }
 
 export function geometryToCoordinate(geometry: string): Coordinate {
