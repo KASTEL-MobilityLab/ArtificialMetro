@@ -24,8 +24,13 @@ const providers: {
 
 async function updateAll() {
     for (const provider of providers) {
-        await updateFromProvider(provider.provider, provider.repo)
-        await cleanupRepo(provider.repo)
+        try {
+            await updateFromProvider(provider.provider, provider.repo)
+            await cleanupRepo(provider.repo)
+        } catch(ex) {
+            console.error("Update failed")
+            console.error(ex)
+        }
     }
 }
 
