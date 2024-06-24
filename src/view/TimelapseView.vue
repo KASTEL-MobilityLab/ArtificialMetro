@@ -3,7 +3,8 @@ import { computed, onMounted, ref, type Ref } from "vue"
 import type { CarsharingStation, Scooter } from "@/model/vehicles"
 import * as carsharing from '../provider/carsharing'
 import * as scooter from '../provider/scooter'
-import { BaseStore, BaseRepo } from "@/storage/base_store"
+import { BaseStore } from "@/storage/base_store"
+import { BaseRepo } from "@/model/repos"
 import { TimeSimulator } from "@/model/simulator"
 import MapView from "./MapView.vue"
 import type { SwitchBusReceiver } from "./switch_bus"

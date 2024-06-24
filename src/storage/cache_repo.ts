@@ -1,7 +1,8 @@
 import type { Storeable } from "@/model/storeable";
+import { normalizeTimestamp } from "@/model/timestamp";
 import { type IDBPDatabase } from "idb";
 
-export class Repo<T extends Storeable, R extends string> {
+export class CacheRepo<T extends Storeable, R extends string> {
     private db: IDBPDatabase<unknown>
     private channel: BroadcastChannel
     private channel_name: string
@@ -14,7 +15,7 @@ export class Repo<T extends Storeable, R extends string> {
         this.channel_name = channel_name
     }
 
-    onUpdate(func: { (repo: Repo<T, R>): void }) {
+    onUpdate(func: { (repo: CacheRepo<T, R>): void }) {
         const channel = new BroadcastChannel(this.channel_name)
         channel.onmessage = (evt: MessageEvent<R>) => {
             const message = evt.data
@@ -96,12 +97,4 @@ export class Repo<T extends Storeable, R extends string> {
         await tx.done
     }
 
-}
-
-function normalizeTimestamp(timestamp: Date): Date {
-    const minutes = timestamp.getMinutes()
-    timestamp.setMinutes(Math.floor(minutes / 5) * 5)
-    timestamp.setSeconds(0)
-    timestamp.setMilliseconds(0)
-    return timestamp
 }

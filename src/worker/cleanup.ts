@@ -1,5 +1,6 @@
 import { type CarsharingStation, type Scooter } from "@/model/vehicles";
-import { BaseRepo, BaseStore } from "@/storage/base_store";
+import { BaseStore } from "@/storage/base_store";
+import { BaseRepo } from "@/model/repos";
 
 const CLEANUP_THRESHOLD = 1 * 60 * 60 * 1000 /* 1h */
 const store = await BaseStore.open()

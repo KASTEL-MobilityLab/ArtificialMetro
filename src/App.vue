@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
-import * as provider from './provider/provider'
+import * as workers from './worker/workers'
 import ViewSwitcher from './view/ViewSwitcher.vue';
 import { MapIcon, TimerIcon } from 'lucide-vue-next';
 import LiveView from './view/LiveView.vue';
@@ -25,7 +25,7 @@ const kioskMode = ref(false)
 let kioskModeTicker: number | undefined = undefined
 
 onMounted(() => {
-  provider.startAll()
+  workers.startAll()
   registerKeyboardSwitcher()
   startKioskMode()
 })
