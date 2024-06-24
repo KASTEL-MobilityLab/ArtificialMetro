@@ -3,7 +3,7 @@ import "leaflet/dist/leaflet.css"
 import L from "leaflet"
 import { LMap, LTileLayer, LCircleMarker } from "@vue-leaflet/vue-leaflet"
 import { computed, onMounted, ref, watch } from "vue"
-import type { CarsharingStation, Scooter } from "@/model/vehicles"
+import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
 import PresetScaler from "./PresetScaler.vue"
 import type { SwitchBusReceiver } from "./switch_bus"
 
@@ -38,6 +38,7 @@ const PRESETS = [
 const props = defineProps<{
   stations: CarsharingStation[],
   scooters: Scooter[],
+  bikes: Bike[],
   attribution: string,
   bus: SwitchBusReceiver,
 }>()
@@ -47,13 +48,10 @@ let zoom = computed(() => PRESETS[currentPreset.value].zoom)
 let center = computed(() => PRESETS[currentPreset.value].position)
 
 function num_to_color(num: number): string {
-  if (num <= 1) {
-    return "#8C423C"
-  } else if (num == 2) {
-    return "#A5784F"
-  } else {
-    return "#6F8750"
+  if (num <= 0) {
+    return "transparent"
   }
+  return "#A5784F"
 }
 
 function setToPreset(num: number) {
@@ -90,6 +88,8 @@ watch(() => props.bus, (bus) => {
 
       <LCircleMarker v-for="marker, i in scooters" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
         :fill="true" fill-color="#398888" :fill-opacity="1" :stroke="false" :radius="5"></LCircleMarker>
+      <LCircleMarker v-for="marker, i in bikes" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
+        :fill="true" fill-color="#6F8750" :fill-opacity="1" :stroke="false" :radius="5"></LCircleMarker>
     </LMap>
   </div>
   <PresetScaler :current-preset="currentPreset" :num-presets="PRESETS.length" @click="setToPreset"></PresetScaler>
