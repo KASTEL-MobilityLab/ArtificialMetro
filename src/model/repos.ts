@@ -1,4 +1,5 @@
 export enum BaseRepo {
     CarsharingStations = "carsharing_stations",
-    Scooters = "scooters"
+    Scooters = "scooters",
+    Bikes = "bikes",
 }

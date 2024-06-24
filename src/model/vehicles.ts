@@ -16,6 +16,12 @@ export interface Scooter {
     position: Coordinate,
 }
 
+export interface Bike {
+    id: string,
+    timestamp: Date,
+    position: Coordinate,
+}
+
 export function geometryToCoordinate(geometry: string): Coordinate {
     geometry = geometry.substring(7)
     const splitter = geometry.indexOf(" ")
