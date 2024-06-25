@@ -11,4 +11,6 @@ export const brandIcons: { [key: string]: string } = {
     "stadtmobil_karlsruhe": "/brands/stadtmobil_karlsruhe.svg",
     "nextbike": "/brands/nextbike.svg",
     "nextbike2": "/brands/nextbike2.svg",
+    "bolt_karlsruhe": "/brands/scooter_bolt.svg",
+    "voi_karlsruhe": "/brands/scooter_voi.svg",
 }

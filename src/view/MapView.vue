@@ -96,9 +96,9 @@ watch(() => props.bus, (bus) => {
         <LIcon :icon-size="[20, 20]" :icon-url="brandIcon(marker.provider)"></LIcon>
       </LMarker>
 
-      <LCircleMarker v-for="marker, i in scooters" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
-        :fill="true" :fill-color="providerColor(marker.provider)" :fill-opacity="1" :stroke="false" :radius="5">
-      </LCircleMarker>
+      <LMarker v-for="marker, i in scooters" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
+        <LIcon :icon-size="[15, 15]" :icon-url="brandIcon(marker.provider)"></LIcon>
+      </LMarker>
       <LMarker v-for="marker, i in bikes" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
         <LIcon :icon-size="[15, 15]" :icon-url="brandIcon(marker.provider)"></LIcon>
       </LMarker>
