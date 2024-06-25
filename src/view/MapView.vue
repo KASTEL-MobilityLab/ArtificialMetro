@@ -6,6 +6,7 @@ import { computed, onMounted, ref, watch } from "vue"
 import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
 import PresetScaler from "./PresetScaler.vue"
 import type { SwitchBusReceiver } from "./switch_bus"
+import { brandColors } from "@/provider/brands"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -47,17 +48,9 @@ let currentPreset = ref(1)
 let zoom = computed(() => PRESETS[currentPreset.value].zoom)
 let center = computed(() => PRESETS[currentPreset.value].position)
 
-let colors: { [key: string]: string } = {
-  "nextbike": "#C30937",
-  "nextbike2": "blue",
-  "stadtmobil_karlsruhe": "#FF7C1E",
-  "bolt_karlsruhe": "#32BB78",
-  "voi_karlsruhe": "#F26961",
-}
-
 function providerColor(provider: string): string {
-  if (provider in colors) {
-    return colors[provider]
+  if (provider in brandColors) {
+    return brandColors[provider]
   }
   console.log(provider)
   return "black"
