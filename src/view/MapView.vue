@@ -49,6 +49,7 @@ let center = computed(() => PRESETS[currentPreset.value].position)
 
 let colors: { [key: string]: string } = {
   "nextbike": "#C30937",
+  "nextbike2": "blue",
   "stadtmobil_karlsruhe": "#FF7C1E",
   "bolt_karlsruhe": "#32BB78",
   "voi_karlsruhe": "#F26961",
@@ -99,7 +100,7 @@ watch(() => props.bus, (bus) => {
         :fill="true" :fill-color="providerColor(marker.provider)" :fill-opacity="1" :stroke="false" :radius="5">
       </LCircleMarker>
       <LCircleMarker v-for="marker, i in bikes" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
-        :fill="true" :fill-color="providerColor(marker.provider)" :fill-opacity="1" :stroke="false" :radius="5">
+        :fill="true" :fill-color="providerColor(marker.provider)" :fill-opacity="1" :stroke="false" :radius="(marker.provider == 'nextbike2') ? 2 : 5">
       </LCircleMarker>
     </LMap>
   </div>
