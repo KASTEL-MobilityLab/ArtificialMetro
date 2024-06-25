@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import "leaflet/dist/leaflet.css"
-import L from "leaflet"
+import L, { type PointExpression } from "leaflet"
 import { LMap, LTileLayer, LCircleMarker, LMarker, LIcon } from "@vue-leaflet/vue-leaflet"
 import { computed, onMounted, ref, watch } from "vue"
 import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
@@ -47,14 +47,18 @@ const props = defineProps<{
 let currentPreset = ref(1)
 let zoom = computed(() => PRESETS[currentPreset.value].zoom)
 let center = computed(() => PRESETS[currentPreset.value].position)
-
-function providerColor(provider: string): string {
-  if (provider in brandColors) {
-    return brandColors[provider]
+let iconSize = computed(() => {
+  switch (zoom.value) {
+    case 14:
+      return [15, 15] as PointExpression
+    case 16:
+      return [25, 25] as PointExpression
+    case 17:
+      return [35, 35] as PointExpression
+    default: 
+      return [20, 20] as PointExpression
   }
-  console.log(provider)
-  return "black"
-}
+})
 
 function brandIcon(provider: string): string {
   if (provider in brandIcons) {
@@ -93,14 +97,14 @@ watch(() => props.bus, (bus) => {
       <LTileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png" layer-type="base"
         name="OSM"></LTileLayer>
       <LMarker v-for="marker, i in stations" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
-        <LIcon :icon-size="[20, 20]" :icon-url="brandIcon(marker.provider)"></LIcon>
+        <LIcon :icon-size="iconSize" :icon-url="brandIcon(marker.provider)"></LIcon>
       </LMarker>
 
       <LMarker v-for="marker, i in scooters" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
-        <LIcon :icon-size="[15, 15]" :icon-url="brandIcon(marker.provider)"></LIcon>
+        <LIcon :icon-size="iconSize" :icon-url="brandIcon(marker.provider)"></LIcon>
       </LMarker>
       <LMarker v-for="marker, i in bikes" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
-        <LIcon :icon-size="[15, 15]" :icon-url="brandIcon(marker.provider)"></LIcon>
+        <LIcon :icon-size="iconSize" :icon-url="brandIcon(marker.provider)"></LIcon>
       </LMarker>
     </LMap>
   </div>
