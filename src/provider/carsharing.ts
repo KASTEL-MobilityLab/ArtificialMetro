@@ -31,7 +31,8 @@ async function extractStations(response: Response): Promise<CarsharingStation[]>
             id: record.FID,
             available: parseInt(record.num_vehicles_available),
             timestamp: currentTime,
-            position: coordinate
+            position: coordinate,
+            provider: record.feed_id,
         }
         stations.push(station)
     }

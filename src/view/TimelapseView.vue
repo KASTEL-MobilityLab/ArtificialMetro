@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type Ref } from "vue"
-import type { CarsharingStation, Scooter } from "@/model/vehicles"
+import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
 import * as carsharing from '../provider/carsharing'
 import * as scooter from '../provider/scooter'
 import { BaseStore } from "@/storage/base_store"
@@ -16,6 +16,7 @@ const props = defineProps<{
 
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
+let bikes: Ref<Bike[]> = ref([])
 
 let simulator = new TimeSimulator(2 /*s*/)
 const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
@@ -43,6 +44,7 @@ onMounted(async () => {
 simulator.onReset(() => {
     stations.value = []
     scooters.value = []
+    bikes.value = []
 })
 
 simulator.onContinue(() => {
@@ -59,9 +61,11 @@ simulator.onTick(async time => {
     let store = await BaseStore.open()
     let carsharingRepo = store.repo<CarsharingStation>(BaseRepo.CarsharingStations)
     let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
+    let bikeRepo = store.repo<Bike>(BaseRepo.Bikes)
 
     const new_stations = await carsharingRepo.forTimestamp(time)
     const new_scooters = await scooterRepo.forTimestamp(time)
+    const new_bikes = await bikeRepo.forTimestamp(time)
 
     // only show new data if there was a change found in the DB
     if (new_stations.length > 0) {
@@ -70,12 +74,15 @@ simulator.onTick(async time => {
     if (new_scooters.length > 0) {
         scooters.value = new_scooters
     }
+    if (new_bikes.length > 0) {
+        bikes.value = new_bikes
+    }
 })
 
 </script>
 
 <template>
-    <MapView :scooters="scooters" :stations="stations" :attribution="attribution" :bus="bus"></MapView>
+    <MapView :scooters="scooters" :stations="stations" :bikes="bikes" :attribution="attribution" :bus="bus"></MapView>
     <div class="current-time">
         <span class="live-dot" active="false"></span>
         {{ currentTime }}

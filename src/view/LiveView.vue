@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch, type Ref } from "vue"
-import type { CarsharingStation, Scooter } from "@/model/vehicles"
+import { computed, onMounted, ref, type Ref } from "vue"
+import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
 import * as carsharing from '../provider/carsharing'
 import * as scooter from '../provider/scooter'
 import { BaseStore } from "@/storage/base_store"
@@ -16,6 +16,7 @@ defineProps<{
 let currentTimestamp = ref(new Date())
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
+let bikes: Ref<Bike[]> = ref([])
 
 const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
 
@@ -31,12 +32,15 @@ onMounted(async () => {
   let store = await BaseStore.open()
   let carsharingRepo = store.repo<CarsharingStation>(BaseRepo.CarsharingStations)
   let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
+  let bikeRepo = store.repo<Bike>(BaseRepo.Bikes)
 
   carsharingRepo.onUpdate(updateCarsharing)
   scooterRepo.onUpdate(updateScooters)
+  bikeRepo.onUpdate(updateBikes)
 
   updateCarsharing(carsharingRepo)
   updateScooters(scooterRepo)
+  updateBikes(bikeRepo)
 })
 
 async function updateScooters(repo: CacheRepo<Scooter, BaseRepo>) {
@@ -51,6 +55,12 @@ async function updateCarsharing(repo: CacheRepo<CarsharingStation, BaseRepo>) {
   updateTimestamp(repo)
 }
 
+async function updateBikes(repo: CacheRepo<Bike, BaseRepo>) {
+  let new_bikes = await repo.current()
+  bikes.value = new_bikes
+  updateTimestamp(repo)
+}
+
 async function updateTimestamp(repo: CacheRepo<any,any>) {
   let timestamp = await repo.getLatestTimestamp()
   if (timestamp != null) currentTimestamp.value = timestamp
@@ -58,7 +68,7 @@ async function updateTimestamp(repo: CacheRepo<any,any>) {
 </script>
 
 <template>
-  <MapView :scooters="scooters" :stations="stations" :attribution="attribution" :bus="bus"></MapView>
+  <MapView :scooters="scooters" :stations="stations" :bikes="bikes" :attribution="attribution" :bus="bus"></MapView>
   <div class="current-time"><span class="live-dot"></span> {{ currentTime }}</div>
 </template>
 

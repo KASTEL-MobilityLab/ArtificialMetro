@@ -1,17 +1,19 @@
 import type { Storeable } from "@/model/storeable"
 import { normalizeTimestamp } from "@/model/timestamp"
-import type { CarsharingStation, Scooter } from "@/model/vehicles"
+import { type Bike, type CarsharingStation, type Scooter } from "@/model/vehicles"
 import { BaseStore } from "@/storage/base_store"
 import { BaseRepo } from "@/model/repos"
 
 export async function sync() {
     loadIncrementalData<CarsharingStation>(BaseRepo.CarsharingStations)
     loadIncrementalData<Scooter>(BaseRepo.Scooters)
+    loadIncrementalData<Bike>(BaseRepo.Bikes)
 }
 
 export async function initial_sync() {
     loadInitialData<CarsharingStation>(BaseRepo.CarsharingStations)
     loadInitialData<Scooter>(BaseRepo.Scooters)
+    loadInitialData<Bike>(BaseRepo.Bikes)
 }
 
 async function loadInitialData<T extends Storeable>(repo: BaseRepo) {

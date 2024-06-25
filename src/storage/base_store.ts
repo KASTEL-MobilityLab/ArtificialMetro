@@ -26,6 +26,7 @@ export class BaseStore {
 function initDatabase(db: IDBPDatabase<unknown>) {
     createObjectStore(db, BaseRepo.CarsharingStations)
     createObjectStore(db, BaseRepo.Scooters)
+    createObjectStore(db, BaseRepo.Bikes)
 }
 function createObjectStore(db: IDBPDatabase<unknown>, repo: BaseRepo) {
     const objectStore = db.createObjectStore(repo)

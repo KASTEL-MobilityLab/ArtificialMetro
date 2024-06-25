@@ -4,6 +4,8 @@ import type { Storeable } from "@/model/storeable"
 import type { Provider } from "@/model/provider"
 import { CarsharingProvider } from "@/provider/carsharing"
 import { ScooterProvider } from "@/provider/scooter"
+import { NextbikeProviderV1 } from "@/provider/nextbike_v1"
+import { NextbikeProviderV2 } from "@/provider/nextbike_v2"
 
 const UPDATE_INTERVAL = 5 * 60 * 1000 /* 5min */
 const CLEANUP_AGE = 48 * 60 * 60 *60 * 1000 /* 28h */
@@ -18,6 +20,12 @@ const providers: {
         }, {
             repo: BaseRepo.Scooters,
             provider: new ScooterProvider(),
+        }, {
+            repo: BaseRepo.Bikes,
+            provider: new NextbikeProviderV1(),
+        }, {
+            repo: BaseRepo.Bikes,
+            provider: new NextbikeProviderV2(),
         }
     ]
 

@@ -30,7 +30,8 @@ async function extractScooter(response: Response): Promise<Scooter[]> {
         const station: Scooter = {
             id: record.FID,
             timestamp: currentTime,
-            position: coordinate
+            position: coordinate,
+            provider: record.feed_id,
         }
         scooters.push(station)
     }
