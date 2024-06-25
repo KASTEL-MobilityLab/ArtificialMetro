@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="24"
+   height="24"
+   viewBox="0 0 24 24"
+   fill="none"
+   stroke="currentColor"
+   stroke-width="2"
+   stroke-linecap="round"
+   stroke-linejoin="round"
+   class="lucide lucide-bike"
+   version="1.1"
+   id="svg3"
+   sodipodi:docname="nextbike2.svg"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs3" />
+  <sodipodi:namedview
+     id="namedview3"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="33.541667"
+     inkscape:cx="11.985093"
+     inkscape:cy="14.057143"
+     inkscape:window-width="1920"
+     inkscape:window-height="1011"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg3" />
+  <circle
+     cx="18.5"
+     cy="17.5"
+     r="3.5"
+     id="circle1"
+     style="stroke:#0046d6;stroke-opacity:1" />
+  <circle
+     cx="5.5"
+     cy="17.5"
+     r="3.5"
+     id="circle2"
+     style="stroke:#0046d6;stroke-opacity:1" />
+  <circle
+     cx="15"
+     cy="5"
+     r="1"
+     id="circle3"
+     style="stroke:#0046d6;stroke-opacity:1" />
+  <path
+     d="M12 17.5V14l-3-3 4-3 2 3h2"
+     id="path3"
+     style="fill:none;fill-opacity:1;stroke:#0046d6;stroke-opacity:1" />
+  <rect
+     style="fill:none;stroke:#ff0000;stroke-width:2;stroke-dasharray:none;stroke-opacity:1"
+     id="rect1"
+     width="24"
+     height="24"
+     x="0"
+     y="0" />
+</svg>

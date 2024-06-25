@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import "leaflet/dist/leaflet.css"
-import L from "leaflet"
-import { LMap, LTileLayer, LCircleMarker } from "@vue-leaflet/vue-leaflet"
+import L, { type PointExpression } from "leaflet"
+import { LMap, LTileLayer, LCircleMarker, LMarker, LIcon } from "@vue-leaflet/vue-leaflet"
 import { computed, onMounted, ref, watch } from "vue"
 import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
 import PresetScaler from "./PresetScaler.vue"
 import type { SwitchBusReceiver } from "./switch_bus"
-import { brandColors } from "@/provider/brands"
+import { brandColors, brandIcons } from "@/provider/brands"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -47,13 +47,25 @@ const props = defineProps<{
 let currentPreset = ref(1)
 let zoom = computed(() => PRESETS[currentPreset.value].zoom)
 let center = computed(() => PRESETS[currentPreset.value].position)
+let iconSize = computed(() => {
+  switch (zoom.value) {
+    case 14:
+      return [15, 15] as PointExpression
+    case 16:
+      return [25, 25] as PointExpression
+    case 17:
+      return [35, 35] as PointExpression
+    default: 
+      return [20, 20] as PointExpression
+  }
+})
 
-function providerColor(provider: string): string {
-  if (provider in brandColors) {
-    return brandColors[provider]
+function brandIcon(provider: string): string {
+  if (provider in brandIcons) {
+    return brandIcons[provider]
   }
   console.log(provider)
-  return "black"
+  return brandIcons["default"]
 }
 
 function setToPreset(num: number) {
@@ -84,17 +96,16 @@ watch(() => props.bus, (bus) => {
 
       <LTileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png" layer-type="base"
         name="OSM"></LTileLayer>
-      <!-- <LTileLayer url="https://c.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png" layer-type="overlay" name="OSM"></LTileLayer> -->
-      <LCircleMarker v-for="marker, i in stations" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
-        :fill="true" :fill-color="providerColor(marker.provider)" :fill-opacity="1" :stroke="false" :radius="8"
-        color="black"></LCircleMarker>
+      <LMarker v-for="marker, i in stations" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
+        <LIcon :icon-size="iconSize" :icon-url="brandIcon(marker.provider)"></LIcon>
+      </LMarker>
 
-      <LCircleMarker v-for="marker, i in scooters" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
-        :fill="true" :fill-color="providerColor(marker.provider)" :fill-opacity="1" :stroke="false" :radius="5">
-      </LCircleMarker>
-      <LCircleMarker v-for="marker, i in bikes" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]"
-        :fill="true" :fill-color="providerColor(marker.provider)" :fill-opacity="1" :stroke="false" :radius="(marker.provider == 'nextbike2') ? 2 : 5">
-      </LCircleMarker>
+      <LMarker v-for="marker, i in scooters" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
+        <LIcon :icon-size="iconSize" :icon-url="brandIcon(marker.provider)"></LIcon>
+      </LMarker>
+      <LMarker v-for="marker, i in bikes" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
+        <LIcon :icon-size="iconSize" :icon-url="brandIcon(marker.provider)"></LIcon>
+      </LMarker>
     </LMap>
   </div>
   <PresetScaler :current-preset="currentPreset" :num-presets="PRESETS.length" @click="setToPreset"></PresetScaler>
