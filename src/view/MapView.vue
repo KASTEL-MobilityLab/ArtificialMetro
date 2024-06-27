@@ -7,6 +7,9 @@ import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
 import PresetScaler from "./PresetScaler.vue"
 import type { SwitchBusReceiver } from "./switch_bus"
 import { brandColors, brandIcons } from "@/provider/brands"
+import { TileProvider } from "./map/tile_provider"
+import LocationFrame from "./map/LocationFrame.vue"
+import TileRenderer from "./map/TileRenderer.vue"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -85,14 +88,18 @@ watch(() => props.bus, (bus) => {
   bus.onNextPreset(nextPreset)
 })
 
+const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
+
 </script>
 
 <template>
   <div style="height: calc(100vh); width: 100%">
-    <LMap :zoom="zoom" :center="[center.lat, center.lon]">
-      <!-- Humanitarian: https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png -->
-      <!-- Dark: https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png -->
-      <!-- Light: https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png -->
+    <!-- Humanitarian: https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png -->
+    <!-- Dark: https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png -->
+    <!-- Light: https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png -->
+
+    <!-- <LMap :zoom="zoom" :center="[center.lat, center.lon]">
+      
 
       <LTileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png" layer-type="base"
         name="OSM"></LTileLayer>
@@ -106,7 +113,12 @@ watch(() => props.bus, (bus) => {
       <LMarker v-for="marker, i in bikes" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
         <LIcon :icon-size="iconSize" :icon-url="brandIcon(marker.provider)"></LIcon>
       </LMarker>
-    </LMap>
+    </LMap> -->
+
+    <LocationFrame :center="center" :zoom="zoom" #default="data">
+      <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>
+    </LocationFrame>
+
   </div>
   <PresetScaler :current-preset="currentPreset" :num-presets="PRESETS.length" @click="setToPreset"></PresetScaler>
   <div class="attribution">

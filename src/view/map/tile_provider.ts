@@ -14,7 +14,6 @@ export class TileProvider {
             const img = document.createElement('img') as HTMLImageElement
             img.onerror = reject
             img.onload = () => {
-                console.log('image loaded')
                 const ctx = canvas.getContext('2d')
                 ctx?.drawImage(img, 0, 0)
                 this.tiles[tileHash(coords)] = canvas

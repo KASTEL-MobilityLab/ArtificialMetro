@@ -114,7 +114,7 @@ const verticalOffset = computed(() => {
 <template>
     <div ref="container" class="location-frame">
         <slot 
-            :center="centerTile" 
+            :center="center" 
             :viewport-dimensions="viewportDimensions"
             :offset="{y: verticalOffset, x: horizontalOffset}"
             :tile-bounds="tileBounds"

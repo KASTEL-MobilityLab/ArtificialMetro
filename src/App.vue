@@ -101,9 +101,9 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
   </FooterBar>
 
   <main>
-    <LocationFrame :center="{lat: 49.006889, lon: 8.403653}" :zoom="14" #default="data">
-      <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>
-    </LocationFrame>
+    <KeepAlive>
+      <component :is="viewComponent" :bus="currentSwitchBus"></component>
+    </KeepAlive>
   </main>
 </template>
 

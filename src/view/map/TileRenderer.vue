@@ -61,6 +61,12 @@ watch(() => props.viewportDimensions, dim => {
         showTiles(props.offset)
     })
 })
+watch(() => props.tileBounds, () => {
+    props.tiles.fetchRange(props.tileBounds).then(() => {
+        renderTiles()
+        showTiles(props.offset)
+    })
+})
 </script>
 
 <template>
