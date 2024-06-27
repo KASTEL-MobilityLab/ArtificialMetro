@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import "leaflet/dist/leaflet.css"
 import { computed, onMounted, ref, watch } from "vue"
 import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
 import PresetScaler from "./PresetScaler.vue"
