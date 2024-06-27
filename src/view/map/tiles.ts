@@ -23,6 +23,11 @@ export interface BoundingBox<T> {
     bottomRight: T,
 }
 
+export interface Marker {
+    position: Coordinate,
+    sprite: string,
+}
+
 /* Returns the x/y/s tile for given coords */
 export function tileFromCoords(coords: Coordinate, scale: number): TileCoordinate {
     return {
@@ -32,7 +37,7 @@ export function tileFromCoords(coords: Coordinate, scale: number): TileCoordinat
     }
 }
 
-export function posOnTile(coords: Coordinate, scale: number): {x: number, y: number} {
+export function posOnTile(coords: Coordinate, scale: number): ViewCoordinate {
     return {
         x: xOnTile(coords.lon, scale),
         y: yOnTile(coords.lat, scale),

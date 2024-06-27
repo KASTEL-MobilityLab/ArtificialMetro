@@ -72,3 +72,12 @@ watch(() => props.tileBounds, () => {
 <template>
     <canvas ref="canvas"></canvas>
 </template>
+
+<style scoped>
+canvas {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+</style>

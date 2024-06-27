@@ -10,6 +10,8 @@ import { brandColors, brandIcons } from "@/provider/brands"
 import { TileProvider } from "./map/tile_provider"
 import LocationFrame from "./map/LocationFrame.vue"
 import TileRenderer from "./map/TileRenderer.vue"
+import MarkerRenderer from "./map/MarkerRenderer.vue"
+import type { Marker } from "./map/tiles"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -46,6 +48,33 @@ const props = defineProps<{
   attribution: string,
   bus: SwitchBusReceiver,
 }>()
+
+const bikeMarker = computed<Marker[]>(() => {
+  return props.bikes.map(bike => {
+    return {
+      position: bike.position,
+      sprite: bike.provider,
+    }
+  })
+})
+
+const scooterMarker = computed<Marker[]>(() => {
+  return props.scooters.map(scooter => {
+    return {
+      position: scooter.position,
+      sprite: scooter.provider,
+    }
+  })
+})
+
+const stationMarker = computed<Marker[]>(() => {
+  return props.stations.map(station => {
+    return {
+      position: station.position,
+      sprite: station.provider,
+    }
+  })
+})
 
 let currentPreset = ref(1)
 let zoom = computed(() => PRESETS[currentPreset.value].zoom)
@@ -117,6 +146,9 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
 
     <LocationFrame :center="center" :zoom="zoom" #default="data">
       <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>
+      <MarkerRenderer v-bind="data" :marker="stationMarker"></MarkerRenderer>
+      <MarkerRenderer v-bind="data" :marker="scooterMarker"></MarkerRenderer>
+      <MarkerRenderer v-bind="data" :marker="bikeMarker"></MarkerRenderer>
     </LocationFrame>
 
   </div>
