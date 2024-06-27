@@ -12,6 +12,7 @@ import LocationFrame from "./map/LocationFrame.vue"
 import TileRenderer from "./map/TileRenderer.vue"
 import MarkerRenderer from "./map/MarkerRenderer.vue"
 import type { Marker } from "./map/tiles"
+import { SpriteManager } from "./map/sprite_manager"
 
 // This is needed to correctly load leaflet
 // see https://github.com/vue-leaflet/vue-leaflet/issues/278
@@ -117,6 +118,15 @@ watch(() => props.bus, (bus) => {
   bus.onNextPreset(nextPreset)
 })
 
+const spriteManager = new SpriteManager()
+spriteManager.fetchSprites([
+  {name: "nextbike", url: "/brands/nextbike.svg", size: 20},
+  {name: "nextbike2", url: "/brands/nextbike.svg", size: 20},
+  {name: "stadtmobil_karlsruhe", url: "/brands/stadtmobil_karlsruhe.svg", size: 20},
+  {name: "voi_karlsruhe", url: "/brands/scooter_voi.svg", size: 20},
+  {name: "bolt_karlsruhe", url: "/brands/scooter_bolt.svg", size: 20},
+])
+
 const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
 
 </script>
@@ -146,9 +156,9 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
 
     <LocationFrame :center="center" :zoom="zoom" #default="data">
       <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>
-      <MarkerRenderer v-bind="data" :marker="stationMarker"></MarkerRenderer>
-      <MarkerRenderer v-bind="data" :marker="scooterMarker"></MarkerRenderer>
-      <MarkerRenderer v-bind="data" :marker="bikeMarker"></MarkerRenderer>
+      <MarkerRenderer v-bind="data" :marker="stationMarker" :sprites="spriteManager"></MarkerRenderer>
+      <MarkerRenderer v-bind="data" :marker="scooterMarker" :sprites="spriteManager"></MarkerRenderer>
+      <MarkerRenderer v-bind="data" :marker="bikeMarker" :sprites="spriteManager"></MarkerRenderer>
     </LocationFrame>
 
   </div>

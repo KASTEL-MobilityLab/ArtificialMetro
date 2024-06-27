@@ -2,6 +2,7 @@
 import type { Coordinate } from '@/model/vehicles';
 import { ref, watch } from 'vue';
 import { TILE_SIZE, coordsFromTile, posOnTile, tileFromCoords, type BoundingBox, type Dimensions, type Marker, type Offset, type TileCoordinate, type ViewCoordinate } from './tiles';
+import type { SpriteManager } from './sprite_manager';
 
 const props = defineProps<{
     center: Coordinate,
@@ -10,6 +11,7 @@ const props = defineProps<{
     viewportDimensions: Dimensions,
     tileBounds: BoundingBox<TileCoordinate>,
     marker: Marker[],
+    sprites: SpriteManager,
 }>()
 
 const markerCanvas = new OffscreenCanvas(TILE_SIZE, TILE_SIZE)
@@ -42,7 +44,9 @@ function renderMarkers() {
             y: tile.y - props.tileBounds.topLeft.y,
         }
         const offset = posOnTile(marker.position, props.zoom)
-        ctx.fillRect(relativeTile.x * TILE_SIZE + offset.x, relativeTile.y * TILE_SIZE + offset.y, 20, 20)
+        const sprite = props.sprites.getSprite({name: marker.sprite, size: 20})
+        ctx.drawImage(sprite, relativeTile.x * TILE_SIZE + offset.x - 10, relativeTile.y * TILE_SIZE + offset.y - 10)
+        // ctx.fillRect(relativeTile.x * TILE_SIZE + offset.x, relativeTile.y * TILE_SIZE + offset.y, 20, 20)
     }
 }
 
