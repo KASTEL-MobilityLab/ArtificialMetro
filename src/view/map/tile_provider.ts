@@ -2,7 +2,7 @@ import { TILE_SIZE, type BoundingBox, type TileCoordinate } from "./tiles"
 
 export class TileProvider {
     private url = ""
-    private tiles: {[key: string]: OffscreenCanvas} = {}
+    private tiles: { [key: string]: OffscreenCanvas } = {}
 
     constructor(url: string) {
         this.url = url
@@ -27,7 +27,7 @@ export class TileProvider {
         const promises: Promise<any>[] = []
         for (let x = range.topLeft.x; x < range.bottomRight.x; ++x) {
             for (let y = range.topLeft.y; y < range.bottomRight.y; ++y) {
-                const coord = {x, y, scale: range.topLeft.scale}
+                const coord = { x, y, scale: range.topLeft.scale }
                 if (!(tileHash(coord) in this.tiles)) {
                     promises.push(this.fetchTile(coord))
                 }

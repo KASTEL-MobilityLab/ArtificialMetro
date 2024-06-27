@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Coordinate } from '@/model/vehicles';
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { TILE_SIZE, posOnTile, tileFromCoords, type BoundingBox, type Dimensions, type Marker, type Offset, type TileCoordinate, type ViewCoordinate } from './tiles';
 import type { SpriteManager } from './sprite_manager';
 
@@ -12,24 +12,25 @@ const props = defineProps<{
     tileBounds: BoundingBox<TileCoordinate>,
     marker: Marker[],
     sprites: SpriteManager,
+    size: number,
 }>()
 
 const markerCanvas = new OffscreenCanvas(TILE_SIZE, TILE_SIZE)
-const canvas = ref<HTMLCanvasElement|undefined>()
+const canvas = ref<HTMLCanvasElement | undefined>()
 let horizontalTiles = 0
 let verticalTiles = 0
 
-function resizeTileCanvas() {
-    horizontalTiles = Math.ceil(props.viewportDimensions.width / TILE_SIZE) + 1
-    verticalTiles = Math.ceil(props.viewportDimensions.height / TILE_SIZE) + 1
+function resizeTileCanvas(dimensions: Dimensions) {
+    horizontalTiles = Math.ceil(dimensions.width / TILE_SIZE) + 1
+    verticalTiles = Math.ceil(dimensions.height / TILE_SIZE) + 1
     markerCanvas.width = horizontalTiles * TILE_SIZE
     markerCanvas.height = verticalTiles * TILE_SIZE
 }
 
-function resizeViewportCanvas(dim: Dimensions) {
+function resizeViewportCanvas(dimensions: Dimensions) {
     if (canvas.value == undefined) return
-    canvas.value.width = dim.width
-    canvas.value.height = dim.height
+    canvas.value.width = dimensions.width
+    canvas.value.height = dimensions.height
 }
 
 function renderMarkers() {
@@ -38,15 +39,32 @@ function renderMarkers() {
     ctx.clearRect(0, 0, markerCanvas.width, markerCanvas.height)
 
     for (const marker of props.marker) {
-        const tile = tileFromCoords(marker.position, props.zoom)
-        const relativeTile = {
-            x: tile.x - props.tileBounds.topLeft.x,
-            y: tile.y - props.tileBounds.topLeft.y,
-        }
-        const offset = posOnTile(marker.position, props.zoom)
-        const sprite = props.sprites.getSprite({name: marker.sprite, size: 20})
-        ctx.drawImage(sprite, relativeTile.x * TILE_SIZE + offset.x - 10, relativeTile.y * TILE_SIZE + offset.y - 10)
-        // ctx.fillRect(relativeTile.x * TILE_SIZE + offset.x, relativeTile.y * TILE_SIZE + offset.y, 20, 20)
+        drawMarker(marker, ctx)
+    }
+}
+
+function drawMarker(marker: Marker, ctx: OffscreenCanvasRenderingContext2D) {
+    const { tile, offset } = relativeTile(marker)
+    const sprite = props.sprites.getSprite({ name: marker.sprite, size: props.size })
+    const markerOffset = props.size / 2
+    const position = {
+        x: tile.x * TILE_SIZE + offset.x - markerOffset,
+        y: tile.y * TILE_SIZE + offset.y - markerOffset,
+    }
+    ctx.drawImage(sprite, position.x, position.y)
+}
+
+function relativeTile(marker: Marker): { tile: TileCoordinate, offset: Offset<ViewCoordinate> } {
+    const tile = tileFromCoords(marker.position, props.zoom)
+    const relativeTile = {
+        x: tile.x - props.tileBounds.topLeft.x,
+        y: tile.y - props.tileBounds.topLeft.y,
+        scale: tile.scale,
+    }
+    const offset = posOnTile(marker.position, props.zoom)
+    return {
+        tile: relativeTile,
+        offset,
     }
 }
 
@@ -57,22 +75,32 @@ function showMarkers(offset: Offset<ViewCoordinate>) {
     ctx.drawImage(markerCanvas, offset.x, offset.y)
 }
 
+function doResize(dimensions: Dimensions) {
+    resizeViewportCanvas(dimensions)
+    resizeTileCanvas(dimensions)
+}
+
+function renderAndShowMarkers() {
+    renderMarkers()
+    showMarkers(props.offset)
+}
+
 watch(() => props.offset, () => {
     showMarkers(props.offset)
 })
 watch(() => props.viewportDimensions, dim => {
-    resizeViewportCanvas(dim)
-    resizeTileCanvas()
-    renderMarkers()
-    showMarkers(props.offset)
+    doResize(dim)
+    renderAndShowMarkers()
 })
 watch(() => props.tileBounds, () => {
-    renderMarkers()
-    showMarkers(props.offset)
+    renderAndShowMarkers()
 })
 watch(() => props.marker, () => {
-    renderMarkers()
-    showMarkers(props.offset)
+    renderAndShowMarkers()
+})
+onMounted(() => {
+    doResize(props.viewportDimensions)
+    renderAndShowMarkers()
 })
 </script>
 

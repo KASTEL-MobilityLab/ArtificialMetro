@@ -111,9 +111,9 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
 
     <LocationFrame :center="center" :zoom="zoom" #default="data">
       <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>
-      <MarkerRenderer v-bind="data" :marker="stationMarker" :sprites="spriteManager"></MarkerRenderer>
-      <MarkerRenderer v-bind="data" :marker="scooterMarker" :sprites="spriteManager"></MarkerRenderer>
-      <MarkerRenderer v-bind="data" :marker="bikeMarker" :sprites="spriteManager"></MarkerRenderer>
+      <MarkerRenderer v-bind="data" :marker="stationMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
+      <MarkerRenderer v-bind="data" :marker="scooterMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
+      <MarkerRenderer v-bind="data" :marker="bikeMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
     </LocationFrame>
 
   </div>

@@ -7,7 +7,7 @@ export type SpriteAsset = Sprite & {
 }
 
 export class SpriteManager {
-    private sprites: {[key: string]: OffscreenCanvas} = {}
+    private sprites: { [key: string]: OffscreenCanvas } = {}
 
     fetchSprite(sprite: SpriteAsset): Promise<OffscreenCanvas> {
         const size = sprite.size
