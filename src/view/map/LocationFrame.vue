@@ -127,5 +127,11 @@ const verticalOffset = computed(() => {
     display: block;
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
+}
+.location-frame > canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 </style>

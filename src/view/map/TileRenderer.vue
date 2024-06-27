@@ -38,8 +38,8 @@ function renderTiles() {
     if (ctx == null) return
     for (let x = 0; x < horizontalTiles; ++x) {
         for (let y = 0; y < verticalTiles; ++y) {
-            ctx.strokeRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-            ctx.fillText(`${x + props.tileBounds.topLeft.x},${y + props.tileBounds.topLeft.y}`, x * TILE_SIZE + 10, y * TILE_SIZE + 10)
+            const tile = props.tiles.getTile({x: x + props.tileBounds.topLeft.x, y: y + props.tileBounds.topLeft.y, scale: props.tileBounds.topLeft.scale})
+            ctx.drawImage(tile, x * TILE_SIZE, y * TILE_SIZE)
         }
     }
 }
@@ -56,14 +56,9 @@ watch(() => props.offset, () => {
 watch(() => props.viewportDimensions, dim => {
     resizeViewportCanvas(dim)
     resizeTileCanvas()
-    renderTiles()
-    showTiles(props.offset)
-
-    props.tiles.fetchTile({x: 8573, y: 5625, scale: 14}).then(tile => {
-        console.log('got tile')
-        const ctx = canvas.value?.getContext('2d') ?? null
-        ctx?.drawImage(tile, 20, 20)
-        return null
+    props.tiles.fetchRange(props.tileBounds).then(() => {
+        renderTiles()
+        showTiles(props.offset)
     })
 })
 </script>

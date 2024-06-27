@@ -89,7 +89,7 @@ function stopKioskMode() {
   kioskMode.value = false
 }
 
-const tileProvider = new TileProvider("https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png")
+const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
 
 </script>
 
