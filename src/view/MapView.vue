@@ -1,22 +1,15 @@
 <script setup lang="ts">
 import "leaflet/dist/leaflet.css"
-import L, { type PointExpression } from "leaflet"
-import { LMap, LTileLayer, LCircleMarker, LMarker, LIcon } from "@vue-leaflet/vue-leaflet"
 import { computed, onMounted, ref, watch } from "vue"
 import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
 import PresetScaler from "./PresetScaler.vue"
 import type { SwitchBusReceiver } from "./switch_bus"
-import { brandColors, brandIcons } from "@/provider/brands"
 import { TileProvider } from "./map/tile_provider"
 import LocationFrame from "./map/LocationFrame.vue"
 import TileRenderer from "./map/TileRenderer.vue"
 import MarkerRenderer from "./map/MarkerRenderer.vue"
 import type { Marker } from "./map/tiles"
 import { SpriteManager } from "./map/sprite_manager"
-
-// This is needed to correctly load leaflet
-// see https://github.com/vue-leaflet/vue-leaflet/issues/278
-globalThis.L = L
 
 const PRESETS = [
   {
@@ -80,26 +73,6 @@ const stationMarker = computed<Marker[]>(() => {
 let currentPreset = ref(1)
 let zoom = computed(() => PRESETS[currentPreset.value].zoom)
 let center = computed(() => PRESETS[currentPreset.value].position)
-let iconSize = computed(() => {
-  switch (zoom.value) {
-    case 14:
-      return [15, 15] as PointExpression
-    case 16:
-      return [25, 25] as PointExpression
-    case 17:
-      return [35, 35] as PointExpression
-    default: 
-      return [20, 20] as PointExpression
-  }
-})
-
-function brandIcon(provider: string): string {
-  if (provider in brandIcons) {
-    return brandIcons[provider]
-  }
-  console.log(provider)
-  return brandIcons["default"]
-}
 
 function setToPreset(num: number) {
   currentPreset.value = num - 1
@@ -136,23 +109,6 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
     <!-- Humanitarian: https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png -->
     <!-- Dark: https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png -->
     <!-- Light: https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png -->
-
-    <!-- <LMap :zoom="zoom" :center="[center.lat, center.lon]">
-      
-
-      <LTileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png" layer-type="base"
-        name="OSM"></LTileLayer>
-      <LMarker v-for="marker, i in stations" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
-        <LIcon :icon-size="iconSize" :icon-url="brandIcon(marker.provider)"></LIcon>
-      </LMarker>
-
-      <LMarker v-for="marker, i in scooters" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
-        <LIcon :icon-size="iconSize" :icon-url="brandIcon(marker.provider)"></LIcon>
-      </LMarker>
-      <LMarker v-for="marker, i in bikes" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
-        <LIcon :icon-size="iconSize" :icon-url="brandIcon(marker.provider)"></LIcon>
-      </LMarker>
-    </LMap> -->
 
     <LocationFrame :center="center" :zoom="zoom" #default="data">
       <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>

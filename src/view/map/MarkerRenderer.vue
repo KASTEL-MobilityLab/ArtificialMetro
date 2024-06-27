@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Coordinate } from '@/model/vehicles';
 import { ref, watch } from 'vue';
-import { TILE_SIZE, coordsFromTile, posOnTile, tileFromCoords, type BoundingBox, type Dimensions, type Marker, type Offset, type TileCoordinate, type ViewCoordinate } from './tiles';
+import { TILE_SIZE, posOnTile, tileFromCoords, type BoundingBox, type Dimensions, type Marker, type Offset, type TileCoordinate, type ViewCoordinate } from './tiles';
 import type { SpriteManager } from './sprite_manager';
 
 const props = defineProps<{
