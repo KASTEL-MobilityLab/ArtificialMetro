@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Coordinate } from '@/model/vehicles';
 import { computed, ref, watch } from 'vue';
-import { TILE_SIZE, tileFromCoords, type Dimensions } from './tiles';
+import { type BoundingBox, TILE_SIZE, tileFromCoords, type Dimensions, type TileCoordinate } from './tiles';
 
 const props = defineProps<{
     center: Coordinate,
@@ -42,6 +42,38 @@ const viewportDimensions = computed(() => {
 
 const centerTile = computed(() => {
     return tileFromCoords(props.center, props.zoom)
+})
+const topLeftTile = computed<TileCoordinate>(() => {
+    const horizontalCenter = Math.ceil(width.value / 2)
+    const tilesOnLeft = Math.ceil(horizontalCenter / TILE_SIZE)
+    const firstX = centerTile.value.x - tilesOnLeft
+    const verticalCenter = Math.ceil(height.value / 2)
+    const tilesAbove = Math.ceil(verticalCenter / TILE_SIZE)
+    const firstY = centerTile.value.y - tilesAbove
+    return {
+        x: firstX,
+        y: firstY,
+        scale: props.zoom,
+    }
+})
+const bottomRightTile = computed<TileCoordinate>(() => {
+    const horizontalCenter = Math.ceil(width.value / 2)
+    const tilesOnLeft = Math.ceil(horizontalCenter / TILE_SIZE)
+    const firstX = centerTile.value.x - tilesOnLeft
+    const verticalCenter = Math.ceil(height.value / 2)
+    const tilesAbove = Math.ceil(verticalCenter / TILE_SIZE)
+    const firstY = centerTile.value.y - tilesAbove
+    return {
+        x: firstX + 2 * tilesOnLeft + 1,
+        y: firstY + 2 * tilesAbove + 1,
+        scale: props.zoom,
+    }
+})
+const tileBounds = computed<BoundingBox<TileCoordinate>>(() => {
+    return {
+        topLeft: topLeftTile.value,
+        bottomRight: bottomRightTile.value,
+    }
 })
 const horizontalTiles = computed(() => {
     const center = Math.ceil(width.value / 2)
@@ -85,6 +117,7 @@ const verticalOffset = computed(() => {
             :center="centerTile" 
             :viewport-dimensions="viewportDimensions"
             :offset="{y: verticalOffset, x: horizontalOffset}"
+            :tile-bounds="tileBounds"
             ></slot>
     </div>
 </template>

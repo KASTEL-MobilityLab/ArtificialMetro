@@ -9,6 +9,7 @@ import LiveView from './view/LiveView.vue'
 import { SwitchBus } from './view/switch_bus'
 import LocationFrame from './view/map/LocationFrame.vue'
 import TileRenderer from './view/map/TileRenderer.vue'
+import { TileProvider } from './view/map/tile_provider'
 
 const KIOSK_INTERVAL = 30 * 1000 /*30s*/
 
@@ -87,6 +88,9 @@ function stopKioskMode() {
   globalThis.clearInterval(kioskModeTicker)
   kioskMode.value = false
 }
+
+const tileProvider = new TileProvider("https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png")
+
 </script>
 
 <template>
@@ -98,7 +102,7 @@ function stopKioskMode() {
 
   <main>
     <LocationFrame :center="{lat: 49.006889, lon: 8.403653}" :zoom="14" #default="data">
-      <TileRenderer v-bind="data"></TileRenderer>
+      <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>
     </LocationFrame>
   </main>
 </template>
