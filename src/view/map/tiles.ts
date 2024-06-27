@@ -2,15 +2,14 @@ import type { Coordinate } from "@/model/vehicles";
 
 export const TILE_SIZE = 256
 
-export interface TileCoords {
+export interface ViewCoordinate {
+    x: number,
+    y: number,
+}
+export interface TileCoordinate {
     x: number,
     y: number,
     scale: number,
-}
-
-export interface TileBoundingBox {
-    topLeft: Coordinate,
-    bottomRight: Coordinate,
 }
 
 export interface Dimensions {
@@ -18,13 +17,14 @@ export interface Dimensions {
     height: number,
 }
 
-export interface Offset {
-    x: number,
-    y: number,
+export type Offset<T> = T
+export interface BoundingBox<T> {
+    topLeft: T,
+    bottomRight: T,
 }
 
 /* Returns the x/y/s tile for given coords */
-export function tileFromCoords(coords: Coordinate, scale: number): TileCoords {
+export function tileFromCoords(coords: Coordinate, scale: number): TileCoordinate {
     return {
         x: lon2tile(coords.lon, scale),
         y: lat2tile(coords.lat, scale),
@@ -40,14 +40,14 @@ export function posOnTile(coords: Coordinate, scale: number): {x: number, y: num
 }
 
 /* Returns the coordinate at the top left corner */
-export function coordsFromTile(tile: TileCoords): Coordinate {
+export function coordsFromTile(tile: TileCoordinate): Coordinate {
     return {
         lon: tile2lon(tile.x, tile.scale),
         lat: tile2lat(tile.y, tile.scale),
     }
 }
 
-export function bbFromTile(tile: TileCoords): TileBoundingBox {
+export function bbFromTile(tile: TileCoordinate): BoundingBox<Coordinate> {
     return {
         topLeft: coordsFromTile(tile),
         bottomRight: coordsFromTile({

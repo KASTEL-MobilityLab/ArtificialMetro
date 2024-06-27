@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { Coordinate } from '@/model/vehicles';
 import { ref, watch } from 'vue';
-import { TILE_SIZE, type Dimensions, type Offset } from './tiles';
+import { TILE_SIZE, type Dimensions, type Offset, type ViewCoordinate } from './tiles';
 
 const props = defineProps<{
     center: Coordinate,
-    offset: Offset,
+    offset: Offset<ViewCoordinate>,
     viewportDimensions: Dimensions,
 }>()
 
@@ -38,7 +38,7 @@ function renderTiles() {
     }
 }
 
-function showTiles(offset: Offset) {
+function showTiles(offset: Offset<ViewCoordinate>) {
     const ctx = canvas.value?.getContext('2d') ?? null
     if (ctx == null) return
     ctx.drawImage(tileCanvas, offset.x, offset.y)
