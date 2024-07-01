@@ -10,6 +10,7 @@ import MarkerRenderer from "./map/MarkerRenderer.vue"
 import type { Marker } from "./map/tiles"
 import { SpriteManager } from "./map/sprite_manager"
 import LegendView from "./LegendView.vue"
+import { brands } from "@/provider/brands"
 
 const PRESETS = [
   {
@@ -91,16 +92,8 @@ watch(() => props.bus, (bus) => {
   bus.onNextPreset(nextPreset)
 })
 
-const providers = [
-  {name: "nextbike", title: "Nextbike", icon: "/brands/nextbike.svg"},
-  {name: "nextbike2", title: "Nextbike 2", icon: "/brands/nextbike.svg"},
-  {name: "stadtmobil_karlsruhe", title: "Stadtmobil", icon: "/brands/stadtmobil_karlsruhe.svg"},
-  {name: "voi_karlsruhe", title: "Voi", icon: "/brands/scooter_voi.svg"},
-  {name: "bolt_karlsruhe", title: "Bolt", icon: "/brands/scooter_bolt.svg"},
-]
-
 const spriteManager = new SpriteManager()
-spriteManager.fetchSprites(providers.map(provider => {
+spriteManager.fetchSprites(brands.map(provider => {
   return {
     name: provider.name,
     url: provider.icon,
@@ -127,7 +120,7 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
 
   </div>
   <PresetScaler :current-preset="currentPreset" :num-presets="PRESETS.length" @click="setToPreset"></PresetScaler>
-  <LegendView :entries="providers"></LegendView>
+  <LegendView :entries="brands"></LegendView>
 </template>
 
 <style scoped>
