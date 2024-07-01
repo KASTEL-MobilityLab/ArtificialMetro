@@ -1,5 +1,10 @@
 #!/bin/env bash
 
+if [ -d ./.git ]; then
+  echo "Cannot update. This copy is managed by git directly"
+  exit
+fi
+
 BRANCH="trunk"
 if [[ ! -z "$1" ]]; then
   BRANCH="$1"
