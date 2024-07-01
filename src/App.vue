@@ -22,11 +22,18 @@ const views: View[] = [
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
 })
+const loading = ref(true)
 const activeView = ref(0)
 const viewComponent = computed(() => views[activeView.value]?.component)
 const currentSwitchBus = computed(() => views[activeView.value]?.bus?.getReceiver())
 const kioskMode = ref(false)
 let kioskModeTicker: number | undefined = undefined
+
+watch(() => loading.value, (loading) => {
+  if (!loading) {
+    activeView.value = 0
+  }
+})
 
 onMounted(() => {
   registerKeyboardSwitcher()
@@ -105,7 +112,7 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
       <component :is="viewComponent" :bus="currentSwitchBus"></component>
     </KeepAlive>
 
-    <StartupView></StartupView>
+    <StartupView v-if="loading" @ready="loading = false"></StartupView>
   </main>
 </template>
 

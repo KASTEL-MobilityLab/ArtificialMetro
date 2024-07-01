@@ -1,21 +1,17 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import * as workers from '@/worker/workers'
 import { BaseRepo } from '@/model/repos';
 
+const emit = defineEmits<{
+    ready: [],
+}>()
 
 const carsharingLoaded = ref(false)
 const scootersLoaded = ref(false)
 const bikesLoaded = ref(false)
 
-onMounted(() => {
-    workers.startCleanupWorker()
-    const syncWorker = workers.startSyncWorker()
-    syncWorker.port.onmessage = (event: MessageEvent<BaseRepo>) => {
-        const repo = event.data
-        repoLoaded(repo)
-    }
-})
+
 
 function repoLoaded(repo: BaseRepo) {
     switch (repo) {
@@ -30,6 +26,30 @@ function repoLoaded(repo: BaseRepo) {
             break
     }
 }
+
+function checkAllLoaded() {
+    const allDataLoaded = carsharingLoaded.value
+        && scootersLoaded.value
+        && bikesLoaded.value
+    if (allDataLoaded) {
+        setTimeout(() => {
+            emit('ready')
+        }, 1000 /*1s*/)
+    }
+}
+
+onMounted(() => {
+    workers.startCleanupWorker()
+    const syncWorker = workers.startSyncWorker()
+    syncWorker.port.onmessage = (event: MessageEvent<BaseRepo>) => {
+        const repo = event.data
+        repoLoaded(repo)
+    }
+})
+
+watch(() => carsharingLoaded.value, checkAllLoaded)
+watch(() => scootersLoaded.value, checkAllLoaded)
+watch(() => bikesLoaded.value, checkAllLoaded)
 
 </script>
 
