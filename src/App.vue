@@ -2,13 +2,10 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
-import * as workers from './worker/workers'
 import ViewSwitcher from './view/ViewSwitcher.vue'
 import { MapIcon, TimerIcon } from 'lucide-vue-next'
 import LiveView from './view/LiveView.vue'
 import { SwitchBus } from './view/switch_bus'
-import LocationFrame from './view/map/LocationFrame.vue'
-import TileRenderer from './view/map/TileRenderer.vue'
 import { TileProvider } from './view/map/tile_provider'
 import StartupView from './view/StartupView.vue'
 
@@ -27,7 +24,7 @@ const activeView = ref(0)
 const viewComponent = computed(() => views[activeView.value]?.component)
 const currentSwitchBus = computed(() => views[activeView.value]?.bus?.getReceiver())
 const kioskMode = ref(false)
-let kioskModeTicker: number | undefined = undefined
+let kioskModeTicker: NodeJS.Timeout | undefined = undefined
 
 watch(() => loading.value, (loading) => {
   if (!loading) {
@@ -64,11 +61,11 @@ function registerKeyboardSwitcher() {
   window.addEventListener('keyup', evt => {
     if (!evt.key.match(/[0-9]/)) return
     if (evt.key == "0") {
-      // enter automatic kiosk mode
-      startKioskMode()
+      // toggle automatic kiosk mode
+      toggleKioskMode()
     } else {
       // switchView is 0-indexed,
-      // but key 0 is special, therefore, we start at key 1
+      // but key 0 is used for kiosk mode, therefore, we start at key 1
       const view = parseInt(evt.key) - 1
       stopKioskMode()
 
@@ -85,6 +82,13 @@ function switchPresetForView(view: number) {
   views[view].bus.nextPreset()
 }
 
+function toggleKioskMode() {
+  if (kioskMode.value) {
+    stopKioskMode()
+  } else {
+    startKioskMode()
+  }
+}
 function startKioskMode() {
   if (kioskMode.value) return
   kioskMode.value = true
@@ -95,8 +99,6 @@ function stopKioskMode() {
   globalThis.clearInterval(kioskModeTicker)
   kioskMode.value = false
 }
-
-const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
 
 </script>
 
