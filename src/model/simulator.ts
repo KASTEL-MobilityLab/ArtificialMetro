@@ -5,7 +5,7 @@ export class TimeSimulator {
     private start: Ref<Date> = ref(new Date())
     private end: Ref<Date> = ref(new Date())
     private delay: number /*s*/
-    private timer: number | undefined = undefined // reference to interval timer; set later
+    private timer: NodeJS.Timeout | undefined = undefined // reference to interval timer; set later
 
     private resetHandler: () => void = () => {}
     private startHandler: () => void = () => {}

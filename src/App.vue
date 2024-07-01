@@ -8,11 +8,13 @@ import LiveView from './view/LiveView.vue'
 import { SwitchBus } from './view/switch_bus'
 import { TileProvider } from './view/map/tile_provider'
 import StartupView from './view/StartupView.vue'
+import { Kiosk } from './model/kiosk'
 
 const KIOSK_INTERVAL = 30 * 1000 /*30s*/
 
 type View = {title: string, icon: any, component: any, bus: SwitchBus }
 
+const kiosk = new Kiosk(KIOSK_INTERVAL)
 const views: View[] = [
   { title: "Live", icon: MapIcon, component: LiveView },
   { title: "Timelapse", icon: TimerIcon, component: TimelapseView },
@@ -23,19 +25,23 @@ const loading = ref(true)
 const activeView = ref(0)
 const viewComponent = computed(() => views[activeView.value]?.component)
 const currentSwitchBus = computed(() => views[activeView.value]?.bus?.getReceiver())
-const kioskMode = ref(false)
-let kioskModeTicker: NodeJS.Timeout | undefined = undefined
 
 watch(() => loading.value, (loading) => {
   if (!loading) {
     activeView.value = 0
+    kiosk.start()
   }
 })
 
 onMounted(() => {
   registerKeyboardSwitcher()
-  startKioskMode()
 })
+
+kiosk.onTick(nextView)
+function nextView() {
+  const nextView = (activeView.value + 1) % views.length
+  switchView(nextView)
+}
 
 function getView(id: number): View | undefined {
   return views[id]
@@ -52,22 +58,19 @@ function switchView(view: number) {
   if (view >= views.length) return
   activeView.value = view
 }
-function nextView() {
-  const nextView = (activeView.value + 1) % views.length
-  switchView(nextView)
-}
+
 
 function registerKeyboardSwitcher() {
   window.addEventListener('keyup', evt => {
     if (!evt.key.match(/[0-9]/)) return
     if (evt.key == "0") {
       // toggle automatic kiosk mode
-      toggleKioskMode()
+      kiosk.toggle()
     } else {
       // switchView is 0-indexed,
       // but key 0 is used for kiosk mode, therefore, we start at key 1
       const view = parseInt(evt.key) - 1
-      stopKioskMode()
+      kiosk.stop()
 
       if (activeView.value == view) {
         switchPresetForView(view)
@@ -82,22 +85,9 @@ function switchPresetForView(view: number) {
   views[view].bus.nextPreset()
 }
 
-function toggleKioskMode() {
-  if (kioskMode.value) {
-    stopKioskMode()
-  } else {
-    startKioskMode()
-  }
-}
-function startKioskMode() {
-  if (kioskMode.value) return
-  kioskMode.value = true
-  kioskModeTicker = globalThis.setInterval(nextView, KIOSK_INTERVAL)
-}
-function stopKioskMode() {
-  if (!kioskMode.value) return
-  globalThis.clearInterval(kioskModeTicker)
-  kioskMode.value = false
+function manuallySwitchToView(view: number) {
+  kiosk.stop()
+  switchView(view)
 }
 
 </script>
@@ -105,7 +95,7 @@ function stopKioskMode() {
 <template>
   <FooterBar>
     <template #left>
-      <ViewSwitcher :views="views" :active="activeView" :automatic="kioskMode" @switch="switchView"></ViewSwitcher>
+      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value" @switch="manuallySwitchToView"></ViewSwitcher>
     </template>
   </FooterBar>
 
