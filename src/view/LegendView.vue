@@ -40,8 +40,8 @@ const props = defineProps<{
 .entry {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
+    justify-content: flex-start;
+    align-items: center;
     gap: 5px;
 }
 .entry img {
