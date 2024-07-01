@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type Ref } from "vue"
 import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
-import * as carsharing from '../provider/carsharing'
-import * as scooter from '../provider/scooter'
 import { BaseStore } from "@/storage/base_store"
 import { BaseRepo } from "@/model/repos"
 import { TimeSimulator } from "@/model/simulator"
@@ -25,10 +23,6 @@ let currentTime = computed(() => {
     return timeFormat.format(time)
 })
 let simulationRunning = ref(false)
-
-let attribution = computed(() => {
-    return `Carsharing: ${carsharing.attribution}, Scooter: ${scooter.attribution}`
-})
 
 onMounted(async () => {
     props.bus.onResume(() => {
@@ -82,7 +76,7 @@ simulator.onTick(async time => {
 </script>
 
 <template>
-    <MapView :scooters="scooters" :stations="stations" :bikes="bikes" :attribution="attribution" :bus="bus"></MapView>
+    <MapView :scooters="scooters" :stations="stations" :bikes="bikes" :bus="bus"></MapView>
     <div class="current-time">
         <span class="live-dot" active="false"></span>
         {{ currentTime }}

@@ -40,7 +40,6 @@ const props = defineProps<{
   stations: CarsharingStation[],
   scooters: Scooter[],
   bikes: Bike[],
-  attribution: string,
   bus: SwitchBusReceiver,
 }>()
 
@@ -124,23 +123,4 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
 </template>
 
 <style scoped>
-.attribution {
-  position: absolute;
-
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 10px;
-
-  bottom: 5px;
-  right: 5px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  max-width: 50%;
-
-  background: var(--card-bg-color);
-  color: var(--card-fg-color);
-  box-shadow: 0 0 5px var(--card-shade-color);
-}
 </style>

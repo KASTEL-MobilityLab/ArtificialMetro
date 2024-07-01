@@ -2,7 +2,7 @@ import { type Bike } from "@/model/vehicles";
 import type { Provider } from "../model/provider";
 
 const endpoint = "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_fg/en/free_bike_status.json"
-export const attribution = "Nextbike"
+const attribution = "Nextbike"
 
 export class NextbikeProviderV2 implements Provider<Bike> {
     attribution(): string {
