@@ -1,11 +1,5 @@
 @import './base.css';
 
-/* Hide leaflet controls here, as they cannot be 
-   controlled by the leaflet vue component */
-.leaflet-control-container {
-    display: none;
-}
-
 .live-dot {
     display: block;
 

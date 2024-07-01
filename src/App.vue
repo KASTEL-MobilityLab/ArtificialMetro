@@ -3,10 +3,13 @@ import { computed, onMounted, ref, watch } from 'vue'
 import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
 import * as workers from './worker/workers'
-import ViewSwitcher from './view/ViewSwitcher.vue';
-import { MapIcon, TimerIcon } from 'lucide-vue-next';
-import LiveView from './view/LiveView.vue';
-import { SwitchBus } from './view/switch_bus';
+import ViewSwitcher from './view/ViewSwitcher.vue'
+import { MapIcon, TimerIcon } from 'lucide-vue-next'
+import LiveView from './view/LiveView.vue'
+import { SwitchBus } from './view/switch_bus'
+import LocationFrame from './view/map/LocationFrame.vue'
+import TileRenderer from './view/map/TileRenderer.vue'
+import { TileProvider } from './view/map/tile_provider'
 
 const KIOSK_INTERVAL = 30 * 1000 /*30s*/
 
@@ -85,6 +88,9 @@ function stopKioskMode() {
   globalThis.clearInterval(kioskModeTicker)
   kioskMode.value = false
 }
+
+const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
+
 </script>
 
 <template>

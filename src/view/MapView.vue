@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import "leaflet/dist/leaflet.css"
-import L, { type PointExpression } from "leaflet"
-import { LMap, LTileLayer, LCircleMarker, LMarker, LIcon } from "@vue-leaflet/vue-leaflet"
 import { computed, onMounted, ref, watch } from "vue"
 import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
 import PresetScaler from "./PresetScaler.vue"
 import type { SwitchBusReceiver } from "./switch_bus"
-import { brandColors, brandIcons } from "@/provider/brands"
-
-// This is needed to correctly load leaflet
-// see https://github.com/vue-leaflet/vue-leaflet/issues/278
-globalThis.L = L
+import { TileProvider } from "./map/tile_provider"
+import LocationFrame from "./map/LocationFrame.vue"
+import TileRenderer from "./map/TileRenderer.vue"
+import MarkerRenderer from "./map/MarkerRenderer.vue"
+import type { Marker } from "./map/tiles"
+import { SpriteManager } from "./map/sprite_manager"
 
 const PRESETS = [
   {
@@ -44,29 +42,36 @@ const props = defineProps<{
   bus: SwitchBusReceiver,
 }>()
 
+const bikeMarker = computed<Marker[]>(() => {
+  return props.bikes.map(bike => {
+    return {
+      position: bike.position,
+      sprite: bike.provider,
+    }
+  })
+})
+
+const scooterMarker = computed<Marker[]>(() => {
+  return props.scooters.map(scooter => {
+    return {
+      position: scooter.position,
+      sprite: scooter.provider,
+    }
+  })
+})
+
+const stationMarker = computed<Marker[]>(() => {
+  return props.stations.map(station => {
+    return {
+      position: station.position,
+      sprite: station.provider,
+    }
+  })
+})
+
 let currentPreset = ref(1)
 let zoom = computed(() => PRESETS[currentPreset.value].zoom)
 let center = computed(() => PRESETS[currentPreset.value].position)
-let iconSize = computed(() => {
-  switch (zoom.value) {
-    case 14:
-      return [15, 15] as PointExpression
-    case 16:
-      return [25, 25] as PointExpression
-    case 17:
-      return [35, 35] as PointExpression
-    default: 
-      return [20, 20] as PointExpression
-  }
-})
-
-function brandIcon(provider: string): string {
-  if (provider in brandIcons) {
-    return brandIcons[provider]
-  }
-  console.log(provider)
-  return brandIcons["default"]
-}
 
 function setToPreset(num: number) {
   currentPreset.value = num - 1
@@ -85,28 +90,32 @@ watch(() => props.bus, (bus) => {
   bus.onNextPreset(nextPreset)
 })
 
+const spriteManager = new SpriteManager()
+spriteManager.fetchSprites([
+  {name: "nextbike", url: "/brands/nextbike.svg", size: 20},
+  {name: "nextbike2", url: "/brands/nextbike.svg", size: 20},
+  {name: "stadtmobil_karlsruhe", url: "/brands/stadtmobil_karlsruhe.svg", size: 20},
+  {name: "voi_karlsruhe", url: "/brands/scooter_voi.svg", size: 20},
+  {name: "bolt_karlsruhe", url: "/brands/scooter_bolt.svg", size: 20},
+])
+
+const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
+
 </script>
 
 <template>
   <div style="height: calc(100vh); width: 100%">
-    <LMap :zoom="zoom" :center="[center.lat, center.lon]">
-      <!-- Humanitarian: https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png -->
-      <!-- Dark: https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png -->
-      <!-- Light: https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png -->
+    <!-- Humanitarian: https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png -->
+    <!-- Dark: https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png -->
+    <!-- Light: https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png -->
 
-      <LTileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png" layer-type="base"
-        name="OSM"></LTileLayer>
-      <LMarker v-for="marker, i in stations" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
-        <LIcon :icon-size="iconSize" :icon-url="brandIcon(marker.provider)"></LIcon>
-      </LMarker>
+    <LocationFrame :center="center" :zoom="zoom" #default="data">
+      <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>
+      <MarkerRenderer v-bind="data" :marker="stationMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
+      <MarkerRenderer v-bind="data" :marker="scooterMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
+      <MarkerRenderer v-bind="data" :marker="bikeMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
+    </LocationFrame>
 
-      <LMarker v-for="marker, i in scooters" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
-        <LIcon :icon-size="iconSize" :icon-url="brandIcon(marker.provider)"></LIcon>
-      </LMarker>
-      <LMarker v-for="marker, i in bikes" v-bind:key="i" :lat-lng="[marker.position.lat, marker.position.lon]">
-        <LIcon :icon-size="iconSize" :icon-url="brandIcon(marker.provider)"></LIcon>
-      </LMarker>
-    </LMap>
   </div>
   <PresetScaler :current-preset="currentPreset" :num-presets="PRESETS.length" @click="setToPreset"></PresetScaler>
   <div class="attribution">
