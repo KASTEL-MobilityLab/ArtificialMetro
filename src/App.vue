@@ -10,6 +10,7 @@ import { SwitchBus } from './view/switch_bus'
 import LocationFrame from './view/map/LocationFrame.vue'
 import TileRenderer from './view/map/TileRenderer.vue'
 import { TileProvider } from './view/map/tile_provider'
+import StartupView from './view/StartupView.vue'
 
 const KIOSK_INTERVAL = 30 * 1000 /*30s*/
 
@@ -28,7 +29,6 @@ const kioskMode = ref(false)
 let kioskModeTicker: number | undefined = undefined
 
 onMounted(() => {
-  workers.startAll()
   registerKeyboardSwitcher()
   startKioskMode()
 })
@@ -104,6 +104,8 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
     <KeepAlive>
       <component :is="viewComponent" :bus="currentSwitchBus"></component>
     </KeepAlive>
+
+    <StartupView></StartupView>
   </main>
 </template>
 

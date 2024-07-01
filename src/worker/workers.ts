@@ -1,8 +1,3 @@
-export function startAll() {
-    startSyncWorker()
-    startCleanupWorker()
-}
-
 export function startCleanupWorker() {
     return new SharedWorker(new URL("./cleanup_worker.ts", import.meta.url), { type: "module" })
 }

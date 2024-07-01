@@ -4,6 +4,13 @@ globalThis.setInterval(() => {
     sync.sync()
 }, 2 * 60 * 1000 /* 2min */)
 
-sync.initial_sync(repo => {
-    globalThis.postMessage(repo)
-})
+const _self = self as any
+_self.onconnect = (evt: any) => {
+    const port = evt.ports[0]
+    sync.initial_sync(repo => {
+        port.postMessage(repo)
+    })
+}
+
+
+
