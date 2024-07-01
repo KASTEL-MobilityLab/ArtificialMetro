@@ -31,7 +31,6 @@ ul {
     gap: 3px;
 
     position: absolute;
-    z-index: 1000;
     left: 5px;
     top: 5px;
     border-radius: 15px;
