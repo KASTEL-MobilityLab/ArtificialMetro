@@ -10,19 +10,20 @@ export async function sync() {
     loadIncrementalData<Bike>(BaseRepo.Bikes)
 }
 
-export async function initial_sync() {
-    loadInitialData<CarsharingStation>(BaseRepo.CarsharingStations)
-    loadInitialData<Scooter>(BaseRepo.Scooters)
-    loadInitialData<Bike>(BaseRepo.Bikes)
+export async function initial_sync(reportStatus: {(repo: BaseRepo): void}) {
+    loadInitialData<CarsharingStation>(BaseRepo.CarsharingStations, reportStatus)
+    loadInitialData<Scooter>(BaseRepo.Scooters, reportStatus)
+    loadInitialData<Bike>(BaseRepo.Bikes, reportStatus)
 }
 
-async function loadInitialData<T extends Storeable>(repo: BaseRepo) {
+async function loadInitialData<T extends Storeable>(repo: BaseRepo, reportStatus: {(repo: BaseRepo): void}) {
     const currentDate = normalizeTimestamp(new Date())
     const lastHour = new Date(currentDate.getTime() - 1 * 60 * 60 * 1000 /* 1h */)
 
     const url = `/v1/${repo}/${lastHour.toISOString()}/${currentDate.toISOString()}`
     const data = await fetchData<T>(url)
     storeData(data, repo)
+    reportStatus(repo)
 }
 
 async function loadIncrementalData<T extends Storeable>(repo: BaseRepo) {

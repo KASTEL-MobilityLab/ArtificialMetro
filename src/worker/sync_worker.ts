@@ -4,4 +4,6 @@ globalThis.setInterval(() => {
     sync.sync()
 }, 2 * 60 * 1000 /* 2min */)
 
-sync.initial_sync()
+sync.initial_sync(repo => {
+    globalThis.postMessage(repo)
+})
