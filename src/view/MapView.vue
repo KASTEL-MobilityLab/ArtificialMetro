@@ -9,6 +9,7 @@ import TileRenderer from "./map/TileRenderer.vue"
 import MarkerRenderer from "./map/MarkerRenderer.vue"
 import type { Marker } from "./map/tiles"
 import { SpriteManager } from "./map/sprite_manager"
+import LegendView from "./LegendView.vue"
 
 const PRESETS = [
   {
@@ -90,14 +91,22 @@ watch(() => props.bus, (bus) => {
   bus.onNextPreset(nextPreset)
 })
 
+const providers = [
+  {name: "nextbike", title: "Nextbike", icon: "/brands/nextbike.svg"},
+  {name: "nextbike2", title: "Nextbike 2", icon: "/brands/nextbike.svg"},
+  {name: "stadtmobil_karlsruhe", title: "Stadtmobil", icon: "/brands/stadtmobil_karlsruhe.svg"},
+  {name: "voi_karlsruhe", title: "Voi", icon: "/brands/scooter_voi.svg"},
+  {name: "bolt_karlsruhe", title: "Bolt", icon: "/brands/scooter_bolt.svg"},
+]
+
 const spriteManager = new SpriteManager()
-spriteManager.fetchSprites([
-  {name: "nextbike", url: "/brands/nextbike.svg", size: 20},
-  {name: "nextbike2", url: "/brands/nextbike.svg", size: 20},
-  {name: "stadtmobil_karlsruhe", url: "/brands/stadtmobil_karlsruhe.svg", size: 20},
-  {name: "voi_karlsruhe", url: "/brands/scooter_voi.svg", size: 20},
-  {name: "bolt_karlsruhe", url: "/brands/scooter_bolt.svg", size: 20},
-])
+spriteManager.fetchSprites(providers.map(provider => {
+  return {
+    name: provider.name,
+    url: provider.icon,
+    size: 20,
+  }
+}))
 
 const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
 
@@ -118,15 +127,12 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
 
   </div>
   <PresetScaler :current-preset="currentPreset" :num-presets="PRESETS.length" @click="setToPreset"></PresetScaler>
-  <div class="attribution">
-    {{ attribution }}
-  </div>
+  <LegendView :entries="providers"></LegendView>
 </template>
 
 <style scoped>
 .attribution {
   position: absolute;
-  z-index: 1000;
 
   display: flex;
   flex-direction: row;
