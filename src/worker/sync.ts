@@ -10,31 +10,32 @@ export async function sync() {
     loadIncrementalData<Bike>(BaseRepo.Bikes)
 }
 
-export async function initial_sync(reportStatus: {(repo: BaseRepo): void}) {
+export async function initial_sync(reportStatus: { (repo: BaseRepo): void }) {
     loadInitialData<CarsharingStation>(BaseRepo.CarsharingStations, reportStatus)
     loadInitialData<Scooter>(BaseRepo.Scooters, reportStatus)
     loadInitialData<Bike>(BaseRepo.Bikes, reportStatus)
 }
 
-async function loadInitialData<T extends Storeable>(repo: BaseRepo, reportStatus: {(repo: BaseRepo): void}) {
+async function loadInitialData<T extends Storeable>(repo: BaseRepo, reportStatus: { (repo: BaseRepo): void }) {
     const currentDate = normalizeTimestamp(new Date())
     const lastHour = new Date(currentDate.getTime() - 1 * 60 * 60 * 1000 /* 1h */)
 
     const url = `/v1/${repo}/${lastHour.toISOString()}/${currentDate.toISOString()}`
-    const data = await fetchData<T>(url)
+    const { data, etag } = await fetchData<T>(url)
     storeData(data, repo)
     reportStatus(repo)
 }
 
 async function loadIncrementalData<T extends Storeable>(repo: BaseRepo) {
     const url = `/v1/${repo}/current`
-    const data = await fetchData<T>(url)
+    const { data, etag } = await fetchData<T>(url)
     storeData(data, repo)
 }
 
-async function fetchData<T extends Storeable>(url: string) {
+async function fetchData<T extends Storeable>(url: string): Promise<{ data: T[], etag: string | null }> {
     const result = await fetch(url)
-    return await result.json() as T[]
+    const etag = result.headers.get('Etag')
+    return { data: await result.json() as T[], etag }
 }
 
 async function storeData<T extends Storeable>(data: T[], repo: BaseRepo) {
