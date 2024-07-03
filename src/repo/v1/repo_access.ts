@@ -16,6 +16,13 @@ export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
         })
     })
 
+    router.get('/available', (req, res) => {
+        requireDatastoreOrFail<T>(res, async ds => {
+            const availableTimestamps = await ds.getAvailableTimestamps()
+            res.json(availableTimestamps)
+        })
+    })
+
     router.get('/:timestamp', (req, res) => {
         const timestamp = req.params.timestamp
         if (timestamp.match(timestampRegex)) {
@@ -40,6 +47,8 @@ export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
             sendNotFound(res)
         }
     })
+
+    
 
     function sendDataForTimestamp<T extends Storeable>(res: any, timestamp: string) {
         requireDatastoreOrFail<T>(res, async ds => {
