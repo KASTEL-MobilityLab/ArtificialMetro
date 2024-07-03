@@ -9,6 +9,8 @@ import TileRenderer from "./map/TileRenderer.vue"
 import MarkerRenderer from "./map/MarkerRenderer.vue"
 import type { Marker } from "./map/tiles"
 import { SpriteManager } from "./map/sprite_manager"
+import LegendView from "./LegendView.vue"
+import { brands } from "@/provider/brands"
 
 const PRESETS = [
   {
@@ -38,7 +40,6 @@ const props = defineProps<{
   stations: CarsharingStation[],
   scooters: Scooter[],
   bikes: Bike[],
-  attribution: string,
   bus: SwitchBusReceiver,
 }>()
 
@@ -91,13 +92,13 @@ watch(() => props.bus, (bus) => {
 })
 
 const spriteManager = new SpriteManager()
-spriteManager.fetchSprites([
-  {name: "nextbike", url: "/brands/nextbike.svg", size: 20},
-  {name: "nextbike2", url: "/brands/nextbike.svg", size: 20},
-  {name: "stadtmobil_karlsruhe", url: "/brands/stadtmobil_karlsruhe.svg", size: 20},
-  {name: "voi_karlsruhe", url: "/brands/scooter_voi.svg", size: 20},
-  {name: "bolt_karlsruhe", url: "/brands/scooter_bolt.svg", size: 20},
-])
+spriteManager.fetchSprites(brands.map(provider => {
+  return {
+    name: provider.name,
+    url: provider.icon,
+    size: 20,
+  }
+}))
 
 const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
 
@@ -118,30 +119,8 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
 
   </div>
   <PresetScaler :current-preset="currentPreset" :num-presets="PRESETS.length" @click="setToPreset"></PresetScaler>
-  <div class="attribution">
-    {{ attribution }}
-  </div>
+  <LegendView :entries="brands"></LegendView>
 </template>
 
 <style scoped>
-.attribution {
-  position: absolute;
-  z-index: 1000;
-
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 10px;
-
-  bottom: 5px;
-  right: 5px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  max-width: 50%;
-
-  background: var(--card-bg-color);
-  color: var(--card-fg-color);
-  box-shadow: 0 0 5px var(--card-shade-color);
-}
 </style>

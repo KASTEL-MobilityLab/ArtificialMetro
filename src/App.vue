@@ -6,7 +6,6 @@ import ViewSwitcher from './view/ViewSwitcher.vue'
 import { MapIcon, TimerIcon } from 'lucide-vue-next'
 import LiveView from './view/LiveView.vue'
 import { SwitchBus } from './view/switch_bus'
-import { TileProvider } from './view/map/tile_provider'
 import StartupView from './view/StartupView.vue'
 import { Kiosk } from './model/kiosk'
 

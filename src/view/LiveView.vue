@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type Ref } from "vue"
 import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
-import * as carsharing from '../provider/carsharing'
-import * as scooter from '../provider/scooter'
 import { BaseStore } from "@/storage/base_store"
 import { BaseRepo } from "@/model/repos"
 import MapView from "./MapView.vue"
@@ -23,11 +21,6 @@ const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit'
 let currentTime = computed(() => {
     return timeFormat.format(currentTimestamp.value)
 })
-
-let attribution = computed(() => {
-  return `Carsharing: ${carsharing.attribution}, Scooter: ${scooter.attribution}`
-})
-
 onMounted(async () => {
   let store = await BaseStore.open()
   let carsharingRepo = store.repo<CarsharingStation>(BaseRepo.CarsharingStations)
@@ -68,7 +61,7 @@ async function updateTimestamp(repo: CacheRepo<any,any>) {
 </script>
 
 <template>
-  <MapView :scooters="scooters" :stations="stations" :bikes="bikes" :attribution="attribution" :bus="bus"></MapView>
+  <MapView :scooters="scooters" :stations="stations" :bikes="bikes" :bus="bus"></MapView>
   <div class="current-time"><span class="live-dot"></span> {{ currentTime }}</div>
 </template>
 

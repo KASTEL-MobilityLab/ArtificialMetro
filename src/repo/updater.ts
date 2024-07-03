@@ -2,41 +2,21 @@ import { DataStore } from "./data_store"
 import { BaseRepo } from "@/model/repos"
 import type { Storeable } from "@/model/storeable"
 import type { Provider } from "@/model/provider"
-import { CarsharingProvider } from "@/provider/carsharing"
-import { ScooterProvider } from "@/provider/scooter"
-import { NextbikeProviderV1 } from "@/provider/nextbike_v1"
-import { NextbikeProviderV2 } from "@/provider/nextbike_v2"
+import registeredProviders from "@/provider/providers"
 
 const UPDATE_INTERVAL = 5 * 60 * 1000 /* 5min */
 const CLEANUP_AGE = 48 * 60 * 60 *60 * 1000 /* 28h */
 
-const providers: {
-    repo: BaseRepo,
-    provider: Provider<Storeable>
-}[] = [
-        {
-            repo: BaseRepo.CarsharingStations,
-            provider: new CarsharingProvider(),
-        }, {
-            repo: BaseRepo.Scooters,
-            provider: new ScooterProvider(),
-        }, {
-            repo: BaseRepo.Bikes,
-            provider: new NextbikeProviderV1(),
-        }, {
-            repo: BaseRepo.Bikes,
-            provider: new NextbikeProviderV2(),
-        }
-    ]
-
+updateAll()
+setInterval(updateAll, UPDATE_INTERVAL)
 
 async function updateAll() {
-    for (const provider of providers) {
+    for (const provider of registeredProviders) {
         try {
             await updateFromProvider(provider.provider, provider.repo)
             await cleanupRepo(provider.repo)
         } catch(ex) {
-            console.error("Update failed")
+            console.error("Update failed for", provider.name)
             console.error(ex)
         }
     }
@@ -58,5 +38,3 @@ async function cleanupRepo(repo: BaseRepo) {
 }
 
 
-updateAll()
-setInterval(updateAll, UPDATE_INTERVAL)
