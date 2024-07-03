@@ -8,11 +8,18 @@ const timestampRegex = /[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9][0,5]:00.000Z/
 export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
     const router = Router()
 
-    router.get('/current', (_, res) => {
+    router.get('/current', (req, res) => {
         requireDatastoreOrFail<T>(res, async ds => {
-            const data = await ds.current()
-            const latestTimestamp = await ds.getLatestTimestamp() ?? new Date()
-            sendResult<T>(res, data, latestTimestamp.toISOString())
+            const requestEtag = req.headers["if-none-match"]
+            const latestTimestamp = (await ds.getLatestTimestamp() ?? new Date()).toISOString()
+            if (requestEtag == latestTimestamp) {
+                console.log("not modified")
+                sendNotModified(res, latestTimestamp)
+            } else {
+                console.log('modified')
+                const data = await ds.current()
+                sendResult<T>(res, data, latestTimestamp)
+            }
         })
     })
 
@@ -94,6 +101,11 @@ export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
 function sendResult<T extends Storeable>(res: any, data: T[], timestamp: string) {
     res.header('Etag', timestamp);
     res.json(data);
+}
+
+function sendNotModified(res: any, timestamp: string) {
+    res.header('Etag', timestamp)
+    res.sendStatus(304)
 }
 
 function sendNotFound(res: any) {
