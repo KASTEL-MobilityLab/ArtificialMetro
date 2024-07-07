@@ -10,7 +10,7 @@ import MarkerRenderer from "./map/MarkerRenderer.vue"
 import type { Marker } from "./map/tiles"
 import { SpriteManager } from "./map/sprite_manager"
 import LegendView from "./LegendView.vue"
-import { brands } from "@/provider/brands"
+import { brands } from "@/model/brands"
 
 const PRESETS = [
   {
