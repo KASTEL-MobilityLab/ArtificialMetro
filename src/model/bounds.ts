@@ -12,3 +12,27 @@ export function isInBounds(coordinate: Coordinate): boolean {
     if (coordinate.lon < LEFT_LON || coordinate.lon > RIGHT_LON) return false
     return true
 }
+
+export const PRESETS = [
+    {
+      position: {
+        lat: 49.006889,
+        lon: 8.403653,
+      },
+      zoom: 14,
+    },
+    {
+      position: {
+        lat: 49.011620,
+        lon: 8.417007,
+      },
+      zoom: 16,
+    },
+    {
+      position: {
+        lat: 49.013618,
+        lon: 8.419233,
+      },
+      zoom: 17,
+    }
+  ]

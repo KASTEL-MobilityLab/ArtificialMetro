@@ -11,30 +11,7 @@ import type { Marker } from "./map/tiles"
 import { SpriteManager } from "./map/sprite_manager"
 import LegendView from "./LegendView.vue"
 import { brands } from "@/model/brands"
-
-const PRESETS = [
-  {
-    position: {
-      lat: 49.006889,
-      lon: 8.403653,
-    },
-    zoom: 14,
-  },
-  {
-    position: {
-      lat: 49.011620,
-      lon: 8.417007,
-    },
-    zoom: 16,
-  },
-  {
-    position: {
-      lat: 49.013618,
-      lon: 8.419233,
-    },
-    zoom: 17,
-  }
-]
+import { PRESETS } from "@/model/bounds"
 
 const props = defineProps<{
   stations: CarsharingStation[],
