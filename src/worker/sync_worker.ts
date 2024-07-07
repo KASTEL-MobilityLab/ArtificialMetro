@@ -1,7 +1,7 @@
 import * as sync from "./sync"
 
 globalThis.setInterval(() => {
-    sync.sync()
+    sync.incremental_sync()
 }, 2 * 60 * 1000 /* 2min */)
 
 const _self = self as any
