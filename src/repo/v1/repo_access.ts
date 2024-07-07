@@ -13,10 +13,8 @@ export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
             const requestEtag = req.headers["if-none-match"]
             const latestTimestamp = (await ds.getLatestTimestamp() ?? new Date()).toISOString()
             if (requestEtag == latestTimestamp) {
-                console.log("not modified")
                 sendNotModified(res, latestTimestamp)
             } else {
-                console.log('modified')
                 const data = await ds.current()
                 sendResult<T>(res, data, latestTimestamp)
             }
@@ -55,8 +53,6 @@ export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
         }
     })
 
-    
-
     function sendDataForTimestamp<T extends Storeable>(res: any, timestamp: string) {
         requireDatastoreOrFail<T>(res, async ds => {
             const data = await ds.forTimestamp(new Date(timestamp));
@@ -76,18 +72,15 @@ export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
         })
     }
 
-
     router.get('/*', (_, res) => {
         sendNotFound(res)
     })
-
-
 
     function requireDatastoreOrFail<T extends Storeable>(res: any, callback: (self: DataStore<T, BaseRepo>) => Promise<void>) {
         DataStore
             .open<T, BaseRepo>(repo, callback)
             .catch(() => {
-                res.sendStatus(501)
+                sendServerError(res);
             })
     }
 
@@ -96,7 +89,9 @@ export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
 
 
 
-
+function sendServerError(res: any) {
+    res.sendStatus(500);
+}
 
 function sendResult<T extends Storeable>(res: any, data: T[], timestamp: string) {
     res.header('Etag', timestamp);
@@ -113,5 +108,5 @@ function sendNotFound(res: any) {
 }
 
 function sendClientError(res: any) {
-    res.sendStatus(401)
+    res.sendStatus(400)
 }
