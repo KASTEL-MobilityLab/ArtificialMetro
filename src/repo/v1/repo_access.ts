@@ -8,11 +8,23 @@ const timestampRegex = /[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9][0,5]:00.000Z/
 export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
     const router = Router()
 
-    router.get('/current', (_, res) => {
+    router.get('/current', (req, res) => {
         requireDatastoreOrFail<T>(res, async ds => {
-            const data = await ds.current()
-            const latestTimestamp = await ds.getLatestTimestamp() ?? new Date()
-            sendResult<T>(res, data, latestTimestamp.toISOString())
+            const requestEtag = req.headers["if-none-match"]
+            const latestTimestamp = (await ds.getLatestTimestamp() ?? new Date()).toISOString()
+            if (requestEtag == latestTimestamp) {
+                sendNotModified(res, latestTimestamp)
+            } else {
+                const data = await ds.current()
+                sendResult<T>(res, data, latestTimestamp)
+            }
+        })
+    })
+
+    router.get('/available', (req, res) => {
+        requireDatastoreOrFail<T>(res, async ds => {
+            const availableTimestamps = await ds.getAvailableTimestamps()
+            res.json(availableTimestamps)
         })
     })
 
@@ -60,18 +72,15 @@ export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
         })
     }
 
-
     router.get('/*', (_, res) => {
         sendNotFound(res)
     })
-
-
 
     function requireDatastoreOrFail<T extends Storeable>(res: any, callback: (self: DataStore<T, BaseRepo>) => Promise<void>) {
         DataStore
             .open<T, BaseRepo>(repo, callback)
             .catch(() => {
-                res.sendStatus(501)
+                sendServerError(res);
             })
     }
 
@@ -80,11 +89,18 @@ export function repoAccess<T extends Storeable>(repo: BaseRepo): Router {
 
 
 
-
+function sendServerError(res: any) {
+    res.sendStatus(500);
+}
 
 function sendResult<T extends Storeable>(res: any, data: T[], timestamp: string) {
     res.header('Etag', timestamp);
     res.json(data);
+}
+
+function sendNotModified(res: any, timestamp: string) {
+    res.header('Etag', timestamp)
+    res.sendStatus(304)
 }
 
 function sendNotFound(res: any) {
@@ -92,5 +108,5 @@ function sendNotFound(res: any) {
 }
 
 function sendClientError(res: any) {
-    res.sendStatus(401)
+    res.sendStatus(400)
 }

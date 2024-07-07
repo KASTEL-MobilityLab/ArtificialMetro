@@ -101,6 +101,7 @@ export class DataStore<T extends Storeable, R extends string> {
     }
 
     private async cleanPartition(timestamp: Date) {
+        console.log('Clean Partition', timestamp)
         const partition = this.getPartition(timestamp)
         await partition.clear()
         await this.index.drop(timestamp.toISOString())

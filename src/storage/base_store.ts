@@ -1,7 +1,7 @@
 import { openDB, type IDBPDatabase } from "idb";
 import { CacheRepo } from "./cache_repo";
 import type { Storeable } from "@/model/storeable";
-import { BaseRepo } from "../model/repos";
+import { BASE_REPO_VERSION, BaseRepo } from "../model/repos";
 
 const BASE_STORE = "base-store"
 export class BaseStore {
@@ -12,9 +12,13 @@ export class BaseStore {
     }
 
     static async open(): Promise<BaseStore> {
-        const db = await openDB(BASE_STORE, 1, {
-            upgrade: (db) => initDatabase(db),
-        })
+        const db = await openDB(
+            BASE_STORE,
+            BASE_REPO_VERSION,
+            {
+                upgrade: (db) => initDatabase(db),
+            }
+        )
         return new BaseStore(db)
     }
 
@@ -24,10 +28,23 @@ export class BaseStore {
 }
 
 function initDatabase(db: IDBPDatabase<unknown>) {
-    createObjectStore(db, BaseRepo.CarsharingStations)
-    createObjectStore(db, BaseRepo.Scooters)
-    createObjectStore(db, BaseRepo.Bikes)
+    dropOldObjectStores(db);
+    createNewObjectStores(db);
 }
+
+function dropOldObjectStores(db: IDBPDatabase<unknown>) {
+    for (const store of db.objectStoreNames) {
+        db.deleteObjectStore(store);
+    }
+}
+
+function createNewObjectStores(db: IDBPDatabase<unknown>) {
+    for (const repo in BaseRepo) {
+        console.log('init repo', repo);
+        createObjectStore(db, repo as BaseRepo);
+    }
+}
+
 function createObjectStore(db: IDBPDatabase<unknown>, repo: BaseRepo) {
     const objectStore = db.createObjectStore(repo)
     objectStore.createIndex("timestamp", "timestamp", { unique: false })

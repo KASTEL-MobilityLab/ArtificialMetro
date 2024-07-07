@@ -5,14 +5,15 @@ import type { Provider } from "@/model/provider"
 import registeredProviders from "@/provider/providers"
 
 const UPDATE_INTERVAL = 5 * 60 * 1000 /* 5min */
-const CLEANUP_AGE = 48 * 60 * 60 *60 * 1000 /* 28h */
+const CLEANUP_AGE = 48 * 60 * 60 * 1000 /* 48h */
 
-updateAll()
+await updateAll()
 setInterval(updateAll, UPDATE_INTERVAL)
 
 async function updateAll() {
     for (const provider of registeredProviders) {
         try {
+            console.log('Update', provider.name)
             await updateFromProvider(provider.provider, provider.repo)
             await cleanupRepo(provider.repo)
         } catch(ex) {
@@ -30,11 +31,11 @@ async function updateFromProvider(provider: Provider<Storeable>, repo: BaseRepo)
 }
 
 async function cleanupRepo(repo: BaseRepo) {
+    console.log('Cleanup repo', repo)
     const now = new Date()
     const oldestTimestamp = new Date(now.getTime() - CLEANUP_AGE)
     await DataStore.open<Storeable, BaseRepo>(repo, async store => {
+        console.log('Cleanup since', oldestTimestamp)
         await store.cleanupSince(oldestTimestamp)
     })
 }
-
-
