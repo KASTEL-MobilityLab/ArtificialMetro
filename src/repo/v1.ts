@@ -5,8 +5,8 @@ import { repoAccess } from "./v1/repo_access"
 
 
 const router = Router()
-router.use('/carsharing_stations', repoAccess<CarsharingStation>(BaseRepo.CarsharingStations))
-router.use('/scooters', repoAccess<Scooter>(BaseRepo.Scooters))
-router.use('/bikes', repoAccess<Bike>(BaseRepo.Bikes))
+router.use('/CarsharingStations', repoAccess<CarsharingStation>(BaseRepo.CarsharingStations))
+router.use('/Scooters', repoAccess<Scooter>(BaseRepo.Scooters))
+router.use('/Bikes', repoAccess<Bike>(BaseRepo.Bikes))
 
 export default router
