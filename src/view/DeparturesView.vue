@@ -9,7 +9,7 @@ import DepartureRow from './DepartureRow.vue'
 
 
 defineProps<{
-  bus: SwitchBusReceiver,
+    bus: SwitchBusReceiver,
 }>()
 
 const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
@@ -22,28 +22,41 @@ let currentTime = computed(() => {
 })
 
 onMounted(async () => {
-  let store = await BaseStore.open()
-  let departuresRepo = store.repo<TramDeparture>(BaseRepo.TramDepartures)
+    let store = await BaseStore.open()
+    let departuresRepo = store.repo<TramDeparture>(BaseRepo.TramDepartures)
 
-  departuresRepo.onUpdate(updateDepartures)
+    departuresRepo.onUpdate(updateDepartures)
 
-  updateDepartures(departuresRepo)
+    updateDepartures(departuresRepo)
 })
 
 async function updateDepartures(repo: CacheRepo<TramDeparture, BaseRepo>) {
-  const new_departures = await repo.current()
-  departures.value = new_departures
-  updateTimestamp(repo)
+    const new_departures = await repo.current()
+    new_departures.sort(compareDepartures)
+    departures.value = new_departures
+    updateTimestamp(repo)
 }
 
-async function updateTimestamp(repo: CacheRepo<any,any>) {
-  let timestamp = await repo.getLatestTimestamp()
-  if (timestamp != null) currentTimestamp.value = timestamp
+async function updateTimestamp(repo: CacheRepo<any, any>) {
+    let timestamp = await repo.getLatestTimestamp()
+    if (timestamp != null) currentTimestamp.value = timestamp
 }
+
+function compareDepartures(a: TramDeparture, b: TramDeparture): number {
+    if (a.realtime == b.realtime) {
+        return 0
+    } else if (a.realtime < b.realtime) {
+        return -1
+    } else {
+        return 1
+    }
+}
+
 </script>
 
 <template>
     <div class="departure-list">
+        <h1>Durlacher Tor / KIT-Campus Süd</h1>
         <DepartureRow v-for="departure in departures" :key="departure.id" :departure="departure"></DepartureRow>
     </div>
     <div class="current-time"><span class="live-dot"></span> {{ currentTime }}</div>
@@ -66,5 +79,9 @@ async function updateTimestamp(repo: CacheRepo<any,any>) {
 
     background: var(--view-bg-color);
     color: var(--view-fg-color);
+}
+
+h1 {
+    padding: 20px 40px;
 }
 </style>
