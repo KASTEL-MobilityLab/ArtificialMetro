@@ -94,12 +94,6 @@ function manuallySwitchToView(view: number) {
 </script>
 
 <template>
-  <FooterBar>
-    <template #left>
-      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value" @switch="manuallySwitchToView"></ViewSwitcher>
-    </template>
-  </FooterBar>
-
   <main>
     <KeepAlive>
       <component :is="viewComponent" :bus="currentSwitchBus"></component>
@@ -107,6 +101,12 @@ function manuallySwitchToView(view: number) {
 
     <StartupView v-if="loading" @ready="loading = false"></StartupView>
   </main>
+
+  <FooterBar>
+    <template #left>
+      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value" @switch="manuallySwitchToView"></ViewSwitcher>
+    </template>
+  </FooterBar>
 </template>
 
 <style scoped></style>

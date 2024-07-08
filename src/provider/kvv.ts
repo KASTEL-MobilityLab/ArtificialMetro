@@ -17,13 +17,13 @@ export class KVVProvider implements Provider<TramDeparture> {
     async fetch(): Promise<TramDeparture[]> {
         const url = endpoint.replace("{LIMIT}", `${LIMIT}`).replace("{STATION}", this.station)
         const response = await fetch(url, { headers: { 'accept-encoding': 'deflate' } })
-        const departures = await extractDepartures(response)
+        const departures = await extractDepartures(response, this.station)
         return departures
     }
 
 }
 
-async function extractDepartures(response: Response): Promise<TramDeparture[]> {
+async function extractDepartures(response: Response, station: string): Promise<TramDeparture[]> {
     const departures = []
     const currentTime = new Date()
 
@@ -38,7 +38,7 @@ async function extractDepartures(response: Response): Promise<TramDeparture[]> {
         try {
             const planned = parseTimestamp(record.dateTime, currentTime, timeAdjustment)
             const realtime = parseTimestamp(record.realDateTime, planned, timeAdjustment)
-            const id = `${record.servingLine.key}-${planned.toISOString()}`
+            const id = `${station}-${record.servingLine.key}`
 
             const departure: TramDeparture = {
                 id,
@@ -67,5 +67,7 @@ function parseTimestamp(record: any, fallback: Date, timeAdjustment: number): Da
     const minute = record.minute
     const timestamp = new Date(`${year}-${month}-${day} ${hour}:${minute}`)
     const adjustedTimestamp = new Date(timestamp.getTime() - timeAdjustment)
+    adjustedTimestamp.setSeconds(0)
+    adjustedTimestamp.setMilliseconds(0)
     return adjustedTimestamp
 }
