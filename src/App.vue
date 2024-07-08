@@ -63,7 +63,7 @@ function switchView(view: number) {
 
 function registerKeyboardSwitcher() {
   window.addEventListener('keyup', evt => {
-    if (!evt.key.match(/[0-9]/)) return
+    if (!evt.key.match(/^[0-9]$/)) return
     if (evt.key == "0") {
       // toggle automatic kiosk mode
       kiosk.toggle()
