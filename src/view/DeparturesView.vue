@@ -85,7 +85,7 @@ h1 {
     padding: 20px 40px;
 }
 
-.deppartures-move,
+.departures-move,
 .departures-enter-active,
 .departures-leave-active {
     transition: 0.5s ease-in-out;

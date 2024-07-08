@@ -12,7 +12,6 @@
 footer {
     display: flex;
     position: fixed;
-    z-index: 1000;
 
     flex-direction: row;
     justify-content: stretch;
