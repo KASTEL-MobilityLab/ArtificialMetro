@@ -59,7 +59,7 @@ const realTime = computed(() => {
 
     gap: 20px;
 
-    padding: 20px 40px;
+    padding: 15px 40px;
 }
 .times {
     display: flex;

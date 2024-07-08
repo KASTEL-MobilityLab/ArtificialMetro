@@ -37,7 +37,7 @@ const providers: ProviderDeclaration[] = [
     {
         name: "KVV",
         repo: BaseRepo.TramDepartures,
-        provider: new KVVProvider(),
+        provider: new KVVProvider("7001001"),
     },
 ]
 

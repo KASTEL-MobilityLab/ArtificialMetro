@@ -1,14 +1,22 @@
 import type { Provider } from "@/model/provider";
 import type { TramDeparture } from "@/model/vehicles";
 
-const endpoint = "https://projekte.kvv-efa.de/sl3-alone/XSLT_DM_REQUEST?outputFormat=JSON&coordOutputFormat=WGS84%5Bdd.ddddd%5D&depType=stopEvents&locationServerActive=1&mode=direct&name_dm=7000238&type_dm=stop&useOnlyStops=1&useRealtime=1&limit=10"
+const LIMIT = 20
+const endpoint = "https://projekte.kvv-efa.de/sl3-alone/XSLT_DM_REQUEST?outputFormat=JSON&coordOutputFormat=WGS84%5Bdd.ddddd%5D&depType=stopEvents&locationServerActive=1&mode=direct&name_dm={STATION}&type_dm=stop&useOnlyStops=1&useRealtime=1&limit={LIMIT}"
 
 export class KVVProvider implements Provider<TramDeparture> {
+    private station: string
+
+    constructor(station: string) {
+        this.station = station
+    }
+
     attribution(): string {
         return "KVV"
     }
     async fetch(): Promise<TramDeparture[]> {
-        const response = await fetch(endpoint, { headers: { 'accept-encoding': 'deflate' } })
+        const url = endpoint.replace("{LIMIT}", `${LIMIT}`).replace("{STATION}", this.station)
+        const response = await fetch(url, { headers: { 'accept-encoding': 'deflate' } })
         const departures = await extractDepartures(response)
         return departures
     }
