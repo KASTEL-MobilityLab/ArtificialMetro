@@ -10,7 +10,7 @@ const emit = defineEmits<{
 const carsharingLoaded = ref(false)
 const scootersLoaded = ref(false)
 const bikesLoaded = ref(false)
-
+const departuresLoaded = ref(false)
 
 
 function repoLoaded(repo: BaseRepo) {
@@ -24,6 +24,9 @@ function repoLoaded(repo: BaseRepo) {
         case BaseRepo.Bikes:
             bikesLoaded.value = true
             break
+        case BaseRepo.TramDepartures:
+            departuresLoaded.value = true
+            break
     }
 }
 
@@ -31,6 +34,7 @@ function checkAllLoaded() {
     const allDataLoaded = carsharingLoaded.value
         && scootersLoaded.value
         && bikesLoaded.value
+        && departuresLoaded.value
     if (allDataLoaded) {
         setTimeout(() => {
             emit('ready')
@@ -50,6 +54,7 @@ onMounted(() => {
 watch(() => carsharingLoaded.value, checkAllLoaded)
 watch(() => scootersLoaded.value, checkAllLoaded)
 watch(() => bikesLoaded.value, checkAllLoaded)
+watch(() => departuresLoaded.value, checkAllLoaded)
 
 </script>
 
@@ -60,7 +65,7 @@ watch(() => bikesLoaded.value, checkAllLoaded)
             <img src="/brands/nextbike.svg" :class="{ disabled: !bikesLoaded }" />
             <img src="/brands/scooter_bolt.svg" :class="{ disabled: !scootersLoaded }" />
             <img src="/brands/train-db.svg" class="disabled" />
-            <img src="/brands/bus-kvv.svg" class="disabled" />
+            <img src="/brands/bus-kvv.svg" :class="{ disabled: !departuresLoaded }" />
         </div>
     </div>
 </template>
