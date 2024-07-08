@@ -4,3 +4,20 @@ export const brands = [
     { name: "voi_karlsruhe", title: "Voi", icon: "/brands/scooter_voi.svg" },
     { name: "bolt_karlsruhe", title: "Bolt", icon: "/brands/scooter_bolt.svg" },
 ]
+
+export const tramLines: { [key: string]: { color: string, type: "tram" | "bus" } } = {
+    "S2": { color: "#A066AA", type: "tram" },
+    "S5": { color: "#F69795", type: "tram" },
+    "S51": { color: "#F69795", type: "tram" },
+    "S4": { color: "#9F184C", type: "tram" },
+    "1": { color: "#ED1C24", type: "tram" },
+    "2": { color: "#0071BC", type: "tram" },
+    "S7": { color: "#FFF200", type: "tram" },
+    "S8": { color: "#6E692A", type: "tram" },
+    "4": { color: "#FFCB04", type: "tram" },
+    "3": { color: "#6E692A", type: "tram" },
+    "30": { color: "#00AEEF", type: "bus" },
+    "42": { color: "#485E88", type: "bus" },
+    "71": { color: "#B2A291", type: "bus" },
+    "125": { color: "#808285", type: "bus" },
+}

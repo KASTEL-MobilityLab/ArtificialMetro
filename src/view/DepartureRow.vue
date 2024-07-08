@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { tramLines } from '@/model/brands';
 import type { TramDeparture } from '@/model/vehicles';
 import { computed } from 'vue';
 
@@ -26,14 +27,29 @@ const realTime = computed(() => {
         return formatTime(realtime as any)
     }
 })
+const line = computed(() => props.departure.line)
+const lineColor = computed(() => {
+    if (line.value in tramLines) {
+        return tramLines[line.value].color
+    } else {
+        return "grey"
+    }
+})
+const transportType =computed(() => {
+    if (line.value in tramLines) {
+        return tramLines[line.value].type
+    } else {
+        return "tram"
+    }
+})
 
 </script>
 
 <template>
     <div class="departure-row">
-        <span class="line">{{ departure.line }}</span>
+        <span class="line" :class="transportType" :style="{ backgroundColor: lineColor }">{{ line }}</span>
         <span class="times">
-            <span class="time" :class="{invalid: realTime != null}">
+            <span class="time" :class="{ invalid: realTime != null }">
                 {{ plannedTime }}
             </span>
             <span class="time realtime" v-if="realTime">
@@ -61,6 +77,7 @@ const realTime = computed(() => {
 
     padding: 15px 40px;
 }
+
 .times {
     display: flex;
     flex-direction: column;
@@ -68,16 +85,20 @@ const realTime = computed(() => {
     justify-content: flex-start;
     align-items: flex-start;
 }
+
 .time {
     font-size: 20px;
     min-width: 60px;
 }
+
 .time.invalid {
     text-decoration: line-through;
 }
+
 .realtime {
     color: var(--accent-color);
 }
+
 .line {
     display: flex;
     flex-direction: row;
@@ -95,6 +116,10 @@ const realTime = computed(() => {
     font-size: 20px;
     font-weight: bold;
 }
+.line.bus {
+    border-radius: 100%;
+}
+
 .direction {
     flex-grow: 1;
     font-size: 20px;
