@@ -12,14 +12,15 @@ defineProps<{
     bus: SwitchBusReceiver,
 }>()
 
-const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
-
-let currentTimestamp = ref(new Date())
+let currentSystemTime = ref(new Date())
 let departures: Ref<TramDeparture[]> = ref([])
-
-let currentTime = computed(() => {
-    return timeFormat.format(currentTimestamp.value)
+let filteredDepartures = computed(() => {
+    const time = currentSystemTime.value
+    return departures.value.filter(departure => {
+        return (new Date(departure.realtime)).getTime() >= time.getTime()
+    })
 })
+
 
 onMounted(async () => {
     let store = await BaseStore.open()
@@ -28,18 +29,18 @@ onMounted(async () => {
     departuresRepo.onUpdate(updateDepartures)
 
     updateDepartures(departuresRepo)
+
+    setInterval(updateSystemTime, 30 * 1000 /*30s*/)
 })
 
 async function updateDepartures(repo: CacheRepo<TramDeparture, BaseRepo>) {
     const new_departures = await repo.current()
     new_departures.sort(compareDepartures)
     departures.value = new_departures
-    updateTimestamp(repo)
 }
 
-async function updateTimestamp(repo: CacheRepo<any, any>) {
-    let timestamp = await repo.getLatestTimestamp()
-    if (timestamp != null) currentTimestamp.value = timestamp
+function updateSystemTime() {
+    currentSystemTime.value = new Date()
 }
 
 function compareDepartures(a: TramDeparture, b: TramDeparture): number {
@@ -55,11 +56,10 @@ function compareDepartures(a: TramDeparture, b: TramDeparture): number {
 </script>
 
 <template>
-    <div class="departure-list">
-        <h1>Durlacher Tor / KIT-Campus Süd</h1>
-        <DepartureRow v-for="departure in departures" :key="departure.id" :departure="departure"></DepartureRow>
-    </div>
-    <div class="current-time"><span class="live-dot"></span> {{ currentTime }}</div>
+    <TransitionGroup class="departure-list" tag="div" name="departures">
+        <h1 key="header">Durlacher Tor / KIT-Campus Süd</h1>
+        <DepartureRow v-for="departure in filteredDepartures" :key="departure.id" :departure="departure"></DepartureRow>
+    </TransitionGroup>
 </template>
 
 <style scoped>
@@ -83,5 +83,22 @@ function compareDepartures(a: TramDeparture, b: TramDeparture): number {
 
 h1 {
     padding: 20px 40px;
+}
+
+.deppartures-move,
+.departures-enter-active,
+.departures-leave-active {
+    transition: 0.5s ease-in-out;
+}
+.departures-enter-from{
+    opacity: 0;
+    transform: translateY(30px);
+}
+.departures-leave-to {
+    opacity: 0;
+    transform: translateY(-30px);
+}
+.departures-leave-active {
+    position: absolute;
 }
 </style>

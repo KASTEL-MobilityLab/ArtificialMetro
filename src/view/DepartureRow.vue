@@ -63,6 +63,7 @@ const transportType =computed(() => {
         <span class="platform">
             Platform {{ departure.track }}
         </span>
+        
     </div>
 </template>
 

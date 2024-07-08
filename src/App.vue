@@ -18,7 +18,7 @@ const kiosk = new Kiosk(KIOSK_INTERVAL)
 const views: View[] = [
   { title: "Live", icon: MapIcon, component: LiveView },
   { title: "Timelapse", icon: TimerIcon, component: TimelapseView },
-  { title: "Tram", icon: TramFrontIcon, component: DeparturesView },
+  { title: "Departures", icon: TramFrontIcon, component: DeparturesView },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
 })
