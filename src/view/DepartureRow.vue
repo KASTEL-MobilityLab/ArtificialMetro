@@ -40,8 +40,13 @@ const realTime = computed(() => {
                 {{ realTime }}
             </span>
         </span>
-        
-        Platform {{ departure.track }}
+
+        <span class="direction">
+            {{ departure.direction }}
+        </span>
+        <span class="platform">
+            Platform {{ departure.track }}
+        </span>
     </div>
 </template>
 
@@ -54,7 +59,7 @@ const realTime = computed(() => {
 
     gap: 20px;
 
-    padding: 10px 20px;
+    padding: 20px 40px;
 }
 .times {
     display: flex;
@@ -89,5 +94,9 @@ const realTime = computed(() => {
 
     font-size: 20px;
     font-weight: bold;
+}
+.direction {
+    flex-grow: 1;
+    font-size: 20px;
 }
 </style>

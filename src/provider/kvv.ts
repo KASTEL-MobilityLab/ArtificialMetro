@@ -31,6 +31,7 @@ async function extractDepartures(response: Response): Promise<TramDeparture[]> {
                 timestamp: currentTime,
                 line: record.servingLine.symbol,
                 track: record.platform,
+                direction: record.servingLine.direction,
                 planned,
                 realtime,
             }

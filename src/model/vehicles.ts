@@ -30,6 +30,7 @@ export interface TramDeparture {
     timestamp: Date,
     line: string,
     track: string,
+    direction: string,
     planned: Date,
     realtime: Date,
 }
