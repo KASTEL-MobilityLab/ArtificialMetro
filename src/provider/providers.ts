@@ -5,6 +5,7 @@ import { CarsharingProvider } from "./carsharing"
 import { ScooterProvider } from "./scooter"
 import { NextbikeProviderV1 } from "./nextbike_v1"
 import { NextbikeProviderV2 } from "./nextbike_v2"
+import { KVVProvider } from "./kvv"
 
 export type ProviderDeclaration = {
     name: string,
@@ -32,7 +33,12 @@ const providers: ProviderDeclaration[] = [
         name: "nextbike v2",
         repo: BaseRepo.Bikes,
         provider: new NextbikeProviderV2(),
-    }
+    },
+    {
+        name: "KVV",
+        repo: BaseRepo.TramDepartures,
+        provider: new KVVProvider(),
+    },
 ]
 
 export default providers
