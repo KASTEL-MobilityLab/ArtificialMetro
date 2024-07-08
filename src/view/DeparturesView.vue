@@ -59,19 +59,18 @@ function compareDepartures(a: TramDeparture, b: TramDeparture): number {
 </script>
 
 <template>
-    <TransitionGroup class="departure-list" tag="div" name="departures">
-        <h1 key="header">{{ title }}</h1>
-        <DepartureRow v-for="departure in filteredDepartures" :key="departure.id" :departure="departure"></DepartureRow>
-    </TransitionGroup>
+    <div class="departures-view">
+        <TransitionGroup class="departure-list" tag="div" name="departures">
+            <h1 key="header">{{ title }}</h1>
+            <DepartureRow v-for="departure in filteredDepartures" :key="departure.id" :departure="departure"></DepartureRow>
+        </TransitionGroup>
+        <div class="fade-out"></div>
+    </div>
 </template>
 
 <style scoped>
-.departure-list {
-    display: flex;
-    flex-direction: column;
-
-    justify-content: flex-start;
-    align-items: stretch;
+.departures-view {
+    display: block;
 
     position: absolute;
     top: 0;
@@ -82,6 +81,13 @@ function compareDepartures(a: TramDeparture, b: TramDeparture): number {
 
     background: var(--view-bg-color);
     color: var(--view-fg-color);
+}
+.departure-list {
+    display: flex;
+    flex-direction: column;
+
+    justify-content: flex-start;
+    align-items: stretch;
 }
 
 h1 {
@@ -103,5 +109,17 @@ h1 {
 }
 .departures-leave-active {
     position: absolute;
+}
+
+.fade-out {
+    display: block;
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 200px;
+
+    background: linear-gradient(to bottom, transparent, var(--view-bg-color));
 }
 </style>
