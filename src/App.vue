@@ -8,7 +8,7 @@ import LiveView from './view/LiveView.vue'
 import { SwitchBus } from './view/switch_bus'
 import StartupView from './view/StartupView.vue'
 import { Kiosk } from './model/kiosk'
-import DeparturesView from './view/DeparturesView.vue'
+import MultiDeparturesView from './view/MultiDeparturesView.vue'
 
 const KIOSK_INTERVAL = 30 * 1000 /*30s*/
 
@@ -18,7 +18,7 @@ const kiosk = new Kiosk(KIOSK_INTERVAL)
 const views: View[] = [
   { title: "Live", icon: MapIcon, component: LiveView },
   { title: "Timelapse", icon: TimerIcon, component: TimelapseView },
-  { title: "Departures", icon: TramFrontIcon, component: DeparturesView },
+  { title: "Departures", icon: TramFrontIcon, component: MultiDeparturesView },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
 })

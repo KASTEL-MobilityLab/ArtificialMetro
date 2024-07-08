@@ -46,6 +46,7 @@ async function extractDepartures(response: Response, station: string): Promise<T
                 line: record.servingLine.symbol,
                 track: record.platform,
                 direction: record.servingLine.direction,
+                station,
                 planned,
                 realtime,
             }

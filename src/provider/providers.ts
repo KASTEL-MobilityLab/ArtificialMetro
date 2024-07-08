@@ -35,9 +35,14 @@ const providers: ProviderDeclaration[] = [
         provider: new NextbikeProviderV2(),
     },
     {
-        name: "KVV",
+        name: "KVV Durlacher Tor",
         repo: BaseRepo.TramDepartures,
         provider: new KVVProvider("7001001"),
+    },
+    {
+        name: "KVV Kronenplatz",
+        repo: BaseRepo.TramDepartures,
+        provider: new KVVProvider("7001002"),
     },
 ]
 

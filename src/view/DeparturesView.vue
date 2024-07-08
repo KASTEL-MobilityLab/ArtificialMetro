@@ -8,8 +8,10 @@ import type { CacheRepo } from '@/storage/cache_repo';
 import DepartureRow from './DepartureRow.vue'
 
 
-defineProps<{
+const props = defineProps<{
     bus: SwitchBusReceiver,
+    station: string,
+    title: string,
 }>()
 
 let currentSystemTime = ref(new Date())
@@ -35,8 +37,9 @@ onMounted(async () => {
 
 async function updateDepartures(repo: CacheRepo<TramDeparture, BaseRepo>) {
     const new_departures = await repo.current()
-    new_departures.sort(compareDepartures)
-    departures.value = new_departures
+    const station_departures = new_departures.filter(departure => departure.station == props.station)
+    station_departures.sort(compareDepartures)
+    departures.value = station_departures
 }
 
 function updateSystemTime() {
@@ -57,7 +60,7 @@ function compareDepartures(a: TramDeparture, b: TramDeparture): number {
 
 <template>
     <TransitionGroup class="departure-list" tag="div" name="departures">
-        <h1 key="header">Durlacher Tor / KIT-Campus Süd</h1>
+        <h1 key="header">{{ title }}</h1>
         <DepartureRow v-for="departure in filteredDepartures" :key="departure.id" :departure="departure"></DepartureRow>
     </TransitionGroup>
 </template>
