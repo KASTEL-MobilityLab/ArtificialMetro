@@ -30,8 +30,8 @@ async function extractDepartures(response: Response): Promise<TramDeparture[]> {
     const json = await response.json()
     for (const record of json.departureList) {
         try {
-            const realtime = parseTimestamp(record.realDateTime)
-            const planned = parseTimestamp(record.dateTime)
+            const planned = parseTimestamp(record.dateTime, currentTime)
+            const realtime = parseTimestamp(record.realDateTime, planned)    
             const id = `${record.servingLine.key}-${planned.toISOString()}`
             
             const departure: TramDeparture = {
@@ -52,7 +52,8 @@ async function extractDepartures(response: Response): Promise<TramDeparture[]> {
     return departures
 }
 
-function parseTimestamp(record: any): Date {
+function parseTimestamp(record: any, fallback: Date): Date {
+    if (record == undefined) return fallback
     const year = record.year
     const month = record.month
     const day = record.day
