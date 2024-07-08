@@ -21,19 +21,23 @@ async function extractDepartures(response: Response): Promise<TramDeparture[]> {
 
     const json = await response.json()
     for (const record of json.departureList) {
-        const realtime = parseTimestamp(record.realDateTime)
-        const planned = parseTimestamp(record.dateTime)
-        const id = `${record.servingLine.key}-${planned.toISOString()}`
-        
-        const departure: TramDeparture = {
-            id,
-            timestamp: currentTime,
-            line: record.servingLine.symbol,
-            track: record.platform,
-            planned,
-            realtime,
+        try {
+            const realtime = parseTimestamp(record.realDateTime)
+            const planned = parseTimestamp(record.dateTime)
+            const id = `${record.servingLine.key}-${planned.toISOString()}`
+            
+            const departure: TramDeparture = {
+                id,
+                timestamp: currentTime,
+                line: record.servingLine.symbol,
+                track: record.platform,
+                planned,
+                realtime,
+            }
+            departures.push(departure)
+        } catch {
+            console.warn("Cannot read", record)
         }
-        departures.push(departure)
     }
 
     return departures

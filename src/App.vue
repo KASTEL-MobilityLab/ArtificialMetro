@@ -3,11 +3,12 @@ import { computed, onMounted, ref, watch } from 'vue'
 import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
 import ViewSwitcher from './view/ViewSwitcher.vue'
-import { MapIcon, TimerIcon } from 'lucide-vue-next'
+import { MapIcon, TimerIcon, TramFrontIcon } from 'lucide-vue-next'
 import LiveView from './view/LiveView.vue'
 import { SwitchBus } from './view/switch_bus'
 import StartupView from './view/StartupView.vue'
 import { Kiosk } from './model/kiosk'
+import DeparturesView from './view/DeparturesView.vue'
 
 const KIOSK_INTERVAL = 30 * 1000 /*30s*/
 
@@ -17,6 +18,7 @@ const kiosk = new Kiosk(KIOSK_INTERVAL)
 const views: View[] = [
   { title: "Live", icon: MapIcon, component: LiveView },
   { title: "Timelapse", icon: TimerIcon, component: TimelapseView },
+  { title: "Tram", icon: TramFrontIcon, component: DeparturesView },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
 })
