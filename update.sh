@@ -5,9 +5,24 @@ if [ -d ./.git ]; then
   exit
 fi
 
-OP="$1" # download, test, apply, do
+OP="$1" # check, download, test, apply, do
 
-if [[ "$OP" == "download" ]]; then
+if [[ "$OP" == "check" ]]; then
+  if [[ ! -f "VERSION" ]]; then
+      touch VERSION
+  fi
+
+  URL="https://github.com/KASTEL-MobilityLab/ArtificialMetro/archive/refs/heads/trunk.zip"
+  LOCAL_VERSION=`cat VERSION`
+  REMOTE_VERSION=`curl -IL $URL | grep etag`
+
+  if [[ "$LOCAL_VERSION" == "$REMOTE_VERSION" ]]; then
+      exit 0
+  else
+      exit 1
+  fi
+
+elif [[ "$OP" == "download" ]]; then
   SUCCESS=0
   BRANCH="trunk"
   if [[ ! -z "$2" ]]; then
@@ -59,6 +74,7 @@ elif [[ "$OP" == "do" ]]; then
 
 else
   echo "Usage:"
+  echo "$0 check                check for update"
   echo "$0 download [BRANCH]    download the current version of BRANCH"
   echo "$0 test                 run some tests to verify a working update"
   echo "$0 apply                apply the previously downloaded update"
