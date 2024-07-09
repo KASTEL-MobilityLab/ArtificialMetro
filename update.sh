@@ -49,7 +49,8 @@ elif [[ "$OP" == "download" ]]; then
 
 elif [[ "$OP" == "test" ]]; then
   echo "Test Update"
-  exit 0
+  RESULT=`./prod-test.sh`
+  exit "$RESULT"
 
 elif [[ "$OP" == "apply" ]]; then
   echo "Apply Update"
