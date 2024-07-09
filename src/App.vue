@@ -3,11 +3,12 @@ import { computed, onMounted, ref, watch } from 'vue'
 import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
 import ViewSwitcher from './view/ViewSwitcher.vue'
-import { MapIcon, TimerIcon } from 'lucide-vue-next'
+import { MapIcon, TimerIcon, TramFrontIcon } from 'lucide-vue-next'
 import LiveView from './view/LiveView.vue'
 import { SwitchBus } from './view/switch_bus'
 import StartupView from './view/StartupView.vue'
 import { Kiosk } from './model/kiosk'
+import MultiDeparturesView from './view/MultiDeparturesView.vue'
 
 const KIOSK_INTERVAL = 30 * 1000 /*30s*/
 
@@ -17,6 +18,7 @@ const kiosk = new Kiosk(KIOSK_INTERVAL)
 const views: View[] = [
   { title: "Live", icon: MapIcon, component: LiveView },
   { title: "Timelapse", icon: TimerIcon, component: TimelapseView },
+  { title: "Departures", icon: TramFrontIcon, component: MultiDeparturesView },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
 })
@@ -61,7 +63,7 @@ function switchView(view: number) {
 
 function registerKeyboardSwitcher() {
   window.addEventListener('keyup', evt => {
-    if (!evt.key.match(/[0-9]/)) return
+    if (!evt.key.match(/^[0-9]$/)) return
     if (evt.key == "0") {
       // toggle automatic kiosk mode
       kiosk.toggle()
@@ -92,12 +94,6 @@ function manuallySwitchToView(view: number) {
 </script>
 
 <template>
-  <FooterBar>
-    <template #left>
-      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value" @switch="manuallySwitchToView"></ViewSwitcher>
-    </template>
-  </FooterBar>
-
   <main>
     <KeepAlive>
       <component :is="viewComponent" :bus="currentSwitchBus"></component>
@@ -105,6 +101,12 @@ function manuallySwitchToView(view: number) {
 
     <StartupView v-if="loading" @ready="loading = false"></StartupView>
   </main>
+
+  <FooterBar>
+    <template #left>
+      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value" @switch="manuallySwitchToView"></ViewSwitcher>
+    </template>
+  </FooterBar>
 </template>
 
 <style scoped></style>

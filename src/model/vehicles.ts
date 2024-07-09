@@ -25,6 +25,17 @@ export interface Bike {
     provider: string,
 }
 
+export interface TramDeparture {
+    id: string,
+    timestamp: Date,
+    line: string,
+    track: string,
+    station: string,
+    direction: string,
+    planned: Date,
+    realtime: Date,
+}
+
 export function geometryToCoordinate(geometry: string): Coordinate {
     geometry = geometry.substring(7)
     const splitter = geometry.indexOf(" ")

@@ -4,6 +4,7 @@ export enum BaseRepo {
     CarsharingStations = "CarsharingStations",
     Scooters = "Scooters",
     Bikes = "Bikes",
+    TramDepartures = "TramDepartures",
 }
 
-export const BASE_REPO_VERSION = 2
+export const BASE_REPO_VERSION = 3
