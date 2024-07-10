@@ -2,6 +2,11 @@ import { expect, test } from 'vitest'
 import * as scooter from './scooter'
 import * as csv from "web-csv-toolbox"
 
+test("NVBW MobiData BW Scooter available", async () => {
+    const response = await fetch(scooter.endpoint, { headers: { 'accept-encoding': 'deflate' } })
+    expect(response.ok).toBeTruthy()
+})
+
 test("NVBW MobiData BW Scooter provider returns expected CSV file", async () => {
     const response = await fetch(scooter.endpoint, { headers: { 'accept-encoding': 'deflate' } })
     const iterator = csv.parse(response)
