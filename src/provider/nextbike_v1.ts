@@ -1,7 +1,7 @@
 import { type Bike } from "@/model/vehicles";
 import type { Provider } from "../model/provider";
 
-const endpoint = "https://gbfs.nextbike.net/maps/gbfs/v1/nextbike_fg/en/free_bike_status.json"
+export const endpoint = "https://gbfs.nextbike.net/maps/gbfs/v1/nextbike_fg/en/free_bike_status.json"
 const attribution = "Nextbike"
 
 export class NextbikeProviderV1 implements Provider<Bike> {
@@ -16,7 +16,7 @@ export class NextbikeProviderV1 implements Provider<Bike> {
     }
 }
 
-async function extractBikes(response: Response): Promise<Bike[]> {
+export async function extractBikes(response: Response): Promise<Bike[]> {
     const bikes = []
     const currentTime = new Date()
 
