@@ -3,7 +3,7 @@ import * as carsharing from './carsharing'
 import * as csv from "web-csv-toolbox"
 
 test("NVBW MobiData BW Carsharing provider returns expected CSV file", async () => {
-    const response = await fetch(carsharing.endpoint, {headers: { 'accept-encoding': 'deflate'}})
+    const response = await fetch(carsharing.endpoint, { headers: { 'accept-encoding': 'deflate' } })
     const iterator = csv.parse(response)
     const firstRecord = (await iterator.next()).value
     expect('FID' in firstRecord).toBeTruthy()

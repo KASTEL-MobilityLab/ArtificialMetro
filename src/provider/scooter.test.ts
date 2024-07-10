@@ -17,11 +17,11 @@ test("Extract Scooters from CSV result", async () => {
     expect(stations.length).toBe(3)
 
     expect(stations[0].id).toEqual("5a530bb20d1dff00063bd779")
-    expect(stations[0].position).toEqual({lon: 8.403653, lat: 49.006889})
+    expect(stations[0].position).toEqual({ lon: 8.403653, lat: 49.006889 })
     expect(stations[0].provider).toEqual("test")
 
     expect(stations[2].id).toEqual("5a967008af71190006b85c9b")
-    expect(stations[2].position).toEqual({lon: 8.403653, lat: 49.006889})
+    expect(stations[2].position).toEqual({ lon: 8.403653, lat: 49.006889 })
     expect(stations[2].provider).toEqual("test")
 })
 

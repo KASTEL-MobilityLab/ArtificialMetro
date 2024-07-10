@@ -12,7 +12,7 @@ export class CarsharingProvider implements Provider<CarsharingStation> {
     }
     async fetch(): Promise<CarsharingStation[]> {
         // Force deflate encoding, because gzip has errors in node.js implementation
-        const response = await fetch(endpoint, {headers: { 'accept-encoding': 'deflate'}})
+        const response = await fetch(endpoint, { headers: { 'accept-encoding': 'deflate' } })
         const stations = await extractStations(response)
         return stations
     }
