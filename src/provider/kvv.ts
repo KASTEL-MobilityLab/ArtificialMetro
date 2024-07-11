@@ -2,7 +2,7 @@ import type { Provider } from "@/model/provider";
 import type { TramDeparture } from "@/model/vehicles";
 
 const LIMIT = 20
-const endpoint = "https://projekte.kvv-efa.de/sl3-alone/XSLT_DM_REQUEST?outputFormat=JSON&coordOutputFormat=WGS84%5Bdd.ddddd%5D&depType=stopEvents&locationServerActive=1&mode=direct&name_dm={STATION}&type_dm=stop&useOnlyStops=1&useRealtime=1&limit={LIMIT}"
+export const endpoint = "https://projekte.kvv-efa.de/sl3-alone/XSLT_DM_REQUEST?outputFormat=JSON&coordOutputFormat=WGS84%5Bdd.ddddd%5D&depType=stopEvents&locationServerActive=1&mode=direct&name_dm={STATION}&type_dm=stop&useOnlyStops=1&useRealtime=1&limit={LIMIT}"
 
 export class KVVProvider implements Provider<TramDeparture> {
     private station: string
@@ -23,7 +23,7 @@ export class KVVProvider implements Provider<TramDeparture> {
 
 }
 
-async function extractDepartures(response: Response, station: string): Promise<TramDeparture[]> {
+export async function extractDepartures(response: Response, station: string): Promise<TramDeparture[]> {
     const departures = []
     const currentTime = new Date()
 
@@ -60,7 +60,9 @@ async function extractDepartures(response: Response, station: string): Promise<T
 }
 
 function parseTimestamp(record: any, fallback: Date, timeAdjustment: number): Date {
-    if (record == undefined) return fallback
+    if (record == undefined) {
+        return fallback
+    }
     const year = record.year
     const month = record.month
     const day = record.day
