@@ -13,14 +13,17 @@ export class DataStore<T extends Storeable, R extends string> {
         this.index = new Index(this.database, 'timestamp')
     }
 
-    close() {
-        this.database.close()
+    async close() {
+        await this.database.close()
     }
 
     static async open<T extends Storeable, R extends string>(store: R, callback: (self: DataStore<T, R>) => Promise<void>) {
         const container = new DataStore<T, R>(store)
-        await callback(container)
-        container.close()
+        try {
+            await callback(container)
+        } finally {
+            await container.close()
+        }
     }
 
     private getPartition(timestamp: Timestamp | Date): Level<Timestamp, T> {
