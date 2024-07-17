@@ -3,6 +3,8 @@
 # directory of Metro install
 INSTALL_DIR="."
 
+# let network start up
+sleep 10
 
 # ensure network connection
 ./check-network.sh
@@ -21,8 +23,16 @@ popd
 for i in {1..100}
 do
     echo "$i"
-    sleep 1
+    sleep 0.2
 done | zenity --progress --auto-close --title="Metro" --text="Starting server..."
 
 # launch UI
-chromium-browser --kiosk --start-fullscreen "http://localhost:3000"
+chromium-browser --kiosk --temp-profile --start-fullscreen "http://localhost:3000"
+
+# reboot when chrome failed
+RESULT=`zenity --question --timeout=10 --ok-label="Restart" --cancel-label="Exit only" --title="Metro" --text="Restart Metro?"`
+if [[ "$RESULT" == "1" ]]; then
+    exit
+else
+    reboot
+fi
