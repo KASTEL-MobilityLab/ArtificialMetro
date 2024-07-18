@@ -34,7 +34,7 @@ elif [[ "$OP" == "download" ]]; then
   wget -O update.zip "$URL"
   NEW_VERSION=`curl -IL $URL | grep etag`
   mkdir update
-  unzip -u -d update/inner update.zip
+  unzip -u -d "update/inner" update.zip
 
   pushd update
     cp -rf inner/*/* .
