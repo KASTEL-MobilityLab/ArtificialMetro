@@ -17,9 +17,16 @@ if [[ "$OP" == "check" ]]; then
   REMOTE_VERSION=`curl -IL $URL | grep etag`
 
   if [[ "$LOCAL_VERSION" == "$REMOTE_VERSION" ]]; then
-      exit 0
+    exit 0
   else
-      exit 1
+    # if an update dir exists, that update has failed. Skip update if it is the same
+    if [[ -d update ]]; then
+      FAILED_VERSION=`cat update/VERSION`
+      if [[ "$FAILED_VERSION" == "$REMOTE_VERSION" ]]; then
+        exit 0
+      fi
+    fi
+    exit 1
   fi
 
 elif [[ "$OP" == "download" ]]; then
@@ -33,6 +40,9 @@ elif [[ "$OP" == "download" ]]; then
   echo "Download $BRANCH"
   wget -O update.zip "$URL"
   NEW_VERSION=`curl -IL $URL | grep etag`
+  if [[ -d update ]]; then
+    rm -r update
+  fi
   mkdir update
   unzip -u -d "update/inner" update.zip
 

@@ -10,7 +10,7 @@ sleep 10
 ./check-network.sh
 
 # check for update
-./auto-upate.sh
+./auto-update.sh
 
 # launch server
 pushd "$INSTALL_DIR"

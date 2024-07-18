@@ -16,7 +16,7 @@ fi
 
 # download update
 pushd "$INSTALL_DIR"
-    zenity --notification --title="Metro Updater" --text="Downloading new Metro version"
+    zenity --info --timeout=10 --title="Metro Updater" --text="Downloading new Metro version" --ok-label="Close (10s)"
     ./update.sh download "$BRANCH" 
     RESULT="$?"
 popd
@@ -28,7 +28,7 @@ fi
 
 # run production tests
 pushd "$INSTALL_DIR"
-    zenity --notification --title="Metro Updater" --text="Running Metro production tests"
+    zenity --info --timeout=10 --title="Metro Updater" --text="Running Metro production tests" --ok-label="Close (10s)"
     ./update.sh test 
     RESULT="$?"
     cat ./update/prod-test-result.txt | zenity --text-info --width=500 --height=500 --timeout=20 --ok-label="Close (20s)" --title="Test result"
@@ -40,7 +40,7 @@ fi
 
 # apply update
 pushd "$INSTALL_DIR"
-    zenity --notification --title="Metro Updater" --text="Applying Metro update"
+    zenity --info --timeout=10 --title="Metro Updater" --text="Applying Metro update" --ok-label="Close (10s)"
     ./update.sh apply
     RESULT="$?"
 popd
