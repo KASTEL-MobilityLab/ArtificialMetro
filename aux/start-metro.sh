@@ -30,7 +30,8 @@ done | zenity --progress --auto-close --title="Metro" --text="Starting server...
 chromium-browser --kiosk --temp-profile --start-fullscreen "http://localhost:3000"
 
 # reboot when chrome failed
-RESULT=`zenity --question --timeout=10 --ok-label="Restart" --cancel-label="Exit only" --title="Metro" --text="Restart Metro?"`
+zenity --question --timeout=10 --ok-label="Restart" --cancel-label="Keep System running" --title="Metro" --text="Restart Metro?"
+RESULT="$?"
 if [[ "$RESULT" == "1" ]]; then
     exit
 else

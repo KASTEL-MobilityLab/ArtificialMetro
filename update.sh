@@ -5,7 +5,7 @@ if [ -d ./.git ]; then
   exit
 fi
 
-OP="$1" # check, download, test, apply, do
+OP="$1" # check, download, test, apply, do, install, postinstall
 
 if [[ "$OP" == "check" ]]; then
   if [[ ! -f "VERSION" ]]; then
@@ -34,19 +34,26 @@ elif [[ "$OP" == "download" ]]; then
   wget -O update.zip "$URL"
   NEW_VERSION=`curl -IL $URL | grep etag`
   mkdir update
-  unzip -u -d update/inner update.zip
+  unzip -u -d "update/inner" update.zip
 
   pushd update
     cp -rf inner/*/* .
     rm -r inner
-    npm i && npm run build
-    SUCCESS="$?"
     chmod u+x *.sh
     echo "$NEW_VERSION" > "VERSION"
+    ./update.sh install # let update handle its own install
+    SUCCESS="$?"
   popd
 
   rm update.zip
   exit "$SUCCESS"
+
+elif [[ "$OP" == "install" ]]; then
+  npm i && npm run build
+  exit "$?"
+
+elif [[ "$OP" == "postinstall" ]]; then
+  exit 0
 
 elif [[ "$OP" == "test" ]]; then
   echo "Test Update"
@@ -61,6 +68,8 @@ elif [[ "$OP" == "apply" ]]; then
   echo "Apply Update"
   cp -rf update/* .
   rm -r update
+  ./update.sh postinstall # let the new update handle its own postinstall
+  exit "$?"
 
 elif [[ "$OP" == "do" ]]; then
   ./update.sh download "$2"
@@ -84,5 +93,6 @@ else
   echo "$0 download [BRANCH]    download the current version of BRANCH"
   echo "$0 test                 run some tests to verify a working update"
   echo "$0 apply                apply the previously downloaded update"
-  echo "$0 do                   perform the whole update process (download, test, apply)"
+  echo "$0 install              do necessary install steps like building etc"
+  echo "$0 postinstall          do some post install steps"
 fi
