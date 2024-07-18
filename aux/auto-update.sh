@@ -29,7 +29,7 @@ fi
 pushd "$INSTALL_DIR"
     ./update.sh test | zenity --progress --pulsate --auto-close --title="Metro Updater" --text="Running production tests"
     RESULT="$?"
-    cat prod-test-result.txt | zenity --text-info --width=500 --height=500 --timeout=20 --ok-label="Close (20s)" --title="Test result"
+    cat ./update/prod-test-result.txt | zenity --text-info --width=500 --height=500 --timeout=20 --ok-label="Close (20s)" --title="Test result"
 popd
 if [[ "$RESULT" != "0" ]]; then
     zenity --error --timeout=20 --title="Metro Updater" --text="Production tests for update failed" --ok-label="Close (20s)"

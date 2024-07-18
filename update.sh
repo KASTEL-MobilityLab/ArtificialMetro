@@ -39,8 +39,9 @@ elif [[ "$OP" == "download" ]]; then
   pushd update
     cp -rf inner/*/* .
     rm -r inner
-    npm i
+    npm i && npm run build
     SUCCESS="$?"
+    chmod u+x *.sh
     echo "$NEW_VERSION" > "VERSION"
   popd
 
@@ -49,7 +50,11 @@ elif [[ "$OP" == "download" ]]; then
 
 elif [[ "$OP" == "test" ]]; then
   echo "Test Update"
-  RESULT=`./prod-test.sh`
+
+  pushd update
+    ./prod-test.sh
+    RESULT="$?"
+  popd
   exit "$RESULT"
 
 elif [[ "$OP" == "apply" ]]; then
