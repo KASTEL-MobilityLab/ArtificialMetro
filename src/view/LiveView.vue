@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type Ref } from "vue"
-import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
+import { type Vehicle, type Bike, type CarsharingStation, type Scooter } from "@/model/vehicles"
 import { BaseStore } from "@/storage/base_store"
 import { BaseRepo } from "@/model/repos"
 import MapView from "./MapView.vue"
@@ -16,6 +16,14 @@ let currentTimestamp = ref(new Date())
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
 let bikes: Ref<Bike[]> = ref([])
+
+let vehicles = computed<Vehicle[]>(() => {
+  const vehicles = []
+  vehicles.push(...stations.value)
+  vehicles.push(...scooters.value)
+  vehicles.push(...bikes.value)
+  return vehicles
+})
 
 const emptyRepos: Ref<BaseRepo[]> = ref([])
 const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
@@ -89,7 +97,7 @@ function contains<T>(value: T, list: T[]): boolean {
 </script>
 
 <template>
-  <MapView :scooters="scooters" :stations="stations" :bikes="bikes" :bus="bus" :brands="relevantBrands"></MapView>
+  <MapView :bus="bus" :brands="relevantBrands" :vehicles="vehicles"></MapView>
   <div class="current-time"><span class="live-dot"></span> {{ currentTime }}</div>
 </template>
 

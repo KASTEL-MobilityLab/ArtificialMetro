@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type Ref } from "vue"
-import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
+import type { Bike, CarsharingStation, Scooter, Vehicle } from "@/model/vehicles"
 import { BaseStore } from "@/storage/base_store"
 import { BaseRepo } from "@/model/repos"
 import { TimeSimulator } from "@/model/simulator"
@@ -16,6 +16,14 @@ const props = defineProps<{
 let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
 let bikes: Ref<Bike[]> = ref([])
+
+let vehicles = computed<Vehicle[]>(() => {
+  const vehicles = []
+  vehicles.push(...stations.value)
+  vehicles.push(...scooters.value)
+  vehicles.push(...bikes.value)
+  return vehicles
+})
 
 let simulator = new TimeSimulator(3 * 60 * 60 /*3h period*/, 1 /*1s delay*/)
 const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
@@ -77,7 +85,7 @@ simulator.onTick(async time => {
 </script>
 
 <template>
-    <MapView :scooters="scooters" :stations="stations" :bikes="bikes" :bus="bus" :brands="brands"></MapView>
+    <MapView :bus="bus" :brands="brands" :vehicles="vehicles"></MapView>
     <div class="current-time">
         <span class="live-dot" active="false"></span>
         {{ currentTime }}
