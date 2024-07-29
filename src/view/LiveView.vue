@@ -12,58 +12,50 @@ defineProps<{
   bus: SwitchBusReceiver,
 }>()
 
-let currentTimestamp = ref(new Date())
-
-let vehicleLists: {[key: string]: Ref<Vehicle[]>} = {}
+let repos: CacheRepo<Vehicle, BaseRepo>[] = []
+let vehicleLists: { [key: string]: Ref<Vehicle[]> } = {}
 Object.keys(BaseRepo).forEach(b => vehicleLists[b] = ref([]))
-
-let allVehicles = computed<Vehicle[]>(() => {
-  const vehicles = []
-  for (const repo in vehicleLists) {
-    vehicles.push(...vehicleLists[repo].value)
-  }
-  return vehicles
-})
+let allVehicles = computed<Vehicle[]>(() => join(vehicleLists))
 
 const emptyRepos: Ref<BaseRepo[]> = ref([])
 const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
 
+let currentTimestamp = ref(new Date())
 let currentTime = computed(() => {
-    return timeFormat.format(currentTimestamp.value)
+  return timeFormat.format(currentTimestamp.value)
 })
+
 onMounted(async () => {
   let store = await BaseStore.open()
-  let carsharingRepo = store.repo<CarsharingStation>(BaseRepo.CarsharingStations)
-  let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
-  let bikeRepo = store.repo<Bike>(BaseRepo.Bikes)
+  repos.push(store.repo(BaseRepo.CarsharingStations))
+  repos.push(store.repo(BaseRepo.Scooters))
+  repos.push(store.repo(BaseRepo.Bikes))
 
-  carsharingRepo.onUpdate(updateVehicles)
-  scooterRepo.onUpdate(updateVehicles)
-  bikeRepo.onUpdate(updateVehicles)
-
-  if (await carsharingRepo.isEmpty()) {
-    emptyRepos.value.push(BaseRepo.CarsharingStations)
-  }
-  if (await scooterRepo.isEmpty()) {
-    console.log('no scooter')
-    emptyRepos.value.push(BaseRepo.Scooters)
-  }
-  if (await bikeRepo.isEmpty()) {
-    emptyRepos.value.push(BaseRepo.Bikes)
+  for (const _repo in repos) {
+    repos[_repo].onUpdate(updateVehicles)
+    updateVehicles(repos[_repo])
   }
 
-  updateVehicles(carsharingRepo)
-  updateVehicles(scooterRepo)
-  updateVehicles(bikeRepo)
+  checkDataAvailability()
 })
+
+function checkDataAvailability() {
+  emptyRepos.value = []
+  repos.forEach(async repo => {
+    if (await repo.isEmpty()) {
+      emptyRepos.value.push(repo.kind())
+    }
+  })
+}
 
 async function updateVehicles(repo: CacheRepo<Vehicle, BaseRepo>) {
   const newVehicles = await repo.current()
   vehicleLists[repo.kind()].value = newVehicles
   updateTimestamp(repo)
+  checkDataAvailability()
 }
 
-async function updateTimestamp(repo: CacheRepo<any,any>) {
+async function updateTimestamp(repo: CacheRepo<any, any>) {
   let timestamp = await repo.getLatestTimestamp()
   if (timestamp != null) currentTimestamp.value = timestamp
 }
@@ -80,6 +72,14 @@ function contains<T>(value: T, list: T[]): boolean {
     }
   }
   return false
+}
+
+function join<T>(list: { [key: string]: Ref<T[]> }): T[] {
+  const all: T[] = []
+  for (const item in list) {
+    all.push(...list[item].value)
+  }
+  return all
 }
 
 </script>
