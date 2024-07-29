@@ -13,7 +13,7 @@ import OnlineIndicator from './view/OnlineIndicator.vue'
 
 const KIOSK_INTERVAL = 45 * 1000 /*45s*/
 
-type View = {title: string, icon: any, component: any, bus: SwitchBus }
+type View = { title: string, icon: any, component: any, bus: SwitchBus }
 
 const kiosk = new Kiosk(KIOSK_INTERVAL)
 const views: View[] = [
@@ -27,6 +27,7 @@ const loading = ref(true)
 const activeView = ref(0)
 const viewComponent = computed(() => views[activeView.value]?.component)
 const currentSwitchBus = computed(() => views[activeView.value]?.bus?.getReceiver())
+const disabledViews = ref([])
 
 watch(() => loading.value, (loading) => {
   if (!loading) {
@@ -41,7 +42,10 @@ onMounted(() => {
 
 kiosk.onTick(nextView)
 function nextView() {
-  const nextView = (activeView.value + 1) % views.length
+  let nextView = (activeView.value + 1) % views.length
+  while (contains(nextView, disabledViews.value)) {
+    nextView = (nextView + 1) % views.length
+  }
   switchView(nextView)
 }
 
@@ -92,6 +96,14 @@ function manuallySwitchToView(view: number) {
   switchView(view)
 }
 
+function contains<T>(value: T, list: T[]): boolean {
+  for (const item of list) {
+    if (item == value) {
+      return true
+    }
+  }
+  return false
+}
 </script>
 
 <template>
@@ -105,7 +117,8 @@ function manuallySwitchToView(view: number) {
 
   <FooterBar>
     <template #left>
-      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value" @switch="manuallySwitchToView"></ViewSwitcher>
+      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value" :disabled-views="disabledViews"
+        @switch="manuallySwitchToView"></ViewSwitcher>
     </template>
   </FooterBar>
 

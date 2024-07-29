@@ -10,10 +10,20 @@ const props = defineProps<{
     views: View[],
     active: number,
     automatic: boolean,
+    disabledViews: number[],
 }>()
 const emit = defineEmits<{
     switch: [view: number],
 }>()
+
+function contains<T>(value: T, list: T[]): boolean {
+    for (const item of list) {
+        if (item == value) {
+            return true
+        }
+    }
+    return false
+}
 </script>
 
 <template>
@@ -25,6 +35,7 @@ const emit = defineEmits<{
             v-for="view, id in props.views" 
             :key="id" 
             :active="id == props.active"
+            :aria-enabled="!contains(id, props.disabledViews)"
             @click="emit('switch', id)"
             >
             <component :is="view.icon" :height="20" :width="20"></component>
@@ -71,6 +82,9 @@ ul li {
 
 ul li[active="true"] {
     background: var(--accent-bg-color);
+}
+ul li[aria-enabled="false"] {
+    opacity: 0.5;
 }
 .automatic {
     display: flex;
