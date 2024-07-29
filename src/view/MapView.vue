@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue"
-import type { Bike, CarsharingStation, Scooter, Vehicle } from "@/model/vehicles"
+import type { Vehicle } from "@/model/vehicles"
 import PresetScaler from "./PresetScaler.vue"
 import type { SwitchBusReceiver } from "./switch_bus"
 import { TileProvider } from "./map/tile_provider"
@@ -10,7 +10,6 @@ import MarkerRenderer from "./map/MarkerRenderer.vue"
 import type { Marker } from "./map/tiles"
 import { SpriteManager } from "./map/sprite_manager"
 import LegendView, { type LegendItem } from "./LegendView.vue"
-// import { brands } from "@/model/brands"
 import { PRESETS } from "@/model/bounds"
 
 const props = defineProps<{
@@ -78,5 +77,4 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
   <LegendView :entries="brands"></LegendView>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

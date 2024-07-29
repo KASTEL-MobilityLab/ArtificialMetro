@@ -13,15 +13,15 @@ defineProps<{
 }>()
 
 let currentTimestamp = ref(new Date())
-let stations: Ref<CarsharingStation[]> = ref([])
-let scooters: Ref<Scooter[]> = ref([])
-let bikes: Ref<Bike[]> = ref([])
+
+let vehicleLists: {[key: string]: Ref<Vehicle[]>} = {}
+Object.keys(BaseRepo).forEach(b => vehicleLists[b] = ref([]))
 
 let vehicles = computed<Vehicle[]>(() => {
   const vehicles = []
-  vehicles.push(...stations.value)
-  vehicles.push(...scooters.value)
-  vehicles.push(...bikes.value)
+  for (const repo in vehicleLists) {
+    vehicles.push(...vehicleLists[repo].value)
+  }
   return vehicles
 })
 
@@ -59,19 +59,19 @@ onMounted(async () => {
 
 async function updateScooters(repo: CacheRepo<Scooter, BaseRepo>) {
   const new_scooters = await repo.current()
-  scooters.value = new_scooters
+  vehicleLists[BaseRepo.Scooters].value = new_scooters
   updateTimestamp(repo)
 }
 
 async function updateCarsharing(repo: CacheRepo<CarsharingStation, BaseRepo>) {
   let new_stations = await repo.current()
-  stations.value = new_stations
+  vehicleLists[BaseRepo.CarsharingStations].value = new_stations
   updateTimestamp(repo)
 }
 
 async function updateBikes(repo: CacheRepo<Bike, BaseRepo>) {
   let new_bikes = await repo.current()
-  bikes.value = new_bikes
+  vehicleLists[BaseRepo.Bikes].value = new_bikes
   updateTimestamp(repo)
 }
 
