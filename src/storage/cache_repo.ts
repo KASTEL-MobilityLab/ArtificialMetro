@@ -43,6 +43,10 @@ export class CacheRepo<T extends Storeable, R extends string> {
         return await this.db.getAll(this.name)
     }
 
+    async isEmpty(): Promise<boolean> {
+        return (await this.db.count(this.name)) == 0
+    }
+
     async current(): Promise<T[]> {
         const currentTimestamp = await this.getLatestTimestamp()
         if (currentTimestamp == null) {

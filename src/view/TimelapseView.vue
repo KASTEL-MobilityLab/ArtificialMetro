@@ -6,6 +6,7 @@ import { BaseRepo } from "@/model/repos"
 import { TimeSimulator } from "@/model/simulator"
 import MapView from "./MapView.vue"
 import type { SwitchBusReceiver } from "./switch_bus"
+import { brands } from "@/model/brands"
 
 
 const props = defineProps<{
@@ -76,7 +77,7 @@ simulator.onTick(async time => {
 </script>
 
 <template>
-    <MapView :scooters="scooters" :stations="stations" :bikes="bikes" :bus="bus"></MapView>
+    <MapView :scooters="scooters" :stations="stations" :bikes="bikes" :bus="bus" :brands="brands"></MapView>
     <div class="current-time">
         <span class="live-dot" active="false"></span>
         {{ currentTime }}

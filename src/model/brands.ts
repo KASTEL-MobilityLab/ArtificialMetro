@@ -1,8 +1,10 @@
-export const brands = [
-    { name: "stadtmobil_karlsruhe", title: "Stadtmobil", icon: "/brands/stadtmobil_karlsruhe.svg" },
-    { name: "nextbike", title: "Nextbike", icon: "/brands/nextbike.svg" },
-    { name: "voi_karlsruhe", title: "Voi", icon: "/brands/scooter_voi.svg" },
-    { name: "bolt_karlsruhe", title: "Bolt", icon: "/brands/scooter_bolt.svg" },
+import { BaseRepo } from "./repos"
+
+export const brands: { name: string, title: string, icon: string, repo: BaseRepo }[] = [
+    { name: "stadtmobil_karlsruhe", title: "Stadtmobil", icon: "/brands/stadtmobil_karlsruhe.svg", repo: BaseRepo.CarsharingStations },
+    { name: "nextbike", title: "Nextbike", icon: "/brands/nextbike.svg", repo: BaseRepo.Bikes },
+    { name: "voi_karlsruhe", title: "Voi", icon: "/brands/scooter_voi.svg", repo: BaseRepo.Scooters },
+    { name: "bolt_karlsruhe", title: "Bolt", icon: "/brands/scooter_bolt.svg", repo: BaseRepo.Scooters },
 ]
 
 export const tramLines: { [key: string]: { color: string, type: "tram" | "bus" } } = {

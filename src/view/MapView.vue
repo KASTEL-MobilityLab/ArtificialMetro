@@ -9,8 +9,8 @@ import TileRenderer from "./map/TileRenderer.vue"
 import MarkerRenderer from "./map/MarkerRenderer.vue"
 import type { Marker } from "./map/tiles"
 import { SpriteManager } from "./map/sprite_manager"
-import LegendView from "./LegendView.vue"
-import { brands } from "@/model/brands"
+import LegendView, { type LegendItem } from "./LegendView.vue"
+// import { brands } from "@/model/brands"
 import { PRESETS } from "@/model/bounds"
 
 const props = defineProps<{
@@ -18,6 +18,7 @@ const props = defineProps<{
   scooters: Scooter[],
   bikes: Bike[],
   bus: SwitchBusReceiver,
+  brands: LegendItem[],
 }>()
 
 const bikeMarker = computed<Marker[]>(() => {
@@ -69,7 +70,7 @@ watch(() => props.bus, (bus) => {
 })
 
 const spriteManager = new SpriteManager()
-spriteManager.fetchSprites(brands.map(provider => {
+spriteManager.fetchSprites(props.brands.map(provider => {
   return {
     name: provider.name,
     url: provider.icon,

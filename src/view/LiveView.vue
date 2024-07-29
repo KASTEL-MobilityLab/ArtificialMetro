@@ -6,6 +6,7 @@ import { BaseRepo } from "@/model/repos"
 import MapView from "./MapView.vue"
 import { SwitchBusReceiver } from "./switch_bus"
 import type { CacheRepo } from "@/storage/cache_repo"
+import { brands } from "@/model/brands"
 
 defineProps<{
   bus: SwitchBusReceiver,
@@ -16,6 +17,7 @@ let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
 let bikes: Ref<Bike[]> = ref([])
 
+const emptyRepos: Ref<BaseRepo[]> = ref([])
 const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
 
 let currentTime = computed(() => {
@@ -30,6 +32,17 @@ onMounted(async () => {
   carsharingRepo.onUpdate(updateCarsharing)
   scooterRepo.onUpdate(updateScooters)
   bikeRepo.onUpdate(updateBikes)
+
+  if (await carsharingRepo.isEmpty()) {
+    emptyRepos.value.push(BaseRepo.CarsharingStations)
+  }
+  if (await scooterRepo.isEmpty()) {
+    console.log('no scooter')
+    emptyRepos.value.push(BaseRepo.Scooters)
+  }
+  if (await bikeRepo.isEmpty()) {
+    emptyRepos.value.push(BaseRepo.Bikes)
+  }
 
   updateCarsharing(carsharingRepo)
   updateScooters(scooterRepo)
@@ -58,10 +71,25 @@ async function updateTimestamp(repo: CacheRepo<any,any>) {
   let timestamp = await repo.getLatestTimestamp()
   if (timestamp != null) currentTimestamp.value = timestamp
 }
+
+const relevantBrands = computed(() => {
+  const skipRepos = emptyRepos.value
+  return brands.filter(b => !contains(b.repo, skipRepos))
+})
+
+function contains<T>(value: T, list: T[]): boolean {
+  for (const item of list) {
+    if (item == value) {
+      return true
+    }
+  }
+  return false
+}
+
 </script>
 
 <template>
-  <MapView :scooters="scooters" :stations="stations" :bikes="bikes" :bus="bus"></MapView>
+  <MapView :scooters="scooters" :stations="stations" :bikes="bikes" :bus="bus" :brands="relevantBrands"></MapView>
   <div class="current-time"><span class="live-dot"></span> {{ currentTime }}</div>
 </template>
 
