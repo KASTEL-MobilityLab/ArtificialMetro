@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, type Ref } from 'vue'
 import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
 import ViewSwitcher from './view/ViewSwitcher.vue'
@@ -10,8 +10,12 @@ import StartupView from './view/StartupView.vue'
 import { Kiosk } from './model/kiosk'
 import MultiDeparturesView from './view/MultiDeparturesView.vue'
 import OnlineIndicator from './view/OnlineIndicator.vue'
+import { BaseStore } from './storage/base_store'
+import { BaseRepo } from './model/repos'
+import type { TramDeparture } from './model/vehicles'
 
 const KIOSK_INTERVAL = 45 * 1000 /*45s*/
+const CHECK_AVAILABILITY_INTERVAL = 5 * 60 * 1000 /*5min*/
 
 type View = { title: string, icon: any, component: any, bus: SwitchBus }
 
@@ -27,7 +31,7 @@ const loading = ref(true)
 const activeView = ref(0)
 const viewComponent = computed(() => views[activeView.value]?.component)
 const currentSwitchBus = computed(() => views[activeView.value]?.bus?.getReceiver())
-const disabledViews = ref([])
+const disabledViews: Ref<number[]> = ref([])
 
 watch(() => loading.value, (loading) => {
   if (!loading) {
@@ -38,6 +42,8 @@ watch(() => loading.value, (loading) => {
 
 onMounted(() => {
   registerKeyboardSwitcher()
+  checkAvailability()
+  setInterval(checkAvailability, CHECK_AVAILABILITY_INTERVAL)
 })
 
 kiosk.onTick(nextView)
@@ -103,6 +109,45 @@ function contains<T>(value: T, list: T[]): boolean {
     }
   }
   return false
+}
+
+function checkAvailability() {
+  checkTimelapseAvailability().then(available => {
+    if (!available) {
+      disabledViews.value.push(1)
+    } else {
+      disabledViews.value = disabledViews.value.filter(v => v != 1)
+    }
+  })
+  checkDeparturesAvailability().then(available => {
+    if (!available) {
+      disabledViews.value.push(2)
+    } else {
+      disabledViews.value = disabledViews.value.filter(v => v != 2)
+    }
+  })
+}
+
+async function checkTimelapseAvailability(): Promise<boolean> {
+  const store = await BaseStore.open()
+  const repos = []
+  repos.push(store.repo(BaseRepo.CarsharingStations))
+  repos.push(store.repo(BaseRepo.Scooters))
+  repos.push(store.repo(BaseRepo.Bikes))
+
+  for (const repo of repos) {
+    const availableTimestamps = await repo.getAvailableTimestamps()
+    if (availableTimestamps.length > 12) {
+      return true
+    }
+  }
+  return false
+}
+
+async function checkDeparturesAvailability(): Promise<boolean> {
+  const store = await BaseStore.open()
+  const repo = store.repo<TramDeparture>(BaseRepo.TramDepartures)
+  return !(await repo.isEmpty())
 }
 </script>
 
