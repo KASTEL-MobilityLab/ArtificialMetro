@@ -16,7 +16,7 @@ let stations: Ref<CarsharingStation[]> = ref([])
 let scooters: Ref<Scooter[]> = ref([])
 let bikes: Ref<Bike[]> = ref([])
 
-let simulator = new TimeSimulator(2 /*s*/)
+let simulator = new TimeSimulator(3 * 60 * 60 /*3h period*/, 1 /*1s delay*/)
 const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
 let currentTime = computed(() => {
     const time = simulator.time.value

@@ -10,7 +10,7 @@ import StartupView from './view/StartupView.vue'
 import { Kiosk } from './model/kiosk'
 import MultiDeparturesView from './view/MultiDeparturesView.vue'
 
-const KIOSK_INTERVAL = 30 * 1000 /*30s*/
+const KIOSK_INTERVAL = 45 * 1000 /*45s*/
 
 type View = {title: string, icon: any, component: any, bus: SwitchBus }
 
