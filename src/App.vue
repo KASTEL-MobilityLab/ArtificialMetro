@@ -9,6 +9,7 @@ import { SwitchBus } from './view/switch_bus'
 import StartupView from './view/StartupView.vue'
 import { Kiosk } from './model/kiosk'
 import MultiDeparturesView from './view/MultiDeparturesView.vue'
+import OnlineIndicator from './view/OnlineIndicator.vue'
 
 const KIOSK_INTERVAL = 45 * 1000 /*45s*/
 
@@ -107,6 +108,8 @@ function manuallySwitchToView(view: number) {
       <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value" @switch="manuallySwitchToView"></ViewSwitcher>
     </template>
   </FooterBar>
+
+  <OnlineIndicator></OnlineIndicator>
 </template>
 
 <style scoped></style>
