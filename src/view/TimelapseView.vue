@@ -7,23 +7,14 @@ import { TimeSimulator } from "@/model/simulator"
 import MapView from "./MapView.vue"
 import type { SwitchBusReceiver } from "./switch_bus"
 import { brands } from "@/model/brands"
+import type { CacheRepo } from "@/storage/cache_repo"
 
 
 const props = defineProps<{
     bus: SwitchBusReceiver,
 }>()
 
-let stations: Ref<CarsharingStation[]> = ref([])
-let scooters: Ref<Scooter[]> = ref([])
-let bikes: Ref<Bike[]> = ref([])
-
-let vehicles = computed<Vehicle[]>(() => {
-  const vehicles = []
-  vehicles.push(...stations.value)
-  vehicles.push(...scooters.value)
-  vehicles.push(...bikes.value)
-  return vehicles
-})
+let vehicles: Ref<Vehicle[]> = ref([])
 
 let simulator = new TimeSimulator(3 * 60 * 60 /*3h period*/, 1 /*1s delay*/)
 const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
@@ -33,7 +24,14 @@ let currentTime = computed(() => {
 })
 let simulationRunning = ref(false)
 
+let repos: CacheRepo<Vehicle, BaseRepo>[] = []
+
 onMounted(async () => {
+    let store = await BaseStore.open()
+    repos.push(store.repo(BaseRepo.CarsharingStations))
+    repos.push(store.repo(BaseRepo.Scooters))
+    repos.push(store.repo(BaseRepo.Bikes))
+
     props.bus.onResume(() => {
         simulator.resetTimeBounds()
         simulator.startSimulation()
@@ -45,9 +43,7 @@ onMounted(async () => {
 })
 
 simulator.onReset(() => {
-    stations.value = []
-    scooters.value = []
-    bikes.value = []
+    vehicles.value = []
 })
 
 simulator.onContinue(() => {
@@ -61,24 +57,10 @@ simulator.onStart(() => {
 })
 
 simulator.onTick(async time => {
-    let store = await BaseStore.open()
-    let carsharingRepo = store.repo<CarsharingStation>(BaseRepo.CarsharingStations)
-    let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
-    let bikeRepo = store.repo<Bike>(BaseRepo.Bikes)
-
-    const new_stations = await carsharingRepo.forTimestamp(time)
-    const new_scooters = await scooterRepo.forTimestamp(time)
-    const new_bikes = await bikeRepo.forTimestamp(time)
-
-    // only show new data if there was a change found in the DB
-    if (new_stations.length > 0) {
-        stations.value = new_stations
-    }
-    if (new_scooters.length > 0) {
-        scooters.value = new_scooters
-    }
-    if (new_bikes.length > 0) {
-        bikes.value = new_bikes
+    vehicles.value = []
+    for (const repo of repos) {
+        const newVehicles = await repo.forTimestamp(time)
+        vehicles.value.push(...newVehicles)
     }
 })
 
