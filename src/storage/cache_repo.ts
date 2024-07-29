@@ -15,6 +15,10 @@ export class CacheRepo<T extends Storeable, R extends string> {
         this.channel_name = channel_name
     }
 
+    kind(): R {
+        return this.name
+    }
+
     onUpdate(func: { (repo: CacheRepo<T, R>): void }) {
         const channel = new BroadcastChannel(this.channel_name)
         channel.onmessage = (evt: MessageEvent<R>) => {

@@ -17,7 +17,7 @@ let currentTimestamp = ref(new Date())
 let vehicleLists: {[key: string]: Ref<Vehicle[]>} = {}
 Object.keys(BaseRepo).forEach(b => vehicleLists[b] = ref([]))
 
-let vehicles = computed<Vehicle[]>(() => {
+let allVehicles = computed<Vehicle[]>(() => {
   const vehicles = []
   for (const repo in vehicleLists) {
     vehicles.push(...vehicleLists[repo].value)
@@ -37,9 +37,9 @@ onMounted(async () => {
   let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
   let bikeRepo = store.repo<Bike>(BaseRepo.Bikes)
 
-  carsharingRepo.onUpdate(updateCarsharing)
-  scooterRepo.onUpdate(updateScooters)
-  bikeRepo.onUpdate(updateBikes)
+  carsharingRepo.onUpdate(updateVehicles)
+  scooterRepo.onUpdate(updateVehicles)
+  bikeRepo.onUpdate(updateVehicles)
 
   if (await carsharingRepo.isEmpty()) {
     emptyRepos.value.push(BaseRepo.CarsharingStations)
@@ -52,26 +52,14 @@ onMounted(async () => {
     emptyRepos.value.push(BaseRepo.Bikes)
   }
 
-  updateCarsharing(carsharingRepo)
-  updateScooters(scooterRepo)
-  updateBikes(bikeRepo)
+  updateVehicles(carsharingRepo)
+  updateVehicles(scooterRepo)
+  updateVehicles(bikeRepo)
 })
 
-async function updateScooters(repo: CacheRepo<Scooter, BaseRepo>) {
-  const new_scooters = await repo.current()
-  vehicleLists[BaseRepo.Scooters].value = new_scooters
-  updateTimestamp(repo)
-}
-
-async function updateCarsharing(repo: CacheRepo<CarsharingStation, BaseRepo>) {
-  let new_stations = await repo.current()
-  vehicleLists[BaseRepo.CarsharingStations].value = new_stations
-  updateTimestamp(repo)
-}
-
-async function updateBikes(repo: CacheRepo<Bike, BaseRepo>) {
-  let new_bikes = await repo.current()
-  vehicleLists[BaseRepo.Bikes].value = new_bikes
+async function updateVehicles(repo: CacheRepo<Vehicle, BaseRepo>) {
+  const newVehicles = await repo.current()
+  vehicleLists[repo.kind()].value = newVehicles
   updateTimestamp(repo)
 }
 
@@ -97,7 +85,7 @@ function contains<T>(value: T, list: T[]): boolean {
 </script>
 
 <template>
-  <MapView :bus="bus" :brands="relevantBrands" :vehicles="vehicles"></MapView>
+  <MapView :bus="bus" :brands="relevantBrands" :vehicles="allVehicles"></MapView>
   <div class="current-time"><span class="live-dot"></span> {{ currentTime }}</div>
 </template>
 
