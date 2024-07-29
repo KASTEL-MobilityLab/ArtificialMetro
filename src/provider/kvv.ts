@@ -1,7 +1,7 @@
 import type { Provider } from "@/model/provider";
 import type { TramDeparture } from "@/model/vehicles";
 
-const LIMIT = 20
+const LIMIT = 30
 export const endpoint = "https://projekte.kvv-efa.de/sl3-alone/XSLT_DM_REQUEST?outputFormat=JSON&coordOutputFormat=WGS84%5Bdd.ddddd%5D&depType=stopEvents&locationServerActive=1&mode=direct&name_dm={STATION}&type_dm=stop&useOnlyStops=1&useRealtime=1&limit={LIMIT}"
 
 export class KVVProvider implements Provider<TramDeparture> {
