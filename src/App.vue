@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
 import ViewSwitcher from './view/ViewSwitcher.vue'
-import { MapIcon, TimerIcon, TramFrontIcon } from 'lucide-vue-next'
+import { HistoryIcon, MapIcon, SignpostIcon } from 'lucide-vue-next'
 import LiveView from './view/LiveView.vue'
 import { SwitchBus } from './view/switch_bus'
 import StartupView from './view/StartupView.vue'
@@ -18,8 +18,8 @@ type View = {title: string, icon: any, component: any, bus: SwitchBus }
 const kiosk = new Kiosk(KIOSK_INTERVAL)
 const views: View[] = [
   { title: "Live", icon: MapIcon, component: LiveView },
-  { title: "Timelapse", icon: TimerIcon, component: TimelapseView },
-  { title: "Departures", icon: TramFrontIcon, component: MultiDeparturesView },
+  { title: "Timelapse", icon: HistoryIcon, component: TimelapseView },
+  { title: "Departures", icon: SignpostIcon, component: MultiDeparturesView },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
 })
