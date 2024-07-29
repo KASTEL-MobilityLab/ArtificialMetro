@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type Ref } from "vue"
-import { type Vehicle, type Bike, type CarsharingStation, type Scooter } from "@/model/vehicles"
+import { type Vehicle } from "@/model/vehicles"
 import { BaseStore } from "@/storage/base_store"
 import { BaseRepo } from "@/model/repos"
 import MapView from "./MapView.vue"
