@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type Ref } from "vue"
-import type { Bike, CarsharingStation, Scooter, Vehicle } from "@/model/vehicles"
+import type { Vehicle } from "@/model/vehicles"
 import { BaseStore } from "@/storage/base_store"
 import { BaseRepo } from "@/model/repos"
 import { TimeSimulator } from "@/model/simulator"
@@ -24,6 +24,7 @@ let currentTime = computed(() => {
 })
 let simulationRunning = ref(false)
 
+const emptyRepos: Ref<BaseRepo[]> = ref([])
 let repos: CacheRepo<Vehicle, BaseRepo>[] = []
 
 onMounted(async () => {
@@ -35,11 +36,16 @@ onMounted(async () => {
     props.bus.onResume(() => {
         simulator.resetTimeBounds()
         simulator.startSimulation()
+        checkDataAvailability()
     })
 
     props.bus.onSuspend(() => {
         simulator.stopSimulation()
     })
+
+    simulator.resetTimeBounds()
+    simulator.startSimulation()
+    checkDataAvailability()
 })
 
 simulator.onReset(() => {
@@ -64,10 +70,33 @@ simulator.onTick(async time => {
     }
 })
 
+function checkDataAvailability() {
+    emptyRepos.value = []
+    repos.forEach(async repo => {
+        if (await repo.isEmpty()) {
+            emptyRepos.value.push(repo.kind())
+        }
+    })
+}
+
+const relevantBrands = computed(() => {
+  const skipRepos = emptyRepos.value
+  return brands.filter(b => !contains(b.repo, skipRepos))
+})
+
+function contains<T>(value: T, list: T[]): boolean {
+  for (const item of list) {
+    if (item == value) {
+      return true
+    }
+  }
+  return false
+}
+
 </script>
 
 <template>
-    <MapView :bus="bus" :brands="brands" :vehicles="vehicles"></MapView>
+    <MapView :bus="bus" :brands="relevantBrands" :vehicles="vehicles"></MapView>
     <div class="current-time">
         <span class="live-dot" active="false"></span>
         {{ currentTime }}
