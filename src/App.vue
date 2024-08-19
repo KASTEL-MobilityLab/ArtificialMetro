@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch, type Ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
 import ViewSwitcher from './view/ViewSwitcher.vue'
@@ -16,14 +16,19 @@ import type { TramDeparture } from './model/vehicles'
 
 const KIOSK_INTERVAL = 45 * 1000 /*45s*/
 const CHECK_AVAILABILITY_INTERVAL = 5 * 60 * 1000 /*5min*/
+enum Views {
+  Live,
+  Timelapse,
+  Departures,
+}
 
-type View = { title: string, icon: any, component: any, bus: SwitchBus }
+type View = { id: Views, title: string, icon: any, component: any, available: boolean, bus: SwitchBus }
 
 const kiosk = new Kiosk(KIOSK_INTERVAL)
 const views: View[] = [
-  { title: "Live", icon: MapIcon, component: LiveView },
-  { title: "Timelapse", icon: HistoryIcon, component: TimelapseView },
-  { title: "Departures", icon: SignpostIcon, component: MultiDeparturesView },
+  { id: Views.Live, title: "Live", icon: MapIcon, component: LiveView, available: true },
+  { id: Views.Timelapse, title: "Timelapse", icon: HistoryIcon, component: TimelapseView, available: false },
+  { id: Views.Departures, title: "Departures", icon: SignpostIcon, component: MultiDeparturesView, available: false },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
 })
@@ -31,7 +36,6 @@ const loading = ref(true)
 const activeView = ref(0)
 const viewComponent = computed(() => views[activeView.value]?.component)
 const currentSwitchBus = computed(() => views[activeView.value]?.bus?.getReceiver())
-const disabledViews: Ref<number[]> = ref([])
 
 watch(() => loading.value, (loading) => {
   if (!loading) {
@@ -49,7 +53,7 @@ onMounted(() => {
 kiosk.onTick(nextView)
 function nextView() {
   let nextView = (activeView.value + 1) % views.length
-  while (contains(nextView, disabledViews.value)) {
+  while (!views[nextView].available) {
     nextView = (nextView + 1) % views.length
   }
   switchView(nextView)
@@ -102,29 +106,20 @@ function manuallySwitchToView(view: number) {
   switchView(view)
 }
 
-function contains<T>(value: T, list: T[]): boolean {
-  for (const item of list) {
-    if (item == value) {
-      return true
+function modifyView(view: Views, modificator: (view: View) => void) {
+  for (const v of views) {
+    if (v.id == view){
+      modificator(v)
     }
   }
-  return false
 }
 
 function checkAvailability() {
   checkTimelapseAvailability().then(available => {
-    if (!available) {
-      disabledViews.value.push(1)
-    } else {
-      disabledViews.value = disabledViews.value.filter(v => v != 1)
-    }
+    modifyView(Views.Timelapse, v => v.available = available)
   })
   checkDeparturesAvailability().then(available => {
-    if (!available) {
-      disabledViews.value.push(2)
-    } else {
-      disabledViews.value = disabledViews.value.filter(v => v != 2)
-    }
+    modifyView(Views.Departures, v => v.available = available)
   })
 }
 
@@ -162,7 +157,7 @@ async function checkDeparturesAvailability(): Promise<boolean> {
 
   <FooterBar>
     <template #left>
-      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value" :disabled-views="disabledViews"
+      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value"
         @switch="manuallySwitchToView"></ViewSwitcher>
     </template>
   </FooterBar>
