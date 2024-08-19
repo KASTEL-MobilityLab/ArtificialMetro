@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
 import ViewSwitcher from './view/ViewSwitcher.vue'
-import { HistoryIcon, MapIcon, SignpostIcon } from 'lucide-vue-next'
+import { HistoryIcon, MapIcon, SignpostIcon, TentTreeIcon, TramFrontIcon } from 'lucide-vue-next'
 import LiveView from './view/LiveView.vue'
 import { SwitchBus } from './view/switch_bus'
 import StartupView from './view/StartupView.vue'
@@ -20,6 +20,8 @@ enum Views {
   Live,
   Timelapse,
   Departures,
+  Trams,
+  Landscape,
 }
 
 type View = { id: Views, title: string, icon: any, component: any, available: boolean, bus: SwitchBus }
@@ -29,6 +31,8 @@ const views: View[] = [
   { id: Views.Live, title: "Live", icon: MapIcon, component: LiveView, available: true },
   { id: Views.Timelapse, title: "Timelapse", icon: HistoryIcon, component: TimelapseView, available: false },
   { id: Views.Departures, title: "Departures", icon: SignpostIcon, component: MultiDeparturesView, available: false },
+  { id: Views.Trams, title: "Trams", icon: TramFrontIcon, component: LiveView, available: false },
+  { id: Views.Landscape, title: "Landscape", icon: TentTreeIcon, component: LiveView, available: false },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
 })
