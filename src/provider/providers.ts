@@ -44,6 +44,31 @@ const providers: ProviderDeclaration[] = [
         repo: BaseRepo.TramDepartures,
         provider: new KVVProvider("7001002"),
     },
+    {
+        name: "KVV Marktplatz Kaiserstraße",
+        repo: BaseRepo.TramDepartures,
+        provider: new KVVProvider("7001003"),
+    },
+    {
+        name: "KVV Marktplatz Pyramide",
+        repo: BaseRepo.TramDepartures,
+        provider: new KVVProvider("7001011"),
+    },
+    {
+        name: "KVV Europaplatz",
+        repo: BaseRepo.TramDepartures,
+        provider: new KVVProvider("7001004"),
+    },
+    {
+        name: "KVV Ettlinger Tor",
+        repo: BaseRepo.TramDepartures,
+        provider: new KVVProvider("7001012"),
+    },
+    {
+        name: "KVV Kongresszentrum",
+        repo: BaseRepo.TramDepartures,
+        provider: new KVVProvider("7001013"),
+    },
 ]
 
 export default providers
