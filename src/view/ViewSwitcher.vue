@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { LucideProps } from 'lucide-vue-next';
-import type { FunctionalComponent } from 'vue';
+import { type FunctionalComponent } from 'vue';
 
 type View = {
     title: string,
     icon: FunctionalComponent<LucideProps, {}, any, {}>,
+    available: boolean,
 }
 const props = defineProps<{
     views: View[],
@@ -21,12 +22,12 @@ const emit = defineEmits<{
         <li class="automatic" :active="automatic">
             <span class="live-dot"></span>
         </li>
-        <li 
-            v-for="view, id in props.views" 
+        <li v-for="view, id in props.views" 
             :key="id" 
-            :active="id == props.active"
+            :active="id == props.active" 
+            :aria-enabled="view.available"
             @click="emit('switch', id)"
-            >
+        >
             <component :is="view.icon" :height="20" :width="20"></component>
             {{ view.title }}
         </li>
@@ -37,6 +38,7 @@ const emit = defineEmits<{
 .view-switcher {
     width: 50%;
 }
+
 ul {
     display: flex;
 
@@ -72,6 +74,11 @@ ul li {
 ul li[active="true"] {
     background: var(--accent-bg-color);
 }
+
+ul li[aria-enabled="false"] {
+    opacity: 0.5;
+}
+
 .automatic {
     display: flex;
 
@@ -79,9 +86,10 @@ ul li[active="true"] {
     justify-content: center;
     align-items: center;
     padding: 0 5px;
-    
+
     visibility: hidden;
 }
+
 .automatic[active="true"] {
     background: none;
     visibility: visible;

@@ -15,6 +15,10 @@ export class CacheRepo<T extends Storeable, R extends string> {
         this.channel_name = channel_name
     }
 
+    kind(): R {
+        return this.name
+    }
+
     onUpdate(func: { (repo: CacheRepo<T, R>): void }) {
         const channel = new BroadcastChannel(this.channel_name)
         channel.onmessage = (evt: MessageEvent<R>) => {
@@ -41,6 +45,10 @@ export class CacheRepo<T extends Storeable, R extends string> {
 
     async all(): Promise<T[]> {
         return await this.db.getAll(this.name)
+    }
+
+    async isEmpty(): Promise<boolean> {
+        return (await this.db.count(this.name)) == 0
     }
 
     async current(): Promise<T[]> {

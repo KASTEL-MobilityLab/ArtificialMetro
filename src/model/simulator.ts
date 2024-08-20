@@ -5,6 +5,7 @@ export class TimeSimulator {
     private start: Ref<Date> = ref(new Date())
     private end: Ref<Date> = ref(new Date())
     private delay: number /*s*/
+    private timePeriod: number /*s*/
     private timer: NodeJS.Timeout | undefined = undefined // reference to interval timer; set later
 
     private resetHandler: () => void = () => {}
@@ -13,7 +14,8 @@ export class TimeSimulator {
     private continueHandler: () => void = () => {}
     private tickHandler: (time: Date) => void = () => {}
 
-    constructor(delay: number) {
+    constructor(timePeriod: number, delay: number) {
+        this.timePeriod = timePeriod
         this.delay = delay
         this.resetTimeBounds()
 
@@ -44,7 +46,7 @@ export class TimeSimulator {
 
     resetTimeBounds() {
         const currentTime = new Date()
-        const start = new Date(currentTime.getTime() - 1 * 60 * 60 * 1000 /*1h*/)
+        const start = new Date(currentTime.getTime() - this.timePeriod * 1000)
         normalizeTimestamp(start)
         
         this.start.value = start

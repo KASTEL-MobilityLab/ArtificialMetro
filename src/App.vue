@@ -3,22 +3,36 @@ import { computed, onMounted, ref, watch } from 'vue'
 import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
 import ViewSwitcher from './view/ViewSwitcher.vue'
-import { MapIcon, TimerIcon, TramFrontIcon } from 'lucide-vue-next'
+import { HistoryIcon, MapIcon, SignpostIcon, TentTreeIcon, TramFrontIcon } from 'lucide-vue-next'
 import LiveView from './view/LiveView.vue'
 import { SwitchBus } from './view/switch_bus'
 import StartupView from './view/StartupView.vue'
 import { Kiosk } from './model/kiosk'
 import MultiDeparturesView from './view/MultiDeparturesView.vue'
+import OnlineIndicator from './view/OnlineIndicator.vue'
+import { BaseStore } from './storage/base_store'
+import { BaseRepo } from './model/repos'
+import type { TramDeparture } from './model/vehicles'
 
-const KIOSK_INTERVAL = 30 * 1000 /*30s*/
+const KIOSK_INTERVAL = 45 * 1000 /*45s*/
+const CHECK_AVAILABILITY_INTERVAL = 5 * 60 * 1000 /*5min*/
+enum Views {
+  Live,
+  Timelapse,
+  Departures,
+  Trams,
+  Landscape,
+}
 
-type View = {title: string, icon: any, component: any, bus: SwitchBus }
+type View = { id: Views, title: string, icon: any, component: any, available: boolean, bus: SwitchBus }
 
 const kiosk = new Kiosk(KIOSK_INTERVAL)
 const views: View[] = [
-  { title: "Live", icon: MapIcon, component: LiveView },
-  { title: "Timelapse", icon: TimerIcon, component: TimelapseView },
-  { title: "Departures", icon: TramFrontIcon, component: MultiDeparturesView },
+  { id: Views.Live, title: "Live", icon: MapIcon, component: LiveView, available: true },
+  { id: Views.Timelapse, title: "Timelapse", icon: HistoryIcon, component: TimelapseView, available: false },
+  { id: Views.Departures, title: "Departures", icon: SignpostIcon, component: MultiDeparturesView, available: false },
+  { id: Views.Trams, title: "Trams", icon: TramFrontIcon, component: LiveView, available: false },
+  { id: Views.Landscape, title: "Landscape", icon: TentTreeIcon, component: LiveView, available: false },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
 })
@@ -36,11 +50,16 @@ watch(() => loading.value, (loading) => {
 
 onMounted(() => {
   registerKeyboardSwitcher()
+  checkAvailability()
+  setInterval(checkAvailability, CHECK_AVAILABILITY_INTERVAL)
 })
 
 kiosk.onTick(nextView)
 function nextView() {
-  const nextView = (activeView.value + 1) % views.length
+  let nextView = (activeView.value + 1) % views.length
+  while (!views[nextView].available) {
+    nextView = (nextView + 1) % views.length
+  }
   switchView(nextView)
 }
 
@@ -91,6 +110,44 @@ function manuallySwitchToView(view: number) {
   switchView(view)
 }
 
+function modifyView(view: Views, modificator: (view: View) => void) {
+  for (const v of views) {
+    if (v.id == view){
+      modificator(v)
+    }
+  }
+}
+
+function checkAvailability() {
+  checkTimelapseAvailability().then(available => {
+    modifyView(Views.Timelapse, v => v.available = available)
+  })
+  checkDeparturesAvailability().then(available => {
+    modifyView(Views.Departures, v => v.available = available)
+  })
+}
+
+async function checkTimelapseAvailability(): Promise<boolean> {
+  const store = await BaseStore.open()
+  const repos = []
+  repos.push(store.repo(BaseRepo.CarsharingStations))
+  repos.push(store.repo(BaseRepo.Scooters))
+  repos.push(store.repo(BaseRepo.Bikes))
+
+  for (const repo of repos) {
+    const availableTimestamps = await repo.getAvailableTimestamps()
+    if (availableTimestamps.length > 12) {
+      return true
+    }
+  }
+  return false
+}
+
+async function checkDeparturesAvailability(): Promise<boolean> {
+  const store = await BaseStore.open()
+  const repo = store.repo<TramDeparture>(BaseRepo.TramDepartures)
+  return !(await repo.isEmpty())
+}
 </script>
 
 <template>
@@ -104,9 +161,12 @@ function manuallySwitchToView(view: number) {
 
   <FooterBar>
     <template #left>
-      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value" @switch="manuallySwitchToView"></ViewSwitcher>
+      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value"
+        @switch="manuallySwitchToView"></ViewSwitcher>
     </template>
   </FooterBar>
+
+  <OnlineIndicator></OnlineIndicator>
 </template>
 
 <style scoped></style>

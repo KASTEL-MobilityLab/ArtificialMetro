@@ -1,29 +1,23 @@
+import type { Storeable } from "./storeable"
+
 export interface Coordinate {
     lat: number,
     lon: number,
 }
 
-export interface CarsharingStation {
+export interface Vehicle extends Storeable {
     id: string,
+    position: Coordinate,
+    provider: string,
+}
+
+export interface CarsharingStation extends Vehicle {
     available: number,
-    timestamp: Date,
-    position: Coordinate,
-    provider: string,
 }
 
-export interface Scooter {
-    id: string,
-    timestamp: Date,
-    position: Coordinate,
-    provider: string,
-}
+export interface Scooter extends Vehicle {}
 
-export interface Bike {
-    id: string,
-    timestamp: Date,
-    position: Coordinate,
-    provider: string,
-}
+export interface Bike extends Vehicle {}
 
 export interface TramDeparture {
     id: string,

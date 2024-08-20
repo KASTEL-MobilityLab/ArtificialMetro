@@ -8,6 +8,10 @@
   --accent-bg-color: #3584e4;
   --accent-fg-color: #fff;
 
+  --error-color: #ff7b63;
+  --error-bg-color: #c01c28;
+  --error-fg-color: #fff;
+
   --card-bg-color: #252525;
   --card-fg-color: #fff;
   --card-shade-color: rgba(0,0,0,0.36);

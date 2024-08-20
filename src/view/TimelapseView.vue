@@ -1,22 +1,22 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type Ref } from "vue"
-import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
+import type { Vehicle } from "@/model/vehicles"
 import { BaseStore } from "@/storage/base_store"
 import { BaseRepo } from "@/model/repos"
 import { TimeSimulator } from "@/model/simulator"
 import MapView from "./MapView.vue"
 import type { SwitchBusReceiver } from "./switch_bus"
+import { brands } from "@/model/brands"
+import type { CacheRepo } from "@/storage/cache_repo"
 
 
 const props = defineProps<{
     bus: SwitchBusReceiver,
 }>()
 
-let stations: Ref<CarsharingStation[]> = ref([])
-let scooters: Ref<Scooter[]> = ref([])
-let bikes: Ref<Bike[]> = ref([])
+let vehicles: Ref<Vehicle[]> = ref([])
 
-let simulator = new TimeSimulator(2 /*s*/)
+let simulator = new TimeSimulator(3 * 60 * 60 /*3h period*/, 1 /*1s delay*/)
 const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
 let currentTime = computed(() => {
     const time = simulator.time.value
@@ -24,21 +24,32 @@ let currentTime = computed(() => {
 })
 let simulationRunning = ref(false)
 
+const emptyRepos: Ref<BaseRepo[]> = ref([])
+let repos: CacheRepo<Vehicle, BaseRepo>[] = []
+
 onMounted(async () => {
+    let store = await BaseStore.open()
+    repos.push(store.repo(BaseRepo.CarsharingStations))
+    repos.push(store.repo(BaseRepo.Scooters))
+    repos.push(store.repo(BaseRepo.Bikes))
+
     props.bus.onResume(() => {
         simulator.resetTimeBounds()
         simulator.startSimulation()
+        checkDataAvailability()
     })
 
     props.bus.onSuspend(() => {
         simulator.stopSimulation()
     })
+
+    simulator.resetTimeBounds()
+    simulator.startSimulation()
+    checkDataAvailability()
 })
 
 simulator.onReset(() => {
-    stations.value = []
-    scooters.value = []
-    bikes.value = []
+    vehicles.value = []
 })
 
 simulator.onContinue(() => {
@@ -52,31 +63,40 @@ simulator.onStart(() => {
 })
 
 simulator.onTick(async time => {
-    let store = await BaseStore.open()
-    let carsharingRepo = store.repo<CarsharingStation>(BaseRepo.CarsharingStations)
-    let scooterRepo = store.repo<Scooter>(BaseRepo.Scooters)
-    let bikeRepo = store.repo<Bike>(BaseRepo.Bikes)
-
-    const new_stations = await carsharingRepo.forTimestamp(time)
-    const new_scooters = await scooterRepo.forTimestamp(time)
-    const new_bikes = await bikeRepo.forTimestamp(time)
-
-    // only show new data if there was a change found in the DB
-    if (new_stations.length > 0) {
-        stations.value = new_stations
-    }
-    if (new_scooters.length > 0) {
-        scooters.value = new_scooters
-    }
-    if (new_bikes.length > 0) {
-        bikes.value = new_bikes
+    vehicles.value = []
+    for (const repo of repos) {
+        const newVehicles = await repo.forTimestamp(time)
+        vehicles.value.push(...newVehicles)
     }
 })
+
+function checkDataAvailability() {
+    emptyRepos.value = []
+    repos.forEach(async repo => {
+        if (await repo.isEmpty()) {
+            emptyRepos.value.push(repo.kind())
+        }
+    })
+}
+
+const relevantBrands = computed(() => {
+  const skipRepos = emptyRepos.value
+  return brands.filter(b => !contains(b.repo, skipRepos))
+})
+
+function contains<T>(value: T, list: T[]): boolean {
+  for (const item of list) {
+    if (item == value) {
+      return true
+    }
+  }
+  return false
+}
 
 </script>
 
 <template>
-    <MapView :scooters="scooters" :stations="stations" :bikes="bikes" :bus="bus"></MapView>
+    <MapView :bus="bus" :brands="relevantBrands" :vehicles="vehicles"></MapView>
     <div class="current-time">
         <span class="live-dot" active="false"></span>
         {{ currentTime }}

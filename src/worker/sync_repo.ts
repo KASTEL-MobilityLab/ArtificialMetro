@@ -3,6 +3,8 @@ import type { Storeable } from "@/model/storeable"
 import { normalizeTimestamp } from "@/model/timestamp"
 import { BaseStore } from "@/storage/base_store"
 
+const CACHE_PERIOD = 3 * 60 * 60 * 1000 /* 3h */
+
 type LoadedHandler = (repo: BaseRepo) => void
 type Etag = string | null
 
@@ -21,9 +23,9 @@ export class SyncRepo<T extends Storeable> {
 
     async loadInitialData() {
         const currentDate = normalizeTimestamp(new Date())
-        const lastHour = new Date(currentDate.getTime() - 1 * 60 * 60 * 1000 /* 1h */)
+        const oldestHour = new Date(currentDate.getTime() - CACHE_PERIOD)
 
-        const url = `/v1/${this.repo}/${lastHour.toISOString()}/${currentDate.toISOString()}`
+        const url = `/v1/${this.repo}/${oldestHour.toISOString()}/${currentDate.toISOString()}`
         const { data, etag } = await fetchData<T>(url, this.etag)
         await storeData(data, this.repo)
         this.loadedHandler(this.repo)

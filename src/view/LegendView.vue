@@ -1,11 +1,13 @@
 <script setup lang="ts">
 export type LegendItem = {
+    name: string,
     icon: string,
     title: string,
 }
-const props = defineProps<{
+defineProps<{
     entries: LegendItem[]
 }>()
+
 </script>
 
 <template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue"
-import type { Bike, CarsharingStation, Scooter } from "@/model/vehicles"
+import type { Vehicle } from "@/model/vehicles"
 import PresetScaler from "./PresetScaler.vue"
 import type { SwitchBusReceiver } from "./switch_bus"
 import { TileProvider } from "./map/tile_provider"
@@ -9,40 +9,20 @@ import TileRenderer from "./map/TileRenderer.vue"
 import MarkerRenderer from "./map/MarkerRenderer.vue"
 import type { Marker } from "./map/tiles"
 import { SpriteManager } from "./map/sprite_manager"
-import LegendView from "./LegendView.vue"
-import { brands } from "@/model/brands"
+import LegendView, { type LegendItem } from "./LegendView.vue"
 import { PRESETS } from "@/model/bounds"
 
 const props = defineProps<{
-  stations: CarsharingStation[],
-  scooters: Scooter[],
-  bikes: Bike[],
+  vehicles: Vehicle[],
   bus: SwitchBusReceiver,
+  brands: LegendItem[],
 }>()
 
-const bikeMarker = computed<Marker[]>(() => {
-  return props.bikes.map(bike => {
+const vehicleMarker = computed<Marker[]>(() => {
+  return props.vehicles.map(vehicle => {
     return {
-      position: bike.position,
-      sprite: bike.provider,
-    }
-  })
-})
-
-const scooterMarker = computed<Marker[]>(() => {
-  return props.scooters.map(scooter => {
-    return {
-      position: scooter.position,
-      sprite: scooter.provider,
-    }
-  })
-})
-
-const stationMarker = computed<Marker[]>(() => {
-  return props.stations.map(station => {
-    return {
-      position: station.position,
-      sprite: station.provider,
+      position: vehicle.position,
+      sprite: vehicle.provider,
     }
   })
 })
@@ -69,7 +49,7 @@ watch(() => props.bus, (bus) => {
 })
 
 const spriteManager = new SpriteManager()
-spriteManager.fetchSprites(brands.map(provider => {
+spriteManager.fetchSprites(props.brands.map(provider => {
   return {
     name: provider.name,
     url: provider.icon,
@@ -89,9 +69,7 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
 
     <LocationFrame :center="center" :zoom="zoom" #default="data">
       <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>
-      <MarkerRenderer v-bind="data" :marker="stationMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
-      <MarkerRenderer v-bind="data" :marker="scooterMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
-      <MarkerRenderer v-bind="data" :marker="bikeMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
+      <MarkerRenderer v-bind="data" :marker="vehicleMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
     </LocationFrame>
 
   </div>
@@ -99,5 +77,4 @@ const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidad
   <LegendView :entries="brands"></LegendView>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
