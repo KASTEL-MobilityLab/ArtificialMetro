@@ -47,6 +47,7 @@ export async function extractDepartures(response: Response, station: string): Pr
                 id,
                 timestamp: currentTime,
                 line: record.servingLine.symbol,
+                trainNumber: record.servingLine.trainNum,
                 track: record.platform,
                 direction: record.servingLine.direction,
                 station,
@@ -105,6 +106,7 @@ if (import.meta.vitest) {
                         key: "54321",
                         symbol: "21",
                         direction: "up",
+                        trainNum: "1234",
                     },
                     dateTime: {
                         year: "2024",
@@ -127,6 +129,7 @@ if (import.meta.vitest) {
                         key: "1234",
                         symbol: "S42",
                         direction: "down",
+                        trainNum: "4321",
                     },
                     dateTime: {
                         year: "2024",
@@ -146,6 +149,7 @@ if (import.meta.vitest) {
         const first = departures[0]
         expect(first.id).toEqual("Earth-54321")
         expect(first.line).toEqual("21")
+        expect(first.trainNumber).toEqual("1234")
         expect(first.direction).toEqual("up")
         expect(first.track).toEqual("A")
         expect(first.planned).toEqual(new Date("2024-07-11T22:00:00Z"))
@@ -154,6 +158,7 @@ if (import.meta.vitest) {
         const last = departures[1]
         expect(last.id).toEqual("Earth-1234")
         expect(last.line).toEqual("S42")
+        expect(last.trainNumber).toEqual("4321")
         expect(last.direction).toEqual("down")
         expect(last.track).toEqual("B")
         expect(last.planned).toEqual(new Date("2024-07-11T22:17:00Z"))
