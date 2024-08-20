@@ -37,7 +37,6 @@ export async function extractDepartures(response: Response, station: string): Pr
             })[0] ?? new Date()
     )
     const timeAdjustment = (serverTime.getTime() - currentTime.getTime())
-    console.log("Adjust time", serverTime, currentTime, timeAdjustment, timeAdjustment / (60 * 60 * 1000))
     for (const record of json.departureList) {
         try {
             const planned = parseTimestamp(record.dateTime, currentTime, timeAdjustment)
