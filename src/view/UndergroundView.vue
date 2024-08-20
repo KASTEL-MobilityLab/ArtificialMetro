@@ -13,6 +13,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { BaseStore } from '@/storage/base_store';
 import { BaseRepo } from '@/model/repos';
 import type { CacheRepo } from '@/storage/cache_repo';
+import { easeInOutCubic, easeInOutQuad, easeInOutSine, interpolateCoordinates } from './map/Coordinate';
 
 const VELVET = "#902C3E" // Velvet Underground
 
@@ -25,6 +26,38 @@ let tramRepo = ref<CacheRepo<TramDeparture, BaseRepo> | null>(null)
 let zoom = 16
 let center = { lon: 8.41, lat: 49.0054 }
 const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
+
+enum Station {
+    MarktplatzKaiserstrasse = "7001003",
+    MarktplatzPyramide = "7001011",
+    Europaplatz = "7001004",
+    EttlingerTor = "7001012",
+    Kongresszentrum = "7001013",
+    Kronenplatz = "7001002",
+    DurlacherTor = "7001001",
+}
+
+const stationLocations: { [key: string]: Coordinate }= {
+    [Station.MarktplatzKaiserstrasse]: { lat: 49.009656, lon: 8.403112 },
+    [Station.MarktplatzPyramide]: { lat: 49.009302, lon: 8.403918 },
+    [Station.Europaplatz]: { lat: 49.010013, lon: 8.395048 },
+    [Station.EttlingerTor]: { lat: 49.005444, lon: 8.403502 },
+    [Station.Kongresszentrum]: { lat: 49.002508, lon: 8.403188 },
+    [Station.Kronenplatz]: { lat: 49.009249, lon: 8.410788 },
+    [Station.DurlacherTor]: { lat: 49.008749, lon: 8.418109 },
+}
+
+const connections: [Station, Station][] = [
+    [Station.DurlacherTor, Station.Kronenplatz],
+    [Station.Kronenplatz, Station.MarktplatzKaiserstrasse],
+    [Station.Kronenplatz, Station.MarktplatzPyramide],
+    [Station.MarktplatzKaiserstrasse, Station.Europaplatz],
+    [Station.MarktplatzPyramide, Station.EttlingerTor],
+    [Station.EttlingerTor, Station.Kongresszentrum],
+]
+
+const relevantSections = [connections, connections.map(c => [c[1], c[0]])].flat() as [Station, Station][]
+
 
 const stations: { [key: string]: Coordinate } = {
     marktplatzKaiserstrasse: { lat: 49.009656, lon: 8.403112 },
@@ -45,19 +78,11 @@ const stationConnections = [
     { start: stations.ettlingerTor, end: stations.kongresszentrum },
 ]
 
-const stationMarker = ref<Marker[]>([])
 const spriteManager = new SpriteManager()
 spriteManager.fetchSprite({
     name: 'station',
     size: 20,
     url: tramStation,
-}).then(() => {
-    stationMarker.value = Object.keys(stations).map<Marker>(key => {
-        return {
-            position: stations[key],
-            sprite: "station",
-        }
-    })
 })
 
 const currentTime = ref(new Date())
@@ -80,20 +105,27 @@ const currentTrainMarkers = computed<Marker[]>(() => {
 onMounted(async () => {
     const baseStore = await BaseStore.open()
     tramRepo.value = baseStore.repo<TramDeparture>(BaseRepo.TramDepartures)
-    tramRepo.value.onUpdate(() => updateSections())
-    updateSections()
+    tramRepo.value.onUpdate(() => updateAllSections())
+    updateAllSections()
 
     setInterval(updateTime, 2 * 1000 /*2s*/)
 })
 
-
-async function updateSections() {
+async function updateAllSections() {
     if (tramRepo.value == null) return
     const departures = await tramRepo.value.current()
-    const startDepartures = departures.filter(d => d.station == "7001001")
-    const endDepartures = departures.filter(d => d.station == "7001002")
+    sections.splice(0, sections.length)
+    for (const section of relevantSections) {
+        console.log('sec', section)
+        updateSection(section, departures)
+    }
+}
 
-    sections.splice(0, sections.length, ...startDepartures
+async function updateSection(section: [Station, Station], departures: TramDeparture[]) {
+    const startDepartures = departures.filter(d => d.station == section[0])
+    const endDepartures = departures.filter(d => d.station == section[1])
+
+    sections.push(...startDepartures
         .map(d => matchDeparture(d, endDepartures))
         .filter(d => d != null)
         .map(d => d as Section)
@@ -111,23 +143,26 @@ function matchDeparture(departure: TramDeparture, otherDepartures: TramDeparture
 
 watch(() => currentTime.value, time => {
     const activeTrains = sections.filter(s => {
-        const departureInPast = new Date(s[0].realtime) < time
-        const arrivalInFuture = new Date(s[1].realtime) > time
-        return departureInPast && arrivalInFuture
+        return trainActiveInSection(new Date(s[0].realtime), new Date(s[1].realtime), time)
     })
     currentTrains.value = activeTrains.map(train => {
         const startTime = new Date(train[0].realtime)
         const endTime = new Date(train[1].realtime)
         const timeDifference = endTime.getTime() - startTime.getTime()
         const factor = (currentTime.value.getTime() - startTime.getTime()) / timeDifference
-        const currentPosition = { 
-            lat: stations.durlacherTor.lat - (stations.durlacherTor.lat - stations.kronenplatz.lat) * factor, 
-            lon: stations.durlacherTor.lon - (stations.durlacherTor.lon - stations.kronenplatz.lon) * factor, 
-        }
+
+        const startStation = stationLocations[train[0].station]
+        const endStation = stationLocations[train[1].station]
+        const currentPosition = interpolateCoordinates(startStation, endStation, factor, easeInOutQuad)
         return currentPosition
     })
-    console.log(activeTrains, currentTrains.value)
 })
+
+function trainActiveInSection(departure: Date, arrival: Date, time: Date): boolean {
+    const departureInPast = departure < time
+    const arrivalInFuture = arrival > time
+    return departureInPast && arrivalInFuture
+}
 
 
 
