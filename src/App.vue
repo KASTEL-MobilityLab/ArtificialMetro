@@ -7,6 +7,7 @@ import { HistoryIcon, MapIcon, SignpostIcon, TentTreeIcon, TramFrontIcon } from 
 import LiveView from './view/LiveView.vue'
 import { SwitchBus } from './view/switch_bus'
 import StartupView from './view/StartupView.vue'
+import UndergroundView from './view/UndergroundView.vue'
 import { Kiosk } from './model/kiosk'
 import MultiDeparturesView from './view/MultiDeparturesView.vue'
 import OnlineIndicator from './view/OnlineIndicator.vue'
@@ -31,7 +32,7 @@ const views: View[] = [
   { id: Views.Live, title: "Live", icon: MapIcon, component: LiveView, available: true },
   { id: Views.Timelapse, title: "Timelapse", icon: HistoryIcon, component: TimelapseView, available: false },
   { id: Views.Departures, title: "Departures", icon: SignpostIcon, component: MultiDeparturesView, available: false },
-  { id: Views.Trams, title: "Trams", icon: TramFrontIcon, component: LiveView, available: false },
+  { id: Views.Trams, title: "Underground", icon: TramFrontIcon, component: UndergroundView, available: true },
   { id: Views.Landscape, title: "Landscape", icon: TentTreeIcon, component: LiveView, available: false },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
@@ -112,7 +113,7 @@ function manuallySwitchToView(view: number) {
 
 function modifyView(view: Views, modificator: (view: View) => void) {
   for (const v of views) {
-    if (v.id == view){
+    if (v.id == view) {
       modificator(v)
     }
   }
@@ -161,8 +162,8 @@ async function checkDeparturesAvailability(): Promise<boolean> {
 
   <FooterBar>
     <template #left>
-      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value"
-        @switch="manuallySwitchToView"></ViewSwitcher>
+      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value" @switch="manuallySwitchToView">
+      </ViewSwitcher>
     </template>
   </FooterBar>
 

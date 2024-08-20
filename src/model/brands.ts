@@ -23,3 +23,5 @@ export const tramLines: { [key: string]: { color: string, type: "tram" | "bus" }
     "71": { color: "#B2A291", type: "bus" },
     "125": { color: "#808285", type: "bus" },
 }
+
+export const tramStation = "/brands/tram-kvv.svg"
