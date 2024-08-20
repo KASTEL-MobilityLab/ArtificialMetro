@@ -31,10 +31,13 @@ export async function extractDepartures(response: Response, station: string): Pr
     const serverTime = new Date(
         (json.parameters as any[])
             .filter(p => p.name == "serverTime")
-            .map(p => p.value)[0] ?? new Date()
+            .map(p => {
+                // make sure to interpret serverTime as UTC
+                return p.value.substr(-1) == "Z" ? p.value : `${p.value}Z`
+            })[0] ?? new Date()
     )
-    // Adjust time in 1h intervals
-    const timeAdjustment = (serverTime.getTime() - currentTime.getTime()) / 60 * 60 * 1000
+    const timeAdjustment = (serverTime.getTime() - currentTime.getTime())
+    console.log("Adjust time", serverTime, currentTime, timeAdjustment, timeAdjustment / (60 * 60 * 1000))
     for (const record of json.departureList) {
         try {
             const planned = parseTimestamp(record.dateTime, currentTime, timeAdjustment)
@@ -69,7 +72,9 @@ function parseTimestamp(record: any, fallback: Date, timeAdjustment: number): Da
     const day = record.day
     const hour = record.hour
     const minute = record.minute
-    const timestamp = new Date(`${year}-${month}-${day} ${hour}:${minute}`)
+    // The timestamp is created in UTC time, bc we take care of the adjustments ourselves
+    // Not using UTC here would cause an additional timezone adjustment
+    const timestamp = new Date(`${year}-${month}-${day} ${hour}:${minute}Z`)
     const adjustedTimestamp = new Date(timestamp.getTime() - timeAdjustment)
     adjustedTimestamp.setSeconds(0)
     adjustedTimestamp.setMilliseconds(0)
