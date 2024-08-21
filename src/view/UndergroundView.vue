@@ -21,7 +21,7 @@ const VELVET = "#902C3E" // Velvet Underground
 type Journey = [TramDeparture, TramDeparture]
 type Train = { position: Coordinate, line: string }
 
-defineProps<{
+const props = defineProps<{
     bus: SwitchBusReceiver,
 }>()
 
@@ -56,10 +56,18 @@ const stationLines: Line[] = stationConnections.map(connection => {
     return [stationGeopositions[connection[0]], stationGeopositions[connection[1]]] as Line
 })
 
-
+let timer: NodeJS.Timeout | undefined =  undefined
 const currentTime = ref(new Date())
 function updateTime() {
     currentTime.value = new Date()
+}
+function startTimer() {
+    if (timer != undefined) return
+    timer = setInterval(updateTime, 0.1 * 1000 /*0.1s*/)
+}
+function stopTimer() {
+    clearTimeout(timer)
+    timer = undefined
 }
 const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
 let displayTime = computed(() => {
@@ -145,7 +153,13 @@ onMounted(async () => {
     tramRepo.value.onUpdate(() => updateJourneys())
     updateJourneys()
 
-    setInterval(updateTime, 0.1 * 1000 /*0.5s*/)
+    startTimer()
+    props.bus.onResume(() => {
+        startTimer()
+    })
+    props.bus.onSuspend(() => {
+        stopTimer()
+    })
 })
 
 
