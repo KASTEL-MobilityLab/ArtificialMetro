@@ -25,6 +25,7 @@ const props = defineProps<{
     bus: SwitchBusReceiver,
 }>()
 
+let shutterActive = ref(false)
 let tramRepo = ref<CacheRepo<TramDeparture, BaseRepo> | null>(null)
 
 let zoom = 16
@@ -87,11 +88,13 @@ const currentTrainMarkers = computed<Marker[]>(() => {
 async function updateJourneys() {
     if (tramRepo.value == null) return
 
+    shutterActive.value = true
     const departures = await tramRepo.value.current()
     journeys.splice(0, journeys.length)
     for (const track of tracks) {
         journeys.push(...journeysInTrack(track, departures))
     }
+    setTimeout(() => shutterActive.value = false, 3 * 1000 /*3s*/)
 }
 
 function journeysInTrack(track: [Station, Station], departures: TramDeparture[]): Journey[] {
@@ -178,7 +181,43 @@ onMounted(async () => {
             {{ displayTime }}
         </div>
 
+        <div class="shutter" :class="{ active: shutterActive }">
+            <img src="../../public/brands/underground-tram.svg" />
+        </div>
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.shutter {
+    display: flex;
+    position: absolute;
+
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    backdrop-filter: grayscale(1);
+    background: rgba(0, 0, 0, 0.7);
+    opacity: 0;
+
+    transition: 1s ease-in-out;
+}
+
+.shutter.active {
+    opacity: 1;
+}
+
+.shutter img {
+    width: 200px;
+}
+.shutter p {
+    font-size: 20px;
+    color: var(--view-fg-color);
+}
+</style>
