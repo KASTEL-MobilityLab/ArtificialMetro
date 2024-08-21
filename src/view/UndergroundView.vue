@@ -5,7 +5,7 @@ import MarkerRenderer from './map/MarkerRenderer.vue';
 import type { SwitchBusReceiver } from './switch_bus';
 import { TileProvider } from './map/tile_provider';
 import { SpriteManager } from './map/sprite_manager';
-import { tramStation } from '@/model/brands';
+import { tramLines, tramStation } from '@/model/brands';
 import type { Marker } from './map/tiles';
 import type { TramDeparture, Coordinate } from '@/model/vehicles';
 import LineRenderer from './map/LineRenderer.vue';
@@ -37,7 +37,7 @@ enum Station {
     DurlacherTor = "7001001",
 }
 
-const stationLocations: { [key: string]: Coordinate }= {
+const stationLocations: { [key: string]: Coordinate } = {
     [Station.MarktplatzKaiserstrasse]: { lat: 49.009656, lon: 8.403112 },
     [Station.MarktplatzPyramide]: { lat: 49.009302, lon: 8.403918 },
     [Station.Europaplatz]: { lat: 49.010013, lon: 8.395048 },
@@ -84,6 +84,22 @@ spriteManager.fetchSprite({
     size: 20,
     url: tramStation,
 })
+Object.keys(tramLines).forEach(line => {
+    const brand = tramLines[line]
+    const canvas = new OffscreenCanvas(20, 20)
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.fillStyle = brand.color
+    ctx.beginPath()
+    ctx.roundRect(0, 0, 20, 20, 3)
+    // ctx.fillRect(0, 0, 20, 20)
+    ctx.fill()
+    ctx.fillStyle = "white"
+    ctx.textAlign = "center"
+    ctx.font = "bold 15px sans-serif"
+    ctx.fillText(line, 10, 15)
+    spriteManager.registerSprite({ name: line, size: 20 }, canvas)
+})
 
 const currentTime = ref(new Date())
 function updateTime() {
@@ -92,12 +108,12 @@ function updateTime() {
 
 type Section = [TramDeparture, TramDeparture]
 const sections: Section[] = []
-const currentTrains = ref<Coordinate[]>([])
+const currentTrains = ref<{ position: Coordinate, line: string }[]>([])
 const currentTrainMarkers = computed<Marker[]>(() => {
     return currentTrains.value.map(t => {
         return {
-            position: t,
-            sprite: "station",
+            position: t.position,
+            sprite: t.line,
         }
     })
 })
@@ -108,7 +124,7 @@ onMounted(async () => {
     tramRepo.value.onUpdate(() => updateAllSections())
     updateAllSections()
 
-    setInterval(updateTime, 2 * 1000 /*2s*/)
+    setInterval(updateTime, 0.1 * 1000 /*0.5s*/)
 })
 
 async function updateAllSections() {
@@ -116,9 +132,9 @@ async function updateAllSections() {
     const departures = await tramRepo.value.current()
     sections.splice(0, sections.length)
     for (const section of relevantSections) {
-        console.log('sec', section)
         updateSection(section, departures)
     }
+    console.log("SECS", sections)
 }
 
 async function updateSection(section: [Station, Station], departures: TramDeparture[]) {
@@ -154,7 +170,7 @@ watch(() => currentTime.value, time => {
         const startStation = stationLocations[train[0].station]
         const endStation = stationLocations[train[1].station]
         const currentPosition = interpolateCoordinates(startStation, endStation, factor, easeInOutQuad)
-        return currentPosition
+        return { position: currentPosition, line: train[0].line }
     })
 })
 
