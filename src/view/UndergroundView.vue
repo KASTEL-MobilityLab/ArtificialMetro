@@ -8,12 +8,13 @@ import { SpriteManager } from './map/sprite_manager';
 import { tramLines, tramStation } from '@/model/brands';
 import type { Marker } from './map/tiles';
 import type { TramDeparture, Coordinate } from '@/model/vehicles';
-import LineRenderer from './map/LineRenderer.vue';
+import LineRenderer, { type Line } from './map/LineRenderer.vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { BaseStore } from '@/storage/base_store';
 import { BaseRepo } from '@/model/repos';
 import type { CacheRepo } from '@/storage/cache_repo';
 import { easeInOutQuad, interpolateCoordinates } from './map/Coordinate';
+import { Station, stationConnections, stationGeopositions } from '@/model/stations';
 
 const VELVET = "#902C3E" // Velvet Underground
 
@@ -27,60 +28,11 @@ let zoom = 16
 let center = { lon: 8.41, lat: 49.0054 }
 const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
 
-enum Station {
-    MarktplatzKaiserstrasse = "7001003",
-    MarktplatzPyramide = "7001011",
-    Europaplatz = "7001004",
-    EttlingerTor = "7001012",
-    Kongresszentrum = "7001013",
-    Kronenplatz = "7001002",
-    DurlacherTor = "7001001",
-}
-
-const stationLocations: { [key: string]: Coordinate } = {
-    [Station.MarktplatzKaiserstrasse]: { lat: 49.009656, lon: 8.403112 },
-    [Station.MarktplatzPyramide]: { lat: 49.009302, lon: 8.403918 },
-    [Station.Europaplatz]: { lat: 49.010013, lon: 8.395048 },
-    [Station.EttlingerTor]: { lat: 49.005444, lon: 8.403502 },
-    [Station.Kongresszentrum]: { lat: 49.002508, lon: 8.403188 },
-    [Station.Kronenplatz]: { lat: 49.009249, lon: 8.410788 },
-    [Station.DurlacherTor]: { lat: 49.008749, lon: 8.418109 },
-}
-
-const connections: [Station, Station][] = [
-    [Station.DurlacherTor, Station.Kronenplatz],
-    [Station.Kronenplatz, Station.MarktplatzKaiserstrasse],
-    [Station.Kronenplatz, Station.MarktplatzPyramide],
-    [Station.MarktplatzKaiserstrasse, Station.Europaplatz],
-    [Station.MarktplatzPyramide, Station.EttlingerTor],
-    [Station.EttlingerTor, Station.Kongresszentrum],
-]
-
-const relevantSections = [connections, connections.map(c => [c[1], c[0]])].flat() as [Station, Station][]
-
-
-const stations: { [key: string]: Coordinate } = {
-    marktplatzKaiserstrasse: { lat: 49.009656, lon: 8.403112 },
-    marktplatzPyramide: { lat: 49.009302, lon: 8.403918 },
-    europaplatz: { lat: 49.010013, lon: 8.395048 },
-    ettlingerTor: { lat: 49.005444, lon: 8.403502 },
-    kongresszentrum: { lat: 49.002508, lon: 8.403188 },
-    kronenplatz: { lat: 49.009249, lon: 8.410788 },
-    durlacherTor: { lat: 49.008749, lon: 8.418109 },
-}
-const stationConnections = [
-    { start: stations.europaplatz, end: stations.marktplatzKaiserstrasse },
-    { start: stations.marktplatzKaiserstrasse, end: stations.kronenplatz },
-    { start: stations.kronenplatz, end: stations.durlacherTor },
-    { start: stations.kronenplatz, end: stations.marktplatzPyramide },
-    { start: stations.marktplatzKaiserstrasse, end: stations.marktplatzPyramide },
-    { start: stations.marktplatzPyramide, end: stations.ettlingerTor },
-    { start: stations.ettlingerTor, end: stations.kongresszentrum },
-]
+const relevantSections = [stationConnections, stationConnections.map(c => [c[1], c[0]])].flat() as [Station, Station][]
 
 const stationMarker: Marker[] = Object.values(Station).map(s => {
     return {
-        position: stationLocations[s],
+        position: stationGeopositions[s],
         sprite: "station",
     }
 })
@@ -180,8 +132,8 @@ watch(() => currentTime.value, time => {
         const timeDifference = endTime.getTime() - startTime.getTime()
         const factor = (currentTime.value.getTime() - startTime.getTime()) / timeDifference
 
-        const startStation = stationLocations[train[0].station]
-        const endStation = stationLocations[train[1].station]
+        const startStation = stationGeopositions[train[0].station]
+        const endStation = stationGeopositions[train[1].station]
         const currentPosition = interpolateCoordinates(startStation, endStation, factor, easeInOutQuad)
         return { position: currentPosition, line: train[0].line }
     })
@@ -192,6 +144,12 @@ function trainActiveInSection(departure: Date, arrival: Date, time: Date): boole
     const arrivalInFuture = arrival > time
     return departureInPast && arrivalInFuture
 }
+
+const stationLines = computed(() => {
+    return stationConnections.map(connection => {
+        return [stationGeopositions[connection[0]], stationGeopositions[connection[1]]] as Line
+    })
+})
 </script>
 
 <template>
@@ -199,7 +157,7 @@ function trainActiveInSection(departure: Date, arrival: Date, time: Date): boole
 
         <LocationFrame :center="center" :zoom="zoom" #default="data">
             <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>
-            <LineRenderer v-bind="data" :lines="stationConnections" :color="VELVET"></LineRenderer>
+            <LineRenderer v-bind="data" :lines="stationLines" :color="VELVET"></LineRenderer>
             <MarkerRenderer v-bind="data" :marker="stationMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
             <MarkerRenderer v-bind="data" :marker="currentTrainMarkers" :sprites="spriteManager" :size="20">
             </MarkerRenderer>

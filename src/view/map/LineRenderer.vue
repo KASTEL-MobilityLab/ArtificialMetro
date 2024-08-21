@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import type { Coordinate } from '@/model/vehicles';
 import { onMounted, ref, watch } from 'vue';
-import { TILE_SIZE, posOnTile, tileFromCoords, type BoundingBox, type Dimensions, type Marker, type Offset, type TileCoordinate, type ViewCoordinate } from './tiles';
-import type { SpriteManager } from './sprite_manager';
+import { TILE_SIZE, posOnTile, tileFromCoords, type BoundingBox, type Dimensions, type Offset, type TileCoordinate, type ViewCoordinate } from './tiles';
 
-export type Line = { start: Coordinate, end: Coordinate }
+export type Line = [Coordinate, Coordinate]
 
 const props = defineProps<{
     center: Coordinate,
@@ -45,8 +44,8 @@ function renderLines() {
 }
 
 function drawLine(line: Line, ctx: OffscreenCanvasRenderingContext2D) {
-    const start = relativeTile(line.start)
-    const end = relativeTile(line.end)
+    const start = relativeTile(line[0])
+    const end = relativeTile(line[1])
     const startPos = {x: start.tile.x * TILE_SIZE + start.offset.x, y: start.tile.y * TILE_SIZE + start.offset.y}
     const endPos = {x: end.tile.x * TILE_SIZE + end.offset.x, y: end.tile.y * TILE_SIZE + end.offset.y}
     ctx.strokeStyle = props.color
