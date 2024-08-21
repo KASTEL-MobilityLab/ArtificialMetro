@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Coordinate } from '@/model/vehicles';
+import type { Coordinate } from './Coordinate';
 import { onMounted, ref, watch } from 'vue';
 import { TILE_SIZE, type BoundingBox, type Dimensions, type Offset, type TileCoordinate, type ViewCoordinate } from './tiles';
 import type { TileProvider } from './tile_provider';
