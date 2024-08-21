@@ -92,7 +92,6 @@ Object.keys(tramLines).forEach(line => {
     ctx.fillStyle = brand.color
     ctx.beginPath()
     ctx.roundRect(0, 0, 20, 20, 3)
-    // ctx.fillRect(0, 0, 20, 20)
     ctx.fill()
     ctx.fillStyle = "white"
     ctx.textAlign = "center"
@@ -134,17 +133,18 @@ async function updateAllSections() {
     for (const section of relevantSections) {
         updateSection(section, departures)
     }
-    console.log("SECS", sections)
 }
 
 async function updateSection(section: [Station, Station], departures: TramDeparture[]) {
     const startDepartures = departures.filter(d => d.station == section[0])
     const endDepartures = departures.filter(d => d.station == section[1])
+    const currentTime = new Date()
 
     sections.push(...startDepartures
         .map(d => matchDeparture(d, endDepartures))
         .filter(d => d != null)
         .map(d => d as Section)
+        .filter(d => new Date(d[0].realtime) >= currentTime || new Date(d[1].realtime) >=  currentTime)
     )
 }
 
@@ -179,9 +179,6 @@ function trainActiveInSection(departure: Date, arrival: Date, time: Date): boole
     const arrivalInFuture = arrival > time
     return departureInPast && arrivalInFuture
 }
-
-
-
 </script>
 
 <template>
