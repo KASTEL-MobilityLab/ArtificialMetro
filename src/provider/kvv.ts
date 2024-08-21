@@ -47,7 +47,7 @@ export async function extractDepartures(response: Response, station: string): Pr
                 id,
                 timestamp: currentTime,
                 line: record.servingLine.symbol,
-                trainNumber: record.servingLine.trainNum,
+                trainNumber: record.servingLine.trainNum ?? record.servingLine.key,
                 track: record.platform,
                 direction: record.servingLine.direction,
                 station,
