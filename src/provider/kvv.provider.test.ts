@@ -28,6 +28,7 @@ describe.skipIf(!isProviderTest)('Provider Test', () => {
         expect(departureList.length).toBeGreaterThanOrEqual(1)
 
         for (const departure of departureList) {
+            expect('stopID' in departure).toBeTruthy()
             expect('platform' in departure).toBeTruthy()
             expect('servingLine' in departure).toBeTruthy()
             assertServingLine(departure.servingLine)

@@ -17,13 +17,13 @@ export class KVVProvider implements Provider<TramDeparture> {
     async fetch(): Promise<TramDeparture[]> {
         const url = endpoint.replace("{LIMIT}", `${LIMIT}`).replace("{STATION}", this.station)
         const response = await fetch(url, { headers: { 'accept-encoding': 'deflate' } })
-        const departures = await extractDepartures(response, this.station)
+        const departures = await extractDepartures(response)
         return departures
     }
 
 }
 
-export async function extractDepartures(response: Response, station: string): Promise<TramDeparture[]> {
+export async function extractDepartures(response: Response): Promise<TramDeparture[]> {
     const departures = []
     const currentTime = new Date()
 
@@ -41,6 +41,7 @@ export async function extractDepartures(response: Response, station: string): Pr
         try {
             const planned = parseTimestamp(record.dateTime, currentTime, timeAdjustment)
             const realtime = parseTimestamp(record.realDateTime, planned, timeAdjustment)
+            const station = record.stopID ?? ""
             const id = `${station}-${record.servingLine.key}`
 
             const departure: TramDeparture = {
@@ -91,7 +92,7 @@ if (import.meta.vitest) {
             departureList: [],
         }
         const response = { json: async () => json } as any
-        const departures = await extractDepartures(response, "Earth")
+        const departures = await extractDepartures(response)
 
         expect(departures.length).toEqual(0)
     })
@@ -101,6 +102,7 @@ if (import.meta.vitest) {
             parameters: [{ name: "serverTime", value: (new Date()).toISOString() }],
             departureList: [
                 {
+                    stopID: "Earth",
                     platform: "A",
                     servingLine: {
                         key: "54321",
@@ -124,6 +126,7 @@ if (import.meta.vitest) {
                     },
                 },
                 {
+                    stopID: "Mars",
                     platform: "B",
                     servingLine: {
                         key: "1234",
@@ -142,7 +145,7 @@ if (import.meta.vitest) {
             ]
         }
         const response = { json: async () => json } as any
-        const departures = await extractDepartures(response, "Earth")
+        const departures = await extractDepartures(response)
 
         expect(departures.length).toEqual(2)
 
@@ -152,15 +155,17 @@ if (import.meta.vitest) {
         expect(first.trainNumber).toEqual("1234")
         expect(first.direction).toEqual("up")
         expect(first.track).toEqual("A")
+        expect(first.station).toEqual("Earth")
         expect(first.planned).toEqual(new Date("2024-07-11T22:00:00Z"))
         expect(first.realtime).toEqual(new Date("2024-07-11T22:15:00Z"))
 
         const last = departures[1]
-        expect(last.id).toEqual("Earth-1234")
+        expect(last.id).toEqual("Mars-1234")
         expect(last.line).toEqual("S42")
         expect(last.trainNumber).toEqual("4321")
         expect(last.direction).toEqual("down")
         expect(last.track).toEqual("B")
+        expect(last.station).toEqual("Mars")
         expect(last.planned).toEqual(new Date("2024-07-11T22:17:00Z"))
         expect(last.realtime).toEqual(new Date("2024-07-11T22:17:00Z"))
     })
