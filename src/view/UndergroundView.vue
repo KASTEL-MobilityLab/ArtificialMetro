@@ -5,7 +5,7 @@ import MarkerRenderer from './map/MarkerRenderer.vue';
 import type { SwitchBusReceiver } from './switch_bus';
 import { TileProvider } from './map/tile_provider';
 import { SpriteManager } from './map/sprite_manager';
-import { tramLines, tramStation } from '@/model/brands';
+import { tramLineSprite, tramLines, tramStation } from '@/model/brands';
 import type { Marker } from './map/tiles';
 import type { TramDeparture, Coordinate } from '@/model/vehicles';
 import LineRenderer, { type Line } from './map/LineRenderer.vue';
@@ -18,6 +18,9 @@ import { Station, stationConnections, stationGeopositions } from '@/model/statio
 
 const VELVET = "#902C3E" // Velvet Underground
 
+type Journey = [TramDeparture, TramDeparture]
+type Train = { position: Coordinate, line: string }
+
 defineProps<{
     bus: SwitchBusReceiver,
 }>()
@@ -28,15 +31,6 @@ let zoom = 16
 let center = { lon: 8.41, lat: 49.0054 }
 const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
 
-const relevantSections = [stationConnections, stationConnections.map(c => [c[1], c[0]])].flat() as [Station, Station][]
-
-const stationMarker: Marker[] = Object.values(Station).map(s => {
-    return {
-        position: stationGeopositions[s],
-        sprite: "station",
-    }
-})
-
 const spriteManager = new SpriteManager()
 spriteManager.fetchSprite({
     name: 'station',
@@ -44,35 +38,38 @@ spriteManager.fetchSprite({
     url: tramStation,
 })
 Object.keys(tramLines).forEach(line => {
-    const brand = tramLines[line]
-    const canvas = new OffscreenCanvas(20, 20)
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    ctx.fillStyle = brand.color
-    ctx.beginPath()
-    ctx.roundRect(0, 0, 20, 20, 3)
-    ctx.fill()
-    ctx.fillStyle = "white"
-    ctx.textAlign = "center"
-    ctx.font = "bold 15px sans-serif"
-    ctx.fillText(line, 10, 15)
-    spriteManager.registerSprite({ name: line, size: 20 }, canvas)
+    const sprite = tramLineSprite(line, 20)
+    if (sprite) {
+        spriteManager.registerSprite({ name: line, size: 20 }, sprite)
+    }
 })
 
+// Tracks are between two stations in both directions
+const tracks = [stationConnections, stationConnections.map(c => [c[1], c[0]])].flat() as [Station, Station][]
+const stationMarker: Marker[] = Object.values(Station).map(s => {
+    return {
+        position: stationGeopositions[s],
+        sprite: "station",
+    }
+})
+const stationLines: Line[] = stationConnections.map(connection => {
+    return [stationGeopositions[connection[0]], stationGeopositions[connection[1]]] as Line
+})
+
+
+const currentTime = ref(new Date())
+function updateTime() {
+    currentTime.value = new Date()
+}
 const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
 let displayTime = computed(() => {
     const time = currentTime.value
     return timeFormat.format(time)
 })
 
-const currentTime = ref(new Date())
-function updateTime() {
-    currentTime.value = new Date()
-}
 
-type Section = [TramDeparture, TramDeparture]
-const sections: Section[] = []
-const currentTrains = ref<{ position: Coordinate, line: string }[]>([])
+const journeys: Journey[] = []
+const currentTrains = ref<Train[]>([])
 const currentTrainMarkers = computed<Marker[]>(() => {
     return currentTrains.value.map(t => {
         return {
@@ -82,74 +79,76 @@ const currentTrainMarkers = computed<Marker[]>(() => {
     })
 })
 
-onMounted(async () => {
-    const baseStore = await BaseStore.open()
-    tramRepo.value = baseStore.repo<TramDeparture>(BaseRepo.TramDepartures)
-    tramRepo.value.onUpdate(() => updateAllSections())
-    updateAllSections()
-
-    setInterval(updateTime, 0.1 * 1000 /*0.5s*/)
-})
-
-async function updateAllSections() {
+async function updateJourneys() {
     if (tramRepo.value == null) return
+
     const departures = await tramRepo.value.current()
-    sections.splice(0, sections.length)
-    for (const section of relevantSections) {
-        updateSection(section, departures)
+    journeys.splice(0, journeys.length)
+    for (const track of tracks) {
+        journeys.push(...journeysInTrack(track, departures))
     }
 }
 
-async function updateSection(section: [Station, Station], departures: TramDeparture[]) {
-    const startDepartures = departures.filter(d => d.station == section[0])
-    const endDepartures = departures.filter(d => d.station == section[1])
+function journeysInTrack(track: [Station, Station], departures: TramDeparture[]): Journey[] {
+    const startDepartures = departures.filter(d => d.station == track[0])
+    const endDepartures = departures.filter(d => d.station == track[1])
     const currentTime = new Date()
 
-    sections.push(...startDepartures
-        .map(d => matchDeparture(d, endDepartures))
-        .filter(d => d != null)
-        .map(d => d as Section)
-        .filter(d => new Date(d[0].realtime) >= currentTime || new Date(d[1].realtime) >= currentTime)
-    )
+    return startDepartures
+        .map(departure => matchToJourney(departure, endDepartures))
+        .filter(j => j != null)
+        .map(j => j as Journey)
+        .filter(journey => {
+            return new Date(journey[0].realtime) >= currentTime
+                || new Date(journey[1].realtime) >= currentTime
+        })
 }
 
-function matchDeparture(departure: TramDeparture, otherDepartures: TramDeparture[]): Section | null {
+function matchToJourney(departure: TramDeparture, otherDepartures: TramDeparture[]): Journey | null {
     for (const otherDeparture of otherDepartures) {
+        // Two adjacent departures with the same train number are a journey
         if (otherDeparture.trainNumber == departure.trainNumber) {
-            return [departure, otherDeparture]
+            return [departure, otherDeparture] as Journey
         }
     }
     return null
 }
 
 watch(() => currentTime.value, time => {
-    const activeTrains = sections.filter(s => {
-        return trainActiveInSection(new Date(s[0].realtime), new Date(s[1].realtime), time)
+    const activeJourneys = journeys.filter(s => {
+        return isTrainActiveInSection(new Date(s[0].realtime), new Date(s[1].realtime), time)
     })
-    currentTrains.value = activeTrains.map(train => {
-        const startTime = new Date(train[0].realtime)
-        const endTime = new Date(train[1].realtime)
-        const timeDifference = endTime.getTime() - startTime.getTime()
-        const factor = (currentTime.value.getTime() - startTime.getTime()) / timeDifference
-
-        const startStation = stationGeopositions[train[0].station]
-        const endStation = stationGeopositions[train[1].station]
-        const currentPosition = interpolateCoordinates(startStation, endStation, factor, easeInOutQuad)
-        return { position: currentPosition, line: train[0].line }
-    })
+    currentTrains.value = activeJourneys.map(calcTrainPosition)
 })
 
-function trainActiveInSection(departure: Date, arrival: Date, time: Date): boolean {
+function calcTrainPosition(journey: Journey): Train {
+    const startTime = new Date(journey[0].realtime)
+    const endTime = new Date(journey[1].realtime)
+    const timeDifference = endTime.getTime() - startTime.getTime()
+    const factor = (currentTime.value.getTime() - startTime.getTime()) / timeDifference
+
+    const startStation = stationGeopositions[journey[0].station]
+    const endStation = stationGeopositions[journey[1].station]
+    const currentPosition = interpolateCoordinates(startStation, endStation, factor, easeInOutQuad)
+    return { position: currentPosition, line: journey[0].line }
+}
+
+function isTrainActiveInSection(departure: Date, arrival: Date, time: Date): boolean {
     const departureInPast = departure < time
     const arrivalInFuture = arrival > time
     return departureInPast && arrivalInFuture
 }
 
-const stationLines = computed(() => {
-    return stationConnections.map(connection => {
-        return [stationGeopositions[connection[0]], stationGeopositions[connection[1]]] as Line
-    })
+onMounted(async () => {
+    const baseStore = await BaseStore.open()
+    tramRepo.value = baseStore.repo<TramDeparture>(BaseRepo.TramDepartures)
+    tramRepo.value.onUpdate(() => updateJourneys())
+    updateJourneys()
+
+    setInterval(updateTime, 0.1 * 1000 /*0.5s*/)
 })
+
+
 </script>
 
 <template>
