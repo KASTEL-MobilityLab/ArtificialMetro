@@ -36,6 +36,10 @@ export class SpriteManager {
         await Promise.all(promises)
     }
 
+    async registerSprite(sprite: Sprite, canvas: OffscreenCanvas) {
+        this.sprites[spriteHash(sprite)] = canvas
+    }
+
     getSprite(sprite: Sprite): OffscreenCanvas {
         const hash = spriteHash(sprite)
         if (hash in this.sprites) {

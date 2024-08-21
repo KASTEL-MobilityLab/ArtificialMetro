@@ -23,6 +23,7 @@ export interface TramDeparture {
     id: string,
     timestamp: Date,
     line: string,
+    trainNumber: string,
     track: string,
     station: string,
     direction: string,

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { Coordinate } from './Coordinate';
+import type { Coordinate } from "./Coordinate"
 import { onMounted, ref, watch } from 'vue';
-import { TILE_SIZE, posOnTile, tileFromCoords, type BoundingBox, type Dimensions, type Marker, type Offset, type TileCoordinate, type ViewCoordinate } from './tiles';
-import type { SpriteManager } from './sprite_manager';
+import { TILE_SIZE, posOnTile, tileFromCoords, type BoundingBox, type Dimensions, type Offset, type TileCoordinate, type ViewCoordinate } from './tiles';
+
+export type Line = [Coordinate, Coordinate]
 
 const props = defineProps<{
     center: Coordinate,
@@ -10,9 +11,8 @@ const props = defineProps<{
     offset: Offset<ViewCoordinate>,
     viewportDimensions: Dimensions,
     tileBounds: BoundingBox<TileCoordinate>,
-    marker: Marker[],
-    sprites: SpriteManager,
-    size: number,
+    lines: Line[],
+    color: string,
 }>()
 
 const markerCanvas = new OffscreenCanvas(TILE_SIZE, TILE_SIZE)
@@ -33,42 +33,45 @@ function resizeViewportCanvas(dimensions: Dimensions) {
     canvas.value.height = dimensions.height
 }
 
-function renderMarkers() {
+function renderLines() {
     const ctx = markerCanvas.getContext('2d')
     if (ctx == null) return
     ctx.clearRect(0, 0, markerCanvas.width, markerCanvas.height)
 
-    for (const marker of props.marker) {
-        drawMarker(marker, ctx)
+    for (const line of props.lines) {
+        drawLine(line, ctx)
     }
 }
 
-function drawMarker(marker: Marker, ctx: OffscreenCanvasRenderingContext2D) {
-    const { tile, offset } = relativeTile(marker)
-    const sprite = props.sprites.getSprite({ name: marker.sprite, size: props.size })
-    const markerOffset = props.size / 2
-    const position = {
-        x: tile.x * TILE_SIZE + offset.x - markerOffset,
-        y: tile.y * TILE_SIZE + offset.y - markerOffset,
-    }
-    ctx.drawImage(sprite, position.x, position.y)
+function drawLine(line: Line, ctx: OffscreenCanvasRenderingContext2D) {
+    const start = relativeTile(line[0])
+    const end = relativeTile(line[1])
+    const startPos = {x: start.tile.x * TILE_SIZE + start.offset.x, y: start.tile.y * TILE_SIZE + start.offset.y}
+    const endPos = {x: end.tile.x * TILE_SIZE + end.offset.x, y: end.tile.y * TILE_SIZE + end.offset.y}
+    ctx.strokeStyle = props.color
+    ctx.lineCap = "round"
+    ctx.lineWidth = 5
+    ctx.beginPath()
+    ctx.moveTo(startPos.x, startPos.y)
+    ctx.lineTo(endPos.x, endPos.y)
+    ctx.stroke()
 }
 
-function relativeTile(marker: Marker): { tile: TileCoordinate, offset: Offset<ViewCoordinate> } {
-    const tile = tileFromCoords(marker.position, props.zoom)
+function relativeTile(position: Coordinate): { tile: TileCoordinate, offset: Offset<ViewCoordinate> } {
+    const tile = tileFromCoords(position, props.zoom)
     const relativeTile = {
         x: tile.x - props.tileBounds.topLeft.x,
         y: tile.y - props.tileBounds.topLeft.y,
         scale: tile.scale,
     }
-    const offset = posOnTile(marker.position, props.zoom)
+    const offset = posOnTile(position, props.zoom)
     return {
         tile: relativeTile,
         offset,
     }
 }
 
-function showMarkers(offset: Offset<ViewCoordinate>) {
+function showLines(offset: Offset<ViewCoordinate>) {
     const ctx = canvas.value?.getContext('2d') ?? null
     if (ctx == null) return
     ctx.clearRect(0, 0, canvas.value!.width, canvas.value!.height)
@@ -80,27 +83,27 @@ function doResize(dimensions: Dimensions) {
     resizeTileCanvas(dimensions)
 }
 
-function renderAndShowMarkers() {
-    renderMarkers()
-    showMarkers(props.offset)
+function renderAndShowLines() {
+    renderLines()
+    showLines(props.offset)
 }
 
 watch(() => props.offset, () => {
-    showMarkers(props.offset)
+    showLines(props.offset)
 })
 watch(() => props.viewportDimensions, dim => {
     doResize(dim)
-    renderAndShowMarkers()
+    renderAndShowLines()
 })
 watch(() => props.tileBounds, () => {
-    renderAndShowMarkers()
+    renderAndShowLines()
 })
-watch(() => props.marker, () => {
-    renderAndShowMarkers()
+watch(() => props.lines, () => {
+    renderAndShowLines()
 })
 onMounted(() => {
     doResize(props.viewportDimensions)
-    renderAndShowMarkers()
+    renderAndShowLines()
 })
 </script>
 

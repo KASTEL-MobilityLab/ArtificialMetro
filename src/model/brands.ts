@@ -23,3 +23,21 @@ export const tramLines: { [key: string]: { color: string, type: "tram" | "bus" }
     "71": { color: "#B2A291", type: "bus" },
     "125": { color: "#808285", type: "bus" },
 }
+
+export const tramStation = "/brands/tram-kvv.svg"
+
+export function tramLineSprite(line: string, size: number): OffscreenCanvas | undefined {
+    const brand = tramLines[line]
+    const canvas = new OffscreenCanvas(20, 20)
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.fillStyle = brand.color
+    ctx.beginPath()
+    ctx.roundRect(0, 0, size, size, 3)
+    ctx.fill()
+    ctx.fillStyle = "white"
+    ctx.textAlign = "center"
+    ctx.font = "bold 15px sans-serif"
+    ctx.fillText(line, size / 2, size / 4 * 3)
+    return canvas
+}

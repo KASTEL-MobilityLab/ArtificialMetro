@@ -56,6 +56,7 @@ function assertServingLine(servingLine: any) {
     expect('key' in servingLine).toBeTruthy()
     expect('symbol' in servingLine).toBeTruthy()
     expect('direction' in servingLine).toBeTruthy()
+    expect('trainNum' in servingLine).toBeTruthy()
 }
 
 function assertDateTime(data: any) {

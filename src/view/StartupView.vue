@@ -64,7 +64,7 @@ watch(() => departuresLoaded.value, checkAllLoaded)
             <img src="/brands/stadtmobil_karlsruhe.svg" :class="{ disabled: !carsharingLoaded }" />
             <img src="/brands/nextbike.svg" :class="{ disabled: !bikesLoaded }" />
             <img src="/brands/scooter_bolt.svg" :class="{ disabled: !scootersLoaded }" />
-            <img src="/brands/train-db.svg" class="disabled" />
+            <img src="/brands/train-db.svg" :class="{ disabled: !departuresLoaded }" />
             <img src="/brands/bus-kvv.svg" :class="{ disabled: !departuresLoaded }" />
         </div>
     </div>

@@ -1,4 +1,4 @@
-import type { Coordinate } from "@/model/vehicles";
+import type { Coordinate } from "./Coordinate";
 
 export const TILE_SIZE = 256
 
