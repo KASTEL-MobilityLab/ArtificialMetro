@@ -13,7 +13,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { BaseStore } from '@/storage/base_store';
 import { BaseRepo } from '@/model/repos';
 import type { CacheRepo } from '@/storage/cache_repo';
-import { easeInOutCubic, easeInOutQuad, easeInOutSine, interpolateCoordinates } from './map/Coordinate';
+import { easeInOutQuad, interpolateCoordinates } from './map/Coordinate';
 
 const VELVET = "#902C3E" // Velvet Underground
 
@@ -78,6 +78,13 @@ const stationConnections = [
     { start: stations.ettlingerTor, end: stations.kongresszentrum },
 ]
 
+const stationMarker: Marker[] = Object.values(Station).map(s => {
+    return {
+        position: stationLocations[s],
+        sprite: "station",
+    }
+})
+
 const spriteManager = new SpriteManager()
 spriteManager.fetchSprite({
     name: 'station',
@@ -98,6 +105,12 @@ Object.keys(tramLines).forEach(line => {
     ctx.font = "bold 15px sans-serif"
     ctx.fillText(line, 10, 15)
     spriteManager.registerSprite({ name: line, size: 20 }, canvas)
+})
+
+const timeFormat = Intl.DateTimeFormat("en-US", { hour12: false, hour: '2-digit', minute: '2-digit' })
+let displayTime = computed(() => {
+    const time = currentTime.value
+    return timeFormat.format(time)
 })
 
 const currentTime = ref(new Date())
@@ -144,7 +157,7 @@ async function updateSection(section: [Station, Station], departures: TramDepart
         .map(d => matchDeparture(d, endDepartures))
         .filter(d => d != null)
         .map(d => d as Section)
-        .filter(d => new Date(d[0].realtime) >= currentTime || new Date(d[1].realtime) >=  currentTime)
+        .filter(d => new Date(d[0].realtime) >= currentTime || new Date(d[1].realtime) >= currentTime)
     )
 }
 
@@ -187,10 +200,15 @@ function trainActiveInSection(departure: Date, arrival: Date, time: Date): boole
         <LocationFrame :center="center" :zoom="zoom" #default="data">
             <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>
             <LineRenderer v-bind="data" :lines="stationConnections" :color="VELVET"></LineRenderer>
-            <!-- <MarkerRenderer v-bind="data" :marker="stationMarker" :sprites="spriteManager" :size="20"></MarkerRenderer> -->
+            <MarkerRenderer v-bind="data" :marker="stationMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
             <MarkerRenderer v-bind="data" :marker="currentTrainMarkers" :sprites="spriteManager" :size="20">
             </MarkerRenderer>
         </LocationFrame>
+
+        <div class="current-time">
+            <span class="live-dot" active="true"></span>
+            {{ displayTime }}
+        </div>
 
     </div>
 </template>

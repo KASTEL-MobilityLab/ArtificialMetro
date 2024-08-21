@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import TimelapseView from './view/TimelapseView.vue'
 import FooterBar from './view/FooterBar.vue'
 import ViewSwitcher from './view/ViewSwitcher.vue'
-import { HistoryIcon, MapIcon, SignpostIcon, TentTreeIcon, TramFrontIcon } from 'lucide-vue-next'
+import { HistoryIcon, MapIcon, SignpostIcon, TentTreeIcon, TrainFrontTunnelIcon } from 'lucide-vue-next'
 import LiveView from './view/LiveView.vue'
 import { SwitchBus } from './view/switch_bus'
 import StartupView from './view/StartupView.vue'
@@ -21,7 +21,7 @@ enum Views {
   Live,
   Timelapse,
   Departures,
-  Trams,
+  Underground,
   Landscape,
 }
 
@@ -32,7 +32,7 @@ const views: View[] = [
   { id: Views.Live, title: "Live", icon: MapIcon, component: LiveView, available: true },
   { id: Views.Timelapse, title: "Timelapse", icon: HistoryIcon, component: TimelapseView, available: false },
   { id: Views.Departures, title: "Departures", icon: SignpostIcon, component: MultiDeparturesView, available: false },
-  { id: Views.Trams, title: "Underground", icon: TramFrontIcon, component: UndergroundView, available: true },
+  { id: Views.Underground, title: "Underground", icon: TrainFrontTunnelIcon, component: UndergroundView, available: false },
   { id: Views.Landscape, title: "Landscape", icon: TentTreeIcon, component: LiveView, available: false },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
@@ -125,6 +125,7 @@ function checkAvailability() {
   })
   checkDeparturesAvailability().then(available => {
     modifyView(Views.Departures, v => v.available = available)
+    modifyView(Views.Underground, v => v.available = available)
   })
 }
 
