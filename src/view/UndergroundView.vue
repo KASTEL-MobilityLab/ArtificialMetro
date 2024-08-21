@@ -5,7 +5,7 @@ import MarkerRenderer from './map/MarkerRenderer.vue';
 import type { SwitchBusReceiver } from './switch_bus';
 import { TileProvider } from './map/tile_provider';
 import { SpriteManager } from './map/sprite_manager';
-import { tramLineSprite, tramLines, tramStation } from '@/model/brands';
+import { tramLineSprite, tramLines, tramStationSprite } from '@/model/brands';
 import type { Marker } from './map/tiles';
 import type { TramDeparture, Coordinate } from '@/model/vehicles';
 import LineRenderer, { type Line } from './map/LineRenderer.vue';
@@ -32,15 +32,12 @@ let center = { lon: 8.41, lat: 49.0054 }
 const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
 
 const spriteManager = new SpriteManager()
-spriteManager.fetchSprite({
-    name: 'station',
-    size: 20,
-    url: tramStation,
-})
+const stationSprite = tramStationSprite(VELVET, 20)
+if (stationSprite) spriteManager.registerSprite({ name: 'station', size: 20 }, stationSprite)
 Object.keys(tramLines).forEach(line => {
-    const sprite = tramLineSprite(line, 20)
+    const sprite = tramLineSprite(line, 24)
     if (sprite) {
-        spriteManager.registerSprite({ name: line, size: 20 }, sprite)
+        spriteManager.registerSprite({ name: line, size: 24 }, sprite)
     }
 })
 
@@ -56,7 +53,7 @@ const stationLines: Line[] = stationConnections.map(connection => {
     return [stationGeopositions[connection[0]], stationGeopositions[connection[1]]] as Line
 })
 
-let timer: NodeJS.Timeout | undefined =  undefined
+let timer: NodeJS.Timeout | undefined = undefined
 const currentTime = ref(new Date())
 function updateTime() {
     currentTime.value = new Date()
@@ -172,7 +169,7 @@ onMounted(async () => {
             <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>
             <LineRenderer v-bind="data" :lines="stationLines" :color="VELVET"></LineRenderer>
             <MarkerRenderer v-bind="data" :marker="stationMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
-            <MarkerRenderer v-bind="data" :marker="currentTrainMarkers" :sprites="spriteManager" :size="20">
+            <MarkerRenderer v-bind="data" :marker="currentTrainMarkers" :sprites="spriteManager" :size="24">
             </MarkerRenderer>
         </LocationFrame>
 
