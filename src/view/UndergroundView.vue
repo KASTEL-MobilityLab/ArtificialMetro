@@ -17,6 +17,8 @@ import { easeInOutQuad, interpolateCoordinates } from './map/Coordinate';
 import { Station, stationConnections, stationGeopositions } from '@/model/stations';
 
 const VELVET = "#902C3E" // Velvet Underground
+const STATION_SPRITE_SIZE = 20
+const TRAIN_SPRITE_SIZE = 24
 
 type Journey = { origin: TramDeparture, destination: TramDeparture }
 type Train = { position: Coordinate, line: string }
@@ -33,12 +35,16 @@ let center = { lon: 8.41, lat: 49.0054 }
 const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
 
 const spriteManager = new SpriteManager()
-const stationSprite = tramStationSprite(VELVET, 20)
-if (stationSprite) spriteManager.registerSprite({ name: 'station', size: 20 }, stationSprite)
+const stationSprite = tramStationSprite(VELVET, STATION_SPRITE_SIZE)
+if (stationSprite) spriteManager.registerSprite({ name: 'station', size: STATION_SPRITE_SIZE }, stationSprite)
 Object.keys(tramLines).forEach(line => {
-    const sprite = tramLineSprite(line, 24)
+    const sprite = tramLineSprite(line, TRAIN_SPRITE_SIZE)
     if (sprite) {
-        spriteManager.registerSprite({ name: line, size: 24 }, sprite)
+        spriteManager.registerSprite({ name: line, size: TRAIN_SPRITE_SIZE }, sprite)
+    }
+    const relicSprite = tramLineSprite(line, TRAIN_SPRITE_SIZE, "#666")
+    if (relicSprite) {
+        spriteManager.registerSprite({ name: `${line}-relic`, size: TRAIN_SPRITE_SIZE }, relicSprite)
     }
 })
 
@@ -176,8 +182,10 @@ onMounted(async () => {
         <LocationFrame :center="center" :zoom="zoom" #default="data">
             <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>
             <LineRenderer v-bind="data" :lines="stationLines" :color="VELVET"></LineRenderer>
-            <MarkerRenderer v-bind="data" :marker="stationMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
-            <MarkerRenderer v-bind="data" :marker="currentTrainMarkers" :sprites="spriteManager" :size="24">
+            <MarkerRenderer v-bind="data" :marker="stationMarker" :sprites="spriteManager" :size="STATION_SPRITE_SIZE">
+            </MarkerRenderer>
+            <MarkerRenderer v-bind="data" :marker="currentTrainMarkers" :sprites="spriteManager"
+                :size="TRAIN_SPRITE_SIZE">
             </MarkerRenderer>
         </LocationFrame>
 
