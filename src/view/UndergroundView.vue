@@ -18,7 +18,7 @@ import { Station, stationConnections, stationGeopositions } from '@/model/statio
 
 const VELVET = "#902C3E" // Velvet Underground
 
-type Journey = [TramDeparture, TramDeparture]
+type Journey = { origin: TramDeparture, destination: TramDeparture }
 type Train = { position: Coordinate, line: string }
 
 const props = defineProps<{
@@ -88,13 +88,15 @@ const currentTrainMarkers = computed<Marker[]>(() => {
 async function updateJourneys() {
     if (tramRepo.value == null) return
 
-    shutterActive.value = true
+    console.log('update')
+
+    // shutterActive.value = true
     const departures = await tramRepo.value.current()
     journeys.splice(0, journeys.length)
     for (const track of tracks) {
         journeys.push(...journeysInTrack(track, departures))
     }
-    setTimeout(() => shutterActive.value = false, 3 * 1000 /*3s*/)
+    // setTimeout(() => shutterActive.value = false, 3 * 1000 /*3s*/)
 }
 
 function journeysInTrack(track: [Station, Station], departures: TramDeparture[]): Journey[] {
@@ -107,8 +109,7 @@ function journeysInTrack(track: [Station, Station], departures: TramDeparture[])
         .filter(j => j != null)
         .map(j => j as Journey)
         .filter(journey => {
-            return new Date(journey[0].realtime) >= currentTime
-                || new Date(journey[1].realtime) >= currentTime
+            return new Date(journey.destination.realtime) >= currentTime
         })
 }
 
@@ -116,7 +117,11 @@ function matchToJourney(departure: TramDeparture, otherDepartures: TramDeparture
     for (const otherDeparture of otherDepartures) {
         // Two adjacent departures with the same train number are a journey
         if (otherDeparture.trainNumber == departure.trainNumber) {
-            return [departure, otherDeparture] as Journey
+            if (new Date(departure.realtime) <= new Date(otherDeparture.realtime)) {
+                return { origin: departure, destination: otherDeparture }
+            } else {
+                return { origin: otherDeparture, destination: departure }
+            }
         }
     }
     return null
@@ -124,21 +129,21 @@ function matchToJourney(departure: TramDeparture, otherDepartures: TramDeparture
 
 watch(() => currentTime.value, time => {
     const activeJourneys = journeys.filter(s => {
-        return isTrainActiveInSection(new Date(s[0].realtime), new Date(s[1].realtime), time)
+        return isTrainActiveInSection(new Date(s.origin.realtime), new Date(s.destination.realtime), time)
     })
     currentTrains.value = activeJourneys.map(calcTrainPosition)
 })
 
 function calcTrainPosition(journey: Journey): Train {
-    const startTime = new Date(journey[0].realtime)
-    const endTime = new Date(journey[1].realtime)
+    const startTime = new Date(journey.origin.realtime)
+    const endTime = new Date(journey.destination.realtime)
     const timeDifference = endTime.getTime() - startTime.getTime()
     const factor = (currentTime.value.getTime() - startTime.getTime()) / timeDifference
 
-    const startStation = stationGeopositions[journey[0].station]
-    const endStation = stationGeopositions[journey[1].station]
+    const startStation = stationGeopositions[journey.origin.station]
+    const endStation = stationGeopositions[journey.destination.station]
     const currentPosition = interpolateCoordinates(startStation, endStation, factor, easeInOutQuad)
-    return { position: currentPosition, line: journey[0].line }
+    return { position: currentPosition, line: journey.origin.line }
 }
 
 function isTrainActiveInSection(departure: Date, arrival: Date, time: Date): boolean {
@@ -216,6 +221,7 @@ onMounted(async () => {
 .shutter img {
     width: 200px;
 }
+
 .shutter p {
     font-size: 20px;
     color: var(--view-fg-color);
