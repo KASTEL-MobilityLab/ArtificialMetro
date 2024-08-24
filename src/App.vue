@@ -14,6 +14,7 @@ import OnlineIndicator from './view/OnlineIndicator.vue'
 import { BaseStore } from './storage/base_store'
 import { BaseRepo } from './model/repos'
 import type { TramDeparture } from './model/vehicles'
+import LandscapeView from './view/LandscapeView.vue'
 
 const KIOSK_INTERVAL = 45 * 1000 /*45s*/
 const CHECK_AVAILABILITY_INTERVAL = 5 * 60 * 1000 /*5min*/
@@ -33,7 +34,7 @@ const views: View[] = [
   { id: Views.Timelapse, title: "Timelapse", icon: HistoryIcon, component: TimelapseView, available: false },
   { id: Views.Departures, title: "Departures", icon: SignpostIcon, component: MultiDeparturesView, available: false },
   { id: Views.Underground, title: "Underground", icon: TrainFrontTunnelIcon, component: UndergroundView, available: false },
-  { id: Views.Landscape, title: "Landscape", icon: TentTreeIcon, component: LiveView, available: false },
+  { id: Views.Landscape, title: "Landscape", icon: TentTreeIcon, component: LandscapeView, available: true },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
 })
