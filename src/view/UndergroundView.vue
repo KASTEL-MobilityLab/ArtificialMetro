@@ -20,8 +20,8 @@ const VELVET = "#902C3E" // Velvet Underground
 const STATION_SPRITE_SIZE = 20
 const TRAIN_SPRITE_SIZE = 24
 
-type Journey = { origin: TramDeparture, destination: TramDeparture }
-type Train = { position: Coordinate, line: string }
+type Journey = { origin: TramDeparture, destination: TramDeparture, relic: boolean }
+type Train = { position: Coordinate, line: string, relic: boolean }
 
 const props = defineProps<{
     bus: SwitchBusReceiver,
@@ -80,13 +80,13 @@ let displayTime = computed(() => {
 })
 
 
-const journeys: Journey[] = []
+let journeys: Journey[] = []
 const currentTrains = ref<Train[]>([])
 const currentTrainMarkers = computed<Marker[]>(() => {
     return currentTrains.value.map(t => {
         return {
             position: t.position,
-            sprite: t.line,
+            sprite: t.relic ? `${t.line}-relic` : t.line,
         }
     })
 })
@@ -94,28 +94,68 @@ const currentTrainMarkers = computed<Marker[]>(() => {
 async function updateJourneys() {
     if (tramRepo.value == null) return
 
-    console.log('update')
+    const tempJourneys = cleanOldJourneys(journeys)
+    taintAllJourneys(tempJourneys)
 
-    // shutterActive.value = true
     const departures = await tramRepo.value.current()
-    journeys.splice(0, journeys.length)
+    const newJourneys: Journey[] = []
     for (const track of tracks) {
-        journeys.push(...journeysInTrack(track, departures))
+        newJourneys.push(...journeysInTrack(track, departures))
     }
-    // setTimeout(() => shutterActive.value = false, 3 * 1000 /*3s*/)
+    insertNewJourneys(tempJourneys, newJourneys)
+    journeys = tempJourneys
+    console.log("Updated", journeys.length)
+}
+
+
+function cleanOldJourneys(journeys: Journey[]): Journey[] {
+    const fiveMinAgo = new Date((new Date()).getTime() - 5 * 60 * 1000 /*5min*/)
+    return journeys.filter(j => {
+        return new Date(j.destination.realtime) >= fiveMinAgo
+    })
+}
+
+function taintAllJourneys(journeys: Journey[]) {
+    for (let journey of journeys) {
+        journey.relic = true
+    }
+}
+
+function insertNewJourneys(journeys: Journey[], newJourneys: Journey[]) {
+    for (const journey of newJourneys) {
+        insertNewJourney(journeys, journey)
+    }
+}
+
+function insertNewJourney(journeys: Journey[], journey: Journey) {
+    for (let j of journeys) {
+        if (j.origin.trainNumber != journey.origin.trainNumber) {
+            continue
+        }
+        if (j.origin.realtime == journey.origin.realtime && j.destination.realtime == journey.destination.realtime) {
+            // console.log('match', j, journey)
+            // nothing has changed -> don't taint anymore
+            j.relic = false
+            return
+        }
+    }
+    // no previous entry was validated again -> add a new non-relic entry
+    // console.log('add', journey.origin.trainNumber)
+    journeys.push(journey)
 }
 
 function journeysInTrack(track: [Station, Station], departures: TramDeparture[]): Journey[] {
     const startDepartures = departures.filter(d => d.station == track[0])
     const endDepartures = departures.filter(d => d.station == track[1])
     const currentTime = new Date()
+    const inQuarterHour = new Date((new Date()).getTime() + 15 * 60 * 1000 /*15min*/)
 
     return startDepartures
         .map(departure => matchToJourney(departure, endDepartures))
         .filter(j => j != null)
         .map(j => j as Journey)
         .filter(journey => {
-            return new Date(journey.destination.realtime) >= currentTime
+            return new Date(journey.destination.realtime) >= currentTime && new Date(journey.origin.realtime) < inQuarterHour
         })
 }
 
@@ -124,9 +164,9 @@ function matchToJourney(departure: TramDeparture, otherDepartures: TramDeparture
         // Two adjacent departures with the same train number are a journey
         if (otherDeparture.trainNumber == departure.trainNumber) {
             if (new Date(departure.realtime) <= new Date(otherDeparture.realtime)) {
-                return { origin: departure, destination: otherDeparture }
+                return { origin: departure, destination: otherDeparture, relic: false }
             } else {
-                return { origin: otherDeparture, destination: departure }
+                return { origin: otherDeparture, destination: departure, relic: false }
             }
         }
     }
@@ -149,7 +189,7 @@ function calcTrainPosition(journey: Journey): Train {
     const startStation = stationGeopositions[journey.origin.station]
     const endStation = stationGeopositions[journey.destination.station]
     const currentPosition = interpolateCoordinates(startStation, endStation, factor, easeInOutQuad)
-    return { position: currentPosition, line: journey.origin.line }
+    return { position: currentPosition, line: journey.origin.line, relic: journey.relic }
 }
 
 function isTrainActiveInSection(departure: Date, arrival: Date, time: Date): boolean {
@@ -172,6 +212,7 @@ onMounted(async () => {
         stopTimer()
     })
 })
+
 
 
 </script>
