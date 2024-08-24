@@ -103,8 +103,8 @@ async function updateJourneys() {
         newJourneys.push(...journeysInTrack(track, departures))
     }
     insertNewJourneys(tempJourneys, newJourneys)
+    tempJourneys.sort((a, b) => a.origin.line < b.origin.line ? -1 : a.origin.line == b.origin.line ? 0 : 1)
     journeys = tempJourneys
-    console.log("Updated", journeys.length)
 }
 
 
@@ -133,14 +133,12 @@ function insertNewJourney(journeys: Journey[], journey: Journey) {
             continue
         }
         if (j.origin.realtime == journey.origin.realtime && j.destination.realtime == journey.destination.realtime) {
-            // console.log('match', j, journey)
             // nothing has changed -> don't taint anymore
             j.relic = false
             return
         }
     }
     // no previous entry was validated again -> add a new non-relic entry
-    // console.log('add', journey.origin.trainNumber)
     journeys.push(journey)
 }
 
