@@ -20,14 +20,13 @@ const VELVET = "#902C3E" // Velvet Underground
 const STATION_SPRITE_SIZE = 20
 const TRAIN_SPRITE_SIZE = 24
 
-type Journey = { origin: TramDeparture, destination: TramDeparture, relic: boolean }
-type Train = { position: Coordinate, line: string, relic: boolean }
+type Journey = { origin: TramDeparture, destination: TramDeparture, outdated: boolean }
+type Train = { position: Coordinate, line: string, outdated: boolean }
 
 const props = defineProps<{
     bus: SwitchBusReceiver,
 }>()
 
-let shutterActive = ref(false)
 let tramRepo = ref<CacheRepo<TramDeparture, BaseRepo> | null>(null)
 
 let zoom = 16
@@ -86,7 +85,7 @@ const currentTrainMarkers = computed<Marker[]>(() => {
     return currentTrains.value.map(t => {
         return {
             position: t.position,
-            sprite: t.relic ? `${t.line}-relic` : t.line,
+            sprite: t.outdated ? `${t.line}-relic` : t.line,
         }
     })
 })
@@ -117,7 +116,7 @@ function cleanOldJourneys(journeys: Journey[]): Journey[] {
 
 function taintAllJourneys(journeys: Journey[]) {
     for (let journey of journeys) {
-        journey.relic = true
+        journey.outdated = true
     }
 }
 
@@ -134,7 +133,7 @@ function insertNewJourney(journeys: Journey[], journey: Journey) {
         }
         if (j.origin.realtime == journey.origin.realtime && j.destination.realtime == journey.destination.realtime) {
             // nothing has changed -> don't taint anymore
-            j.relic = false
+            j.outdated = false
             return
         }
     }
@@ -162,9 +161,9 @@ function matchToJourney(departure: TramDeparture, otherDepartures: TramDeparture
         // Two adjacent departures with the same train number are a journey
         if (otherDeparture.trainNumber == departure.trainNumber) {
             if (new Date(departure.realtime) <= new Date(otherDeparture.realtime)) {
-                return { origin: departure, destination: otherDeparture, relic: false }
+                return { origin: departure, destination: otherDeparture, outdated: false }
             } else {
-                return { origin: otherDeparture, destination: departure, relic: false }
+                return { origin: otherDeparture, destination: departure, outdated: false }
             }
         }
     }
@@ -187,7 +186,7 @@ function calcTrainPosition(journey: Journey): Train {
     const startStation = stationGeopositions[journey.origin.station]
     const endStation = stationGeopositions[journey.destination.station]
     const currentPosition = interpolateCoordinates(startStation, endStation, factor, easeInOutQuad)
-    return { position: currentPosition, line: journey.origin.line, relic: journey.relic }
+    return { position: currentPosition, line: journey.origin.line, outdated: journey.outdated }
 }
 
 function isTrainActiveInSection(departure: Date, arrival: Date, time: Date): boolean {
@@ -232,45 +231,8 @@ onMounted(async () => {
             <span class="live-dot" active="true"></span>
             {{ displayTime }}
         </div>
-
-        <div class="shutter" :class="{ active: shutterActive }">
-            <img src="../../public/brands/underground-tram.svg" />
-        </div>
     </div>
 </template>
 
 <style scoped>
-.shutter {
-    display: flex;
-    position: absolute;
-
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    backdrop-filter: grayscale(1);
-    background: rgba(0, 0, 0, 0.7);
-    opacity: 0;
-
-    transition: 1s ease-in-out;
-}
-
-.shutter.active {
-    opacity: 1;
-}
-
-.shutter img {
-    width: 200px;
-}
-
-.shutter p {
-    font-size: 20px;
-    color: var(--view-fg-color);
-}
 </style>
