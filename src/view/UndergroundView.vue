@@ -17,15 +17,16 @@ import { easeInOutQuad, interpolateCoordinates } from './map/Coordinate';
 import { Station, stationConnections, stationGeopositions } from '@/model/stations';
 
 const VELVET = "#902C3E" // Velvet Underground
+const STATION_SPRITE_SIZE = 20
+const TRAIN_SPRITE_SIZE = 24
 
-type Journey = [TramDeparture, TramDeparture]
-type Train = { position: Coordinate, line: string }
+type Journey = { origin: TramDeparture, destination: TramDeparture, outdated: boolean }
+type Train = { position: Coordinate, line: string, outdated: boolean }
 
 const props = defineProps<{
     bus: SwitchBusReceiver,
 }>()
 
-let shutterActive = ref(false)
 let tramRepo = ref<CacheRepo<TramDeparture, BaseRepo> | null>(null)
 
 let zoom = 16
@@ -33,12 +34,16 @@ let center = { lon: 8.41, lat: 49.0054 }
 const tileProvider = new TileProvider("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png")
 
 const spriteManager = new SpriteManager()
-const stationSprite = tramStationSprite(VELVET, 20)
-if (stationSprite) spriteManager.registerSprite({ name: 'station', size: 20 }, stationSprite)
+const stationSprite = tramStationSprite(VELVET, STATION_SPRITE_SIZE)
+if (stationSprite) spriteManager.registerSprite({ name: 'station', size: STATION_SPRITE_SIZE }, stationSprite)
 Object.keys(tramLines).forEach(line => {
-    const sprite = tramLineSprite(line, 24)
+    const sprite = tramLineSprite(line, TRAIN_SPRITE_SIZE)
     if (sprite) {
-        spriteManager.registerSprite({ name: line, size: 24 }, sprite)
+        spriteManager.registerSprite({ name: line, size: TRAIN_SPRITE_SIZE }, sprite)
+    }
+    const relicSprite = tramLineSprite(line, TRAIN_SPRITE_SIZE, "#666")
+    if (relicSprite) {
+        spriteManager.registerSprite({ name: `${line}-relic`, size: TRAIN_SPRITE_SIZE }, relicSprite)
     }
 })
 
@@ -74,13 +79,13 @@ let displayTime = computed(() => {
 })
 
 
-const journeys: Journey[] = []
+let journeys: Journey[] = []
 const currentTrains = ref<Train[]>([])
 const currentTrainMarkers = computed<Marker[]>(() => {
     return currentTrains.value.map(t => {
         return {
             position: t.position,
-            sprite: t.line,
+            sprite: t.outdated ? `${t.line}-relic` : t.line,
         }
     })
 })
@@ -88,27 +93,66 @@ const currentTrainMarkers = computed<Marker[]>(() => {
 async function updateJourneys() {
     if (tramRepo.value == null) return
 
-    shutterActive.value = true
+    const tempJourneys = cleanOldJourneys(journeys)
+    taintAllJourneys(tempJourneys)
+
     const departures = await tramRepo.value.current()
-    journeys.splice(0, journeys.length)
+    const newJourneys: Journey[] = []
     for (const track of tracks) {
-        journeys.push(...journeysInTrack(track, departures))
+        newJourneys.push(...journeysInTrack(track, departures))
     }
-    setTimeout(() => shutterActive.value = false, 3 * 1000 /*3s*/)
+    insertNewJourneys(tempJourneys, newJourneys)
+    tempJourneys.sort((a, b) => a.origin.line < b.origin.line ? -1 : a.origin.line == b.origin.line ? 0 : 1)
+    journeys = tempJourneys
+}
+
+
+function cleanOldJourneys(journeys: Journey[]): Journey[] {
+    const fiveMinAgo = new Date((new Date()).getTime() - 5 * 60 * 1000 /*5min*/)
+    return journeys.filter(j => {
+        return new Date(j.destination.realtime) >= fiveMinAgo
+    })
+}
+
+function taintAllJourneys(journeys: Journey[]) {
+    for (let journey of journeys) {
+        journey.outdated = true
+    }
+}
+
+function insertNewJourneys(journeys: Journey[], newJourneys: Journey[]) {
+    for (const journey of newJourneys) {
+        insertNewJourney(journeys, journey)
+    }
+}
+
+function insertNewJourney(journeys: Journey[], journey: Journey) {
+    for (let j of journeys) {
+        if (j.origin.trainNumber != journey.origin.trainNumber) {
+            continue
+        }
+        if (j.origin.realtime == journey.origin.realtime && j.destination.realtime == journey.destination.realtime) {
+            // nothing has changed -> don't taint anymore
+            j.outdated = false
+            return
+        }
+    }
+    // no previous entry was validated again -> add a new non-relic entry
+    journeys.push(journey)
 }
 
 function journeysInTrack(track: [Station, Station], departures: TramDeparture[]): Journey[] {
     const startDepartures = departures.filter(d => d.station == track[0])
     const endDepartures = departures.filter(d => d.station == track[1])
     const currentTime = new Date()
+    const inQuarterHour = new Date((new Date()).getTime() + 15 * 60 * 1000 /*15min*/)
 
     return startDepartures
         .map(departure => matchToJourney(departure, endDepartures))
         .filter(j => j != null)
         .map(j => j as Journey)
         .filter(journey => {
-            return new Date(journey[0].realtime) >= currentTime
-                || new Date(journey[1].realtime) >= currentTime
+            return new Date(journey.destination.realtime) >= currentTime && new Date(journey.origin.realtime) < inQuarterHour
         })
 }
 
@@ -116,7 +160,11 @@ function matchToJourney(departure: TramDeparture, otherDepartures: TramDeparture
     for (const otherDeparture of otherDepartures) {
         // Two adjacent departures with the same train number are a journey
         if (otherDeparture.trainNumber == departure.trainNumber) {
-            return [departure, otherDeparture] as Journey
+            if (new Date(departure.realtime) <= new Date(otherDeparture.realtime)) {
+                return { origin: departure, destination: otherDeparture, outdated: false }
+            } else {
+                return { origin: otherDeparture, destination: departure, outdated: false }
+            }
         }
     }
     return null
@@ -124,21 +172,21 @@ function matchToJourney(departure: TramDeparture, otherDepartures: TramDeparture
 
 watch(() => currentTime.value, time => {
     const activeJourneys = journeys.filter(s => {
-        return isTrainActiveInSection(new Date(s[0].realtime), new Date(s[1].realtime), time)
+        return isTrainActiveInSection(new Date(s.origin.realtime), new Date(s.destination.realtime), time)
     })
     currentTrains.value = activeJourneys.map(calcTrainPosition)
 })
 
 function calcTrainPosition(journey: Journey): Train {
-    const startTime = new Date(journey[0].realtime)
-    const endTime = new Date(journey[1].realtime)
+    const startTime = new Date(journey.origin.realtime)
+    const endTime = new Date(journey.destination.realtime)
     const timeDifference = endTime.getTime() - startTime.getTime()
     const factor = (currentTime.value.getTime() - startTime.getTime()) / timeDifference
 
-    const startStation = stationGeopositions[journey[0].station]
-    const endStation = stationGeopositions[journey[1].station]
+    const startStation = stationGeopositions[journey.origin.station]
+    const endStation = stationGeopositions[journey.destination.station]
     const currentPosition = interpolateCoordinates(startStation, endStation, factor, easeInOutQuad)
-    return { position: currentPosition, line: journey[0].line }
+    return { position: currentPosition, line: journey.origin.line, outdated: journey.outdated }
 }
 
 function isTrainActiveInSection(departure: Date, arrival: Date, time: Date): boolean {
@@ -163,6 +211,7 @@ onMounted(async () => {
 })
 
 
+
 </script>
 
 <template>
@@ -171,8 +220,10 @@ onMounted(async () => {
         <LocationFrame :center="center" :zoom="zoom" #default="data">
             <TileRenderer v-bind="data" :tiles="tileProvider"></TileRenderer>
             <LineRenderer v-bind="data" :lines="stationLines" :color="VELVET"></LineRenderer>
-            <MarkerRenderer v-bind="data" :marker="stationMarker" :sprites="spriteManager" :size="20"></MarkerRenderer>
-            <MarkerRenderer v-bind="data" :marker="currentTrainMarkers" :sprites="spriteManager" :size="24">
+            <MarkerRenderer v-bind="data" :marker="stationMarker" :sprites="spriteManager" :size="STATION_SPRITE_SIZE">
+            </MarkerRenderer>
+            <MarkerRenderer v-bind="data" :marker="currentTrainMarkers" :sprites="spriteManager"
+                :size="TRAIN_SPRITE_SIZE">
             </MarkerRenderer>
         </LocationFrame>
 
@@ -180,44 +231,8 @@ onMounted(async () => {
             <span class="live-dot" active="true"></span>
             {{ displayTime }}
         </div>
-
-        <div class="shutter" :class="{ active: shutterActive }">
-            <img src="../../public/brands/underground-tram.svg" />
-        </div>
     </div>
 </template>
 
 <style scoped>
-.shutter {
-    display: flex;
-    position: absolute;
-
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    backdrop-filter: grayscale(1);
-    background: rgba(0, 0, 0, 0.7);
-    opacity: 0;
-
-    transition: 1s ease-in-out;
-}
-
-.shutter.active {
-    opacity: 1;
-}
-
-.shutter img {
-    width: 200px;
-}
-.shutter p {
-    font-size: 20px;
-    color: var(--view-fg-color);
-}
 </style>

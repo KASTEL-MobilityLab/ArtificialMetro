@@ -31,12 +31,12 @@ export const tramLines: { [key: string]: { color: string, type: "tram" | "bus" }
 
 export const tramStation = "/brands/tram-kvv.svg"
 
-export function tramLineSprite(line: string, size: number): OffscreenCanvas | undefined {
+export function tramLineSprite(line: string, size: number, overwriteColor?: string): OffscreenCanvas | undefined {
     const brand = tramLines[line]
     const canvas = new OffscreenCanvas(size, size)
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    ctx.fillStyle = brand.color
+    ctx.fillStyle = overwriteColor ?? brand.color
     ctx.beginPath()
     ctx.roundRect(0, 0, size, size, 3)
     ctx.fill()
