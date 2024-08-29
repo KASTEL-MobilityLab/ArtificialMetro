@@ -36,10 +36,6 @@ const emit = defineEmits<{
 </template>
 
 <style scoped>
-.view-switcher {
-    width: 50%;
-}
-
 ul {
     display: flex;
 
