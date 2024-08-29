@@ -131,7 +131,7 @@ function checkAvailability() {
     modifyView(Views.Underground, v => v.available = available)
   })
   checkLandscapeAvailability().then(available => {
-    modifyView(Views.Landscape, v => v.available =  available)
+    modifyView(Views.Landscape, v => v.available = available)
   })
 }
 
@@ -174,9 +174,9 @@ async function checkUndergroundAvailability(): Promise<boolean> {
 
 async function checkLandscapeAvailability(): Promise<boolean> {
   const response = await fetch('/v1/videos')
-    if (!response.ok) return false
-    const list = await response.json() as []
-    return list.length > 0
+  if (!response.ok) return false
+  const list = await response.json() as []
+  return list.length > 0
 }
 
 </script>
@@ -192,7 +192,8 @@ async function checkLandscapeAvailability(): Promise<boolean> {
 
   <FooterBar>
     <template #left>
-      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value" @switch="manuallySwitchToView">
+      <ViewSwitcher :views="views" :active="activeView" :automatic="kiosk.active.value" @switch="manuallySwitchToView"
+        @toggleAutomatic="kiosk.toggle()">
       </ViewSwitcher>
     </template>
   </FooterBar>
