@@ -34,7 +34,7 @@ const views: View[] = [
   { id: Views.Timelapse, title: "Timelapse", icon: HistoryIcon, component: TimelapseView, available: false },
   { id: Views.Departures, title: "Departures", icon: SignpostIcon, component: MultiDeparturesView, available: false },
   { id: Views.Underground, title: "Underground", icon: TrainFrontTunnelIcon, component: UndergroundView, available: false },
-  { id: Views.Landscape, title: "Landscape", icon: TentTreeIcon, component: LandscapeView, available: true },
+  { id: Views.Landscape, title: "Landscape", icon: TentTreeIcon, component: LandscapeView, available: false },
 ].map(view => {
   return { ...view, bus: new SwitchBus() }
 })
@@ -126,7 +126,12 @@ function checkAvailability() {
   })
   checkDeparturesAvailability().then(available => {
     modifyView(Views.Departures, v => v.available = available)
+  })
+  checkUndergroundAvailability().then(available => {
     modifyView(Views.Underground, v => v.available = available)
+  })
+  checkLandscapeAvailability().then(available => {
+    modifyView(Views.Landscape, v => v.available =  available)
   })
 }
 
@@ -151,6 +156,29 @@ async function checkDeparturesAvailability(): Promise<boolean> {
   const repo = store.repo<TramDeparture>(BaseRepo.TramDepartures)
   return !(await repo.isEmpty())
 }
+
+async function checkUndergroundAvailability(): Promise<boolean> {
+  const store = await BaseStore.open()
+  const repo = store.repo<TramDeparture>(BaseRepo.TramDepartures)
+  const currentTrams = await repo.current()
+  if (currentTrams.length == 0) return false
+  const firstStation = currentTrams[0].station
+  for (const tram of currentTrams) {
+    if (tram.station != firstStation) {
+      // at least trams from two different stations exist
+      return true
+    }
+  }
+  return false
+}
+
+async function checkLandscapeAvailability(): Promise<boolean> {
+  const response = await fetch('/v1/videos')
+    if (!response.ok) return false
+    const list = await response.json() as []
+    return list.length > 0
+}
+
 </script>
 
 <template>
