@@ -10,13 +10,13 @@ defineProps<{
     <div class="side-by-side">
         <DeparturesView
             :bus="bus"
-            station="7001001"
-            title="Durlacher Tor / KIT-Campus Süd"
+            station="7001002"
+            title="Kronenplatz"
         ></DeparturesView>
         <DeparturesView
             :bus="bus"
-            station="7001002"
-            title="Kronenplatz"
+            station="7001001"
+            title="Durlacher Tor / KIT-Campus Süd"
         ></DeparturesView>
     </div>
 </template>

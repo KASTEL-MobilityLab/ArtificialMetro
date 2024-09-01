@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { LucideProps } from 'lucide-vue-next';
+import { Repeat2Icon, type LucideProps } from 'lucide-vue-next';
 import { type FunctionalComponent } from 'vue';
 
 type View = {
@@ -14,13 +14,14 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{
     switch: [view: number],
+    toggleAutomatic: [],
 }>()
 </script>
 
 <template>
     <ul class="view-switcher">
-        <li class="automatic" :active="automatic">
-            <span class="live-dot"></span>
+        <li class="automatic" :active="automatic" @click.stop.prevent="emit('toggleAutomatic')">
+            <Repeat2Icon></Repeat2Icon>
         </li>
         <li v-for="view, id in props.views" 
             :key="id" 
@@ -35,10 +36,6 @@ const emit = defineEmits<{
 </template>
 
 <style scoped>
-.view-switcher {
-    width: 50%;
-}
-
 ul {
     display: flex;
 
@@ -86,12 +83,10 @@ ul li[aria-enabled="false"] {
     justify-content: center;
     align-items: center;
     padding: 0 5px;
-
-    visibility: hidden;
 }
 
 .automatic[active="true"] {
+    color: var(--accent-color);
     background: none;
-    visibility: visible;
 }
 </style>

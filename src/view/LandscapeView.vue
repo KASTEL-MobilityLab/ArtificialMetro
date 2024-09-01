@@ -81,11 +81,10 @@ onMounted(() => {
     display: block;
     position: absolute;
 
-    top: 30px;
-    left: 50px;
-    right: 50px;
-    bottom: 30px;
-    border-radius: 20px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
     overflow: hidden;
 }
