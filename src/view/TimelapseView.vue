@@ -63,11 +63,16 @@ simulator.onStart(() => {
 })
 
 simulator.onTick(async time => {
-    vehicles.value = []
+    // avoid flicker by pushing everything to a local array first
+    const tempVehicles: Vehicle[] = []
+
     for (const repo of repos) {
         const newVehicles = await repo.forTimestamp(time)
-        vehicles.value.push(...newVehicles)
+        tempVehicles.push(...newVehicles)
     }
+
+    // and then applying the whole array to the rendered vehicles at once
+    vehicles.value = tempVehicles
 })
 
 function checkDataAvailability() {
