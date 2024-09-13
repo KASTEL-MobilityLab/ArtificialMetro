@@ -60,7 +60,7 @@ onMounted(() => {
 <template>
     <div class="window-frame">
         <div class="window-view">
-            <video ref="video" :src="currentVideo" muted controls="false"></video>
+            <video ref="video" :src="currentVideo" muted controls="false" playsinline="true"></video>
         </div>
     </div>
 </template>
@@ -90,5 +90,9 @@ onMounted(() => {
 }
 .window-view video {
     height: 100%;
+}
+video::-webkit-media-controls-panel {
+    display: none !important;
+    opacity: 0 !important;
 }
 </style>
